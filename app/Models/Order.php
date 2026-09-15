@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    public function statusHistories()
+{
+    return $this->hasMany(
+        OrderStatusHistory::class
+    )->oldest();
+}
     use HasFactory;
 
     protected $fillable = [

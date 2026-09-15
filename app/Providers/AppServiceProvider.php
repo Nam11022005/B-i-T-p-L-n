@@ -1,23 +1,34 @@
 <?php
+
 namespace App\Providers;
 
+use App\Models\Category;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator; // <-- 1. THÊM DÒNG KHOAI BÁO NÀY Ở ĐÂY
+
 class AppServiceProvider extends ServiceProvider
 {
-/**
-* Register any application services.
-*/
-public function register(): void
-{
-//
-}
-/**
-* Bootstrap any application services.
-*/
-public function boot(): void
-{
-// <-- 2. THÊM DÒNG LỆNH NÀY VÀO BÊN TRONG HÀM BOOT
-Paginator::useBootstrap();
-}
+    public function register(): void
+    {
+        //
+    }
+
+    public function boot(): void
+    {
+        Paginator::useBootstrap();
+
+        View::composer('layouts.app', function ($view) {
+
+            $menuCategories = Category::with([
+                'products' => function ($query) {
+                    $query->orderBy('name', 'asc');
+                }
+            ])
+            ->orderBy('name', 'asc')
+            ->get();
+
+            $view->with('menuCategories', $menuCategories);
+        });
+    }
 }

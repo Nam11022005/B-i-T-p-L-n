@@ -6,7 +6,7 @@
 
 <div class="container py-4">
 
-    <h2 class="fw-bold mb-4">
+    <h2 class="fw-bold mb-4 checkout-page-title">
         🛒 Thanh toán
     </h2>
 
@@ -53,127 +53,98 @@
         {{-- =====================================
              ĐỊA CHỈ NHẬN HÀNG
         ====================================== --}}
+        @php
+            $defaultAddress = $addresses->firstWhere('is_default', true) ?? $addresses->first();
+            $selectedAddressId = old('selected_address_id', $defaultAddress?->id);
+        @endphp
 
         <div class="checkout-section mb-4">
-
-            <div class="checkout-section-header">
-
-                <div class="checkout-section-icon">
-                    📍
+            <div class="checkout-section-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="checkout-section-icon">📍</div>
+                    <div>
+                        <h4 class="fw-bold mb-1">Địa chỉ nhận hàng</h4>
+                        <p class="text-muted mb-0">Chọn địa chỉ đã lưu hoặc nhập địa chỉ khác.</p>
+                    </div>
                 </div>
-
-                <div>
-                    <h4 class="fw-bold mb-1">
-                        Địa chỉ nhận hàng
-                    </h4>
-
-                    <p class="text-muted mb-0">
-                        Vui lòng nhập chính xác thông tin để shop giao hàng
-                    </p>
-                </div>
-
+                <a href="{{ route('addresses.index') }}" class="btn btn-outline-danger btn-sm">⚙️ Quản lý địa chỉ</a>
             </div>
 
+            @if($addresses->isNotEmpty())
+                <div class="saved-address-grid mt-4">
+                    @foreach($addresses as $address)
+                        @php
+                            $fullAddress = collect([
+                                $address->address_detail,
+                                $address->ward,
+                                $address->province,
+                            ])->filter()->implode(', ');
+                        @endphp
+                        <label class="saved-address-card {{ (string)$selectedAddressId === (string)$address->id ? 'selected' : '' }}">
+                            <input type="radio" name="selected_address_id" value="{{ $address->id }}"
+                                class="address-radio"
+                                data-name="{{ $address->receiver_name }}"
+                                data-phone="{{ $address->phone }}"
+                                data-address="{{ $fullAddress }}"
+                                {{ (string)$selectedAddressId === (string)$address->id ? 'checked' : '' }}>
+                            <div class="d-flex justify-content-between gap-3">
+                                <div>
+                                    <div class="fw-bold">{{ $address->label }}</div>
+                                    <div class="mt-1"><strong>{{ $address->receiver_name }}</strong> · {{ $address->phone }}</div>
+                                    <div class="text-muted small mt-1">{{ $fullAddress }}</div>
+                                </div>
+                                @if($address->is_default)
+                                    <span class="badge text-bg-success align-self-start">Mặc định</span>
+                                @endif
+                            </div>
+                        </label>
+                    @endforeach
 
-            <div class="row g-4 mt-1">
-
-                {{-- HỌ VÀ TÊN --}}
-                <div class="col-md-6">
-
-                    <label class="form-label fw-semibold">
-                        Họ và tên
-                        <span class="text-danger">*</span>
+                    <label class="saved-address-card {{ old('selected_address_id') === 'other' ? 'selected' : '' }}">
+                        <input type="radio" name="selected_address_id" value="other" class="address-radio"
+                            {{ old('selected_address_id') === 'other' ? 'checked' : '' }}>
+                        <div class="fw-bold">➕ Sử dụng địa chỉ khác</div>
+                        <div class="text-muted small mt-1">Nhập thông tin giao hàng cho đơn này.</div>
                     </label>
-
-                    <div class="input-group checkout-input">
-
-                        <span class="input-group-text">
-                            👤
-                        </span>
-
-                        <input
-                            type="text"
-                            name="customer_name"
-                            class="form-control"
-                            value="{{ old('customer_name', Auth::user()->name) }}"
-                            placeholder="Nhập họ và tên người nhận"
-                            required
-                        >
-
-                    </div>
-
                 </div>
+            @else
+                <div class="alert alert-warning mt-4 mb-0">
+                    Bạn chưa có địa chỉ đã lưu. Có thể nhập bên dưới hoặc
+                    <a href="{{ route('addresses.index') }}" class="fw-bold">thêm địa chỉ mới</a>.
+                </div>
+            @endif
 
-
-                {{-- SỐ ĐIỆN THOẠI --}}
+            <div class="row g-4 mt-1" id="manualAddressFields">
                 <div class="col-md-6">
-
-                    <label class="form-label fw-semibold">
-                        Số điện thoại
-                        <span class="text-danger">*</span>
-                    </label>
-
+                    <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
                     <div class="input-group checkout-input">
-
-                        <span class="input-group-text">
-                            📞
-                        </span>
-
-                        <input
-                            type="text"
-                            name="customer_phone"
-                            class="form-control"
-                            value="{{ old('customer_phone') }}"
-                            placeholder="Ví dụ: 0385742505"
-                            required
-                        >
-
+                        <span class="input-group-text">👤</span>
+                        <input type="text" id="customerName" name="customer_name" class="form-control"
+                            value="{{ old('customer_name', $defaultAddress?->receiver_name ?? Auth::user()->name) }}"
+                            placeholder="Nhập họ và tên người nhận" required>
                     </div>
-
                 </div>
-
-
-                {{-- ĐỊA CHỈ GIAO HÀNG --}}
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                    <div class="input-group checkout-input">
+                        <span class="input-group-text">📞</span>
+                        <input type="text" id="customerPhone" name="customer_phone" class="form-control"
+                            value="{{ old('customer_phone', $defaultAddress?->phone) }}"
+                            placeholder="Ví dụ: 0385742505" required>
+                    </div>
+                </div>
                 <div class="col-12">
-
-                    <label class="form-label fw-semibold">
-                        Địa chỉ giao hàng
-                        <span class="text-danger">*</span>
-                    </label>
-
+                    <label class="form-label fw-semibold">Địa chỉ giao hàng <span class="text-danger">*</span></label>
                     <div class="input-group checkout-input align-items-stretch">
-
-                        <span class="input-group-text align-items-start pt-3">
-                            🏠
-                        </span>
-
-                        <textarea
-                            name="shipping_address"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố..."
-                            required
-                        >{{ old('shipping_address') }}</textarea>
-
+                        <span class="input-group-text align-items-start pt-3">🏠</span>
+                        <textarea id="shippingAddress" name="shipping_address" class="form-control" rows="3"
+                            placeholder="Số nhà, đường, phường/xã, tỉnh/thành phố..." required>{{ old('shipping_address', $defaultAddress ? collect([$defaultAddress->address_detail, $defaultAddress->ward, $defaultAddress->province])->filter()->implode(', ') : '') }}</textarea>
                     </div>
-
                 </div>
-
             </div>
 
-
-            <div class="delivery-note mt-4">
-
-                <span class="me-2">💡</span>
-
-                <span>
-                    Shop sẽ sử dụng thông tin này để giao hàng. Hãy kiểm tra kỹ số điện thoại và địa chỉ trước khi đặt hàng.
-                </span>
-
-            </div>
-
+            <div class="delivery-note mt-4"><span class="me-2">💡</span><span>Chọn địa chỉ đã lưu để hệ thống tự điền thông tin. Bạn vẫn có thể chỉnh lại trước khi đặt hàng.</span></div>
         </div>
-
 
         {{-- =====================================
              SẢN PHẨM
@@ -386,23 +357,98 @@
                 </div>
 
 
-                <div class="small text-muted mt-2">
-
-                    Mã thử:
-
-                    <strong>SHOPEE10</strong>
-                    -
-                    <strong>FREESHIP</strong>
-                    -
-                    <strong>GIAM50K</strong>
-
-                </div>
-
-
                 <div
                     id="voucherMessage"
                     class="mt-2"
                 ></div>
+
+                {{-- DANH SÁCH VOUCHER KHẢ DỤNG --}}
+                <div class="mt-4">
+                    <div class="fw-bold mb-2">
+                        🎁 Voucher đang khả dụng
+                    </div>
+
+                    @forelse($availableVouchers as $voucher)
+                        @php
+                            $canUseVoucher =
+                                $subtotal >= (float) $voucher->min_order_value;
+
+                            if ($voucher->type === 'percent') {
+                                $voucherDescription =
+                                    'Giảm ' .
+                                    rtrim(rtrim(number_format($voucher->value, 2, '.', ''), '0'), '.') .
+                                    '%';
+
+                                if ($voucher->max_discount !== null) {
+                                    $voucherDescription .=
+                                        ', tối đa ' .
+                                        number_format($voucher->max_discount, 0, ',', '.') .
+                                        'đ';
+                                }
+                            } elseif ($voucher->type === 'fixed') {
+                                $voucherDescription =
+                                    'Giảm ' .
+                                    number_format($voucher->value, 0, ',', '.') .
+                                    'đ';
+                            } else {
+                                $voucherDescription =
+                                    'Giảm phí vận chuyển tối đa ' .
+                                    number_format($voucher->value, 0, ',', '.') .
+                                    'đ';
+                            }
+                        @endphp
+
+                        <div
+                            class="voucher-option {{ $canUseVoucher ? '' : 'voucher-disabled' }}"
+                        >
+                            <div class="voucher-option-content">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="voucher-badge">
+                                        {{ $voucher->code }}
+                                    </span>
+
+                                    <strong>
+                                        {{ $voucher->name }}
+                                    </strong>
+                                </div>
+
+                                <div class="small mt-2">
+                                    {{ $voucherDescription }}
+                                </div>
+
+                                <div class="small text-muted mt-1">
+                                    Đơn tối thiểu:
+                                    {{ number_format($voucher->min_order_value, 0, ',', '.') }}đ
+
+                                    @if($voucher->usage_limit !== null)
+                                        · Còn
+                                        {{ max($voucher->usage_limit - $voucher->used_count, 0) }}
+                                        lượt
+                                    @endif
+                                </div>
+
+                                @unless($canUseVoucher)
+                                    <div class="small text-danger mt-1">
+                                        Đơn hàng chưa đủ điều kiện áp dụng.
+                                    </div>
+                                @endunless
+                            </div>
+
+                            <button
+                                type="button"
+                                class="btn btn-sm {{ $canUseVoucher ? 'btn-outline-danger' : 'btn-outline-secondary' }}"
+                                onclick="selectVoucher('{{ $voucher->code }}')"
+                                {{ $canUseVoucher ? '' : 'disabled' }}
+                            >
+                                Áp dụng
+                            </button>
+                        </div>
+                    @empty
+                        <div class="text-muted small">
+                            Hiện chưa có voucher nào khả dụng.
+                        </div>
+                    @endforelse
+                </div>
 
             </div>
 
@@ -464,162 +510,32 @@
 
 
 {{-- ==========================================
-    THÔNG TIN CHUYỂN KHOẢN
+    THANH TOÁN CHUYỂN KHOẢN TỰ ĐỘNG
 ========================================== --}}
 <div
     id="bankTransferInfo"
     class="card border-primary mt-3"
     style="display: none;"
 >
-
     <div class="card-header bg-primary text-white">
-
-        <strong>
-            🏦 Thông tin chuyển khoản
-        </strong>
-
+        <strong>🏦 Chuyển khoản tự động</strong>
     </div>
 
     <div class="card-body">
-
-        <div class="alert alert-info">
-
-            Vui lòng chuyển khoản đúng số tiền và nội dung
-            bên dưới trước khi bấm đặt hàng.
-
+        <div class="alert alert-info mb-3">
+            <strong>Bước 1:</strong> Bấm “Tạo đơn & thanh toán QR”.<br>
+            <strong>Bước 2:</strong> Hệ thống sẽ tạo đơn hàng và hiển thị mã QR có
+            <strong>đúng số tiền + mã thanh toán riêng của đơn</strong>.<br>
+            <strong>Bước 3:</strong> Sau khi ngân hàng ghi nhận giao dịch, trang đơn hàng
+            sẽ tự chuyển sang <strong>✅ Thanh toán thành công</strong>.
         </div>
 
-
-        <div class="row g-3">
-
-            <div class="col-md-6">
-
-                <small class="text-muted">
-                    Ngân hàng
-                </small>
-
-                <div class="fw-bold fs-5">
-                    MB BANK
-                </div>
-
-            </div>
-
-
-            <div class="col-md-6">
-
-                <small class="text-muted">
-                    Chủ tài khoản
-                </small>
-
-                <div class="fw-bold fs-5">
-                    ĐỖ PHƯƠNG NAM
-                </div>
-
-            </div>
-
-
-            <div class="col-md-6">
-
-                <small class="text-muted">
-                    Số tài khoản
-                </small>
-
-                <div class="fw-bold fs-4 text-primary">
-                    0385742505 
-                </div>
-
-            </div>
-
-
-            <div class="col-md-6">
-
-                <small class="text-muted">
-                    Số tiền cần chuyển
-                </small>
-
-                <div
-                    id="bankTransferAmount"
-                    class="fw-bold fs-4 text-danger"
-                >
-                    0đ
-                </div>
-
-            </div>
-
+        <div class="small text-muted">
+            Không chuyển khoản trước khi đơn hàng được tạo để tránh giao dịch
+            không có mã đơn tương ứng.
         </div>
-
-{{-- QR CHUYỂN KHOẢN --}}
-<div class="text-center mt-4">
-
-    <h6 class="fw-bold mb-3">
-        📱 Quét mã QR để chuyển khoản
-    </h6>
-
-    <div class="bg-white border rounded-3 p-3 d-inline-block shadow-sm">
-
-        <img
-            id="bankQrCode"
-            src=""
-            alt="QR chuyển khoản"
-            class="img-fluid"
-            style="width: 280px; max-width: 100%;"
-        >
-
     </div>
-
-    <div class="small text-muted mt-2">
-        Mở ứng dụng ngân hàng và quét mã QR
-    </div>
-
 </div>
-        <hr>
-
-
-        <div>
-
-            <small class="text-muted">
-                Nội dung chuyển khoản
-            </small>
-
-            <div class="input-group mt-1">
-
-                <input
-                    type="text"
-                    id="bankTransferContent"
-                    class="form-control fw-bold"
-                    value="PHUONGNAM {{ Auth::id() }}"
-                    readonly
-                >
-
-                <button
-                    type="button"
-                    class="btn btn-outline-primary"
-                    onclick="copyTransferContent()"
-                >
-                    📋 Sao chép
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div class="alert alert-warning mt-3 mb-0">
-
-            ⚠️ Sau khi đặt hàng, trạng thái thanh toán
-            sẽ là <strong>Chờ xác nhận chuyển khoản</strong>.
-            Shop sẽ kiểm tra và xác nhận sau khi nhận được tiền.
-
-        </div>
-
-    </div>
-
-</div>
-
-            </div>
-
-        </div>
-
 
         {{-- =====================================
              GHI CHÚ
@@ -764,15 +680,106 @@
 
 <style>
 
+:root {
+    --tb-brown: #5f341d;
+    --tb-brown-dark: #2c1810;
+    --tb-red: #a83b2d;
+    --tb-orange: #d97706;
+    --tb-gold: #f2c15c;
+    --tb-green: #48633b;
+    --tb-cream: #fffaf0;
+    --tb-soft: #f8efe2;
+    --tb-border: #ead8bf;
+    --tb-text: #2f241e;
+}
+
+body {
+    background: linear-gradient(180deg, #fffaf0 0%, #f8efe2 100%);
+    color: var(--tb-text);
+}
+
+.checkout-page-title {
+    color: var(--tb-brown-dark);
+}
+
+.card,
+.checkout-section {
+    border: 1px solid var(--tb-border) !important;
+    background: #fffdf8 !important;
+    box-shadow: 0 10px 30px rgba(95, 52, 29, 0.08) !important;
+}
+
+.card {
+    border-radius: 20px !important;
+}
+
+.card h5,
+.checkout-section h4 {
+    color: var(--tb-brown-dark);
+}
+
+.btn-danger,
+.btn-tb-primary {
+    background: linear-gradient(135deg, var(--tb-red), var(--tb-brown)) !important;
+    border-color: var(--tb-red) !important;
+    color: #fff !important;
+}
+
+.btn-danger:hover,
+.btn-tb-primary:hover {
+    background: linear-gradient(135deg, #8f3025, var(--tb-brown-dark)) !important;
+    border-color: #8f3025 !important;
+}
+
+.btn-outline-danger {
+    color: var(--tb-red) !important;
+    border-color: var(--tb-red) !important;
+}
+
+.btn-outline-danger:hover {
+    color: #fff !important;
+    background: var(--tb-red) !important;
+}
+
+.text-danger {
+    color: var(--tb-red) !important;
+}
+
+.text-success {
+    color: var(--tb-green) !important;
+}
+
+.form-control,
+.form-select {
+    border-color: var(--tb-border) !important;
+    background: #fff !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--tb-red) !important;
+    box-shadow: 0 0 0 3px rgba(168, 59, 45, 0.10) !important;
+}
+
+.input-group-text {
+    border-color: var(--tb-border) !important;
+    background: var(--tb-soft) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--tb-red) !important;
+    border-color: var(--tb-red) !important;
+}
+
 /* ==========================================
    ĐỊA CHỈ NHẬN HÀNG
 ========================================== */
 .checkout-section {
-    background: #ffffff;
+    background: #fffdf8;
     border-radius: 22px;
     padding: 28px;
-    border: 1px solid #eef2f7;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    border: 1px solid var(--tb-border);
+    box-shadow: 0 10px 30px rgba(95, 52, 29, 0.08);
 }
 
 .checkout-section-header {
@@ -780,7 +787,7 @@
     align-items: center;
     gap: 15px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #eef2f7;
+    border-bottom: 1px solid var(--tb-border);
 }
 
 .checkout-section-icon {
@@ -792,12 +799,12 @@
     justify-content: center;
     font-size: 25px;
     flex-shrink: 0;
-    background: linear-gradient(135deg, #fee2e2, #fff1f2);
+    background: linear-gradient(135deg, #f8efe2, #fff3d6);
 }
 
 .checkout-input .input-group-text {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--tb-soft);
+    border: 1px solid var(--tb-border);
     border-right: none;
     min-width: 48px;
     justify-content: center;
@@ -805,17 +812,17 @@
 
 .checkout-input .form-control {
     min-height: 48px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--tb-border);
     box-shadow: none;
 }
 
 .checkout-input .form-control:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+    border-color: var(--tb-red);
+    box-shadow: 0 0 0 3px rgba(168, 59, 45, 0.10);
 }
 
 .checkout-input:focus-within .input-group-text {
-    border-color: #4f46e5;
+    border-color: var(--tb-red);
 }
 
 .checkout-input textarea.form-control {
@@ -824,8 +831,8 @@
 }
 
 .delivery-note {
-    background: #eff6ff;
-    color: #475569;
+    background: #fff3d6;
+    color: #6b4a36;
     padding: 14px 16px;
     border-radius: 12px;
     font-size: 14px;
@@ -842,15 +849,16 @@
 }
 
 .shipping-option {
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
+    border: 1px solid var(--tb-border);
+    border-radius: 14px;
     padding: 15px;
     transition: 0.2s;
+    background: #fffdf8;
 }
 
 .shipping-option:hover {
-    border-color: #dc3545;
-    background: #fff8f8;
+    border-color: var(--tb-red);
+    background: #fff7f2;
 }
 
 .shipping-option input {
@@ -861,6 +869,88 @@
     cursor: pointer;
 }
 
+
+/* ==========================================
+   VOUCHER KHẢ DỤNG
+========================================== */
+.voucher-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    border: 1px dashed var(--tb-gold);
+    border-radius: 14px;
+    background: var(--tb-cream);
+}
+
+.voucher-option-content {
+    min-width: 0;
+}
+
+.voucher-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: var(--tb-soft);
+    color: var(--tb-red);
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.voucher-disabled {
+    opacity: .62;
+    background: #f8f9fa;
+}
+
+@media (max-width: 575.98px) {
+    .voucher-option {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+
+
+#bankTransferInfo {
+    border-color: var(--tb-border) !important;
+}
+
+#bankTransferInfo .card-header {
+    background: linear-gradient(
+        135deg,
+        var(--tb-brown),
+        var(--tb-green)
+    ) !important;
+    border-color: transparent !important;
+}
+
+#bankTransferAmount,
+#bankTransferInfo .text-primary {
+    color: var(--tb-red) !important;
+}
+
+.alert-info {
+    background: #fff3d6 !important;
+    border-color: #f0d5a4 !important;
+    color: #6b4a36 !important;
+}
+
+.alert-warning {
+    background: #fff7df !important;
+    border-color: #efd39b !important;
+    color: #6b4a36 !important;
+}
+
+
+
+.saved-address-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.saved-address-card { display:block; position:relative; padding:16px; border:1px solid var(--tb-border); border-radius:14px; background:#fff; cursor:pointer; transition:.2s; }
+.saved-address-card:hover, .saved-address-card.selected { border-color:var(--tb-red); box-shadow:0 0 0 3px rgba(168,59,45,.08); background:#fffaf7; }
+.saved-address-card .address-radio { position:absolute; opacity:0; pointer-events:none; }
+@media(max-width:767.98px){ .saved-address-grid{grid-template-columns:1fr;} }
+
 </style>
 
 
@@ -868,13 +958,124 @@
      JAVASCRIPT
 ========================================== --}}
 
+@php
+    $voucherJsData = $availableVouchers
+        ->map(function ($voucher) {
+            return [
+                'code' => $voucher->code,
+                'type' => $voucher->type,
+                'value' => (float) $voucher->value,
+                'min_order_value' => (float) $voucher->min_order_value,
+                'max_discount' => $voucher->max_discount !== null
+                    ? (float) $voucher->max_discount
+                    : null,
+            ];
+        })
+        ->values();
+@endphp
+
 <script>
+function applySavedAddress(input) {
+    // Bỏ trạng thái selected khỏi tất cả thẻ địa chỉ
+    document
+        .querySelectorAll('.saved-address-card')
+        .forEach(card => card.classList.remove('selected'));
+
+    // Đánh dấu thẻ vừa chọn
+    input
+        .closest('.saved-address-card')
+        ?.classList.add('selected');
+
+    const name =
+        document.getElementById('customerName');
+
+    const phone =
+        document.getElementById('customerPhone');
+
+    const address =
+        document.getElementById('shippingAddress');
+
+
+    // ==========================================
+    // SỬ DỤNG ĐỊA CHỈ KHÁC
+    // => XÓA TRẮNG TOÀN BỘ THÔNG TIN
+    // ==========================================
+    if (input.value === 'other') {
+
+        if (name) {
+            name.value = '';
+            name.focus();
+        }
+
+        if (phone) {
+            phone.value = '';
+        }
+
+        if (address) {
+            address.value = '';
+        }
+
+        return;
+    }
+
+
+    // ==========================================
+    // ĐỊA CHỈ ĐÃ LƯU
+    // => TỰ ĐIỀN THÔNG TIN
+    // ==========================================
+    if (name) {
+        name.value =
+            input.dataset.name || '';
+    }
+
+    if (phone) {
+        phone.value =
+            input.dataset.phone || '';
+    }
+
+    if (address) {
+        address.value =
+            input.dataset.address || '';
+    }
+}
+
+
+// Bắt sự kiện chọn địa chỉ
+document
+    .querySelectorAll('.address-radio')
+    .forEach(function(input) {
+
+        input.addEventListener(
+            'change',
+            function() {
+                applySavedAddress(this);
+            }
+        );
+
+    });
+
+
+// Nếu trang được load lại do validation,
+// đồng bộ form theo địa chỉ đang được chọn.
+const checkedAddress =
+    document.querySelector(
+        '.address-radio:checked'
+    );
+
+if (checkedAddress) {
+    applySavedAddress(checkedAddress);
+}
+
+
 
 const subtotal = {{ $subtotal }};
 
 let discount = 0;
 
 let voucherApplied = false;
+
+const availableVouchers = @json($voucherJsData);
+
 
 
 // Format tiền Việt Nam
@@ -957,18 +1158,25 @@ document
             'change',
             function()
             {
-                discount = 0;
-
-                voucherApplied = false;
-
-                document.getElementById(
-                    'voucherMessage'
-                ).innerHTML = '';
-
-                updateTotal();
+                if (voucherApplied) {
+                    applyVoucher();
+                } else {
+                    updateTotal();
+                }
             }
         );
     });
+
+
+// Chọn voucher từ danh sách
+function selectVoucher(code)
+{
+    document.getElementById(
+        'voucherCode'
+    ).value = code;
+
+    applyVoucher();
+}
 
 
 // Áp dụng voucher
@@ -981,19 +1189,16 @@ function applyVoucher()
         .trim()
         .toUpperCase();
 
-
     const message =
         document.getElementById(
             'voucherMessage'
         );
 
-
     const shippingFee =
         getShippingFee();
 
-
     discount = 0;
-
+    voucherApplied = false;
 
     if (code === '')
     {
@@ -1001,56 +1206,78 @@ function applyVoucher()
             '<span class="text-danger">Vui lòng nhập mã voucher.</span>';
 
         updateTotal();
-
         return;
     }
 
+    const voucher =
+        availableVouchers.find(function(item)
+        {
+            return item.code.toUpperCase() === code;
+        });
 
-    if (code === 'SHOPEE10')
+    if (!voucher)
     {
-        discount =
-            subtotal * 0.10;
-
         message.innerHTML =
-            '<span class="text-success">✓ Giảm 10% thành công!</span>';
+            '<span class="text-danger">✕ Voucher không tồn tại hoặc hiện không khả dụng.</span>';
+
+        updateTotal();
+        return;
     }
 
-    else if (code === 'FREESHIP')
+    if (subtotal < voucher.min_order_value)
+    {
+        message.innerHTML =
+            '<span class="text-danger">✕ Đơn hàng phải đạt tối thiểu '
+            + formatMoney(voucher.min_order_value)
+            + ' để sử dụng voucher này.</span>';
+
+        updateTotal();
+        return;
+    }
+
+    if (voucher.type === 'percent')
+    {
+        const percent =
+            Math.min(Number(voucher.value), 100);
+
+        discount =
+            subtotal * (percent / 100);
+    }
+    else if (voucher.type === 'fixed')
     {
         discount =
             Math.min(
-                25000,
-                shippingFee
-            );
-
-        message.innerHTML =
-            '<span class="text-success">✓ Đã áp dụng mã miễn phí vận chuyển!</span>';
-    }
-
-    else if (code === 'GIAM50K')
-    {
-        discount =
-            Math.min(
-                50000,
+                Number(voucher.value),
                 subtotal
             );
-
-        message.innerHTML =
-            '<span class="text-success">✓ Giảm 50.000đ thành công!</span>';
     }
-
-    else
+    else if (voucher.type === 'shipping')
     {
-        message.innerHTML =
-            '<span class="text-danger">✕ Mã voucher không hợp lệ.</span>';
+        discount =
+            Math.min(
+                Number(voucher.value),
+                shippingFee
+            );
     }
 
+    if (voucher.max_discount !== null)
+    {
+        discount =
+            Math.min(
+                discount,
+                Number(voucher.max_discount)
+            );
+    }
 
     voucherApplied = true;
 
+    message.innerHTML =
+        '<span class="text-success">✓ Đã áp dụng voucher '
+        + code
+        + '.</span>';
+
     updateTotal();
 }
-
 
 updateTotal();
 // ==========================================
@@ -1137,7 +1364,7 @@ function updateOrderButton()
     )
     {
         orderButton.innerHTML =
-            '🏦 Tôi đã chuyển khoản & đặt hàng';
+            '🏦 Tạo đơn & thanh toán QR';
 
         orderButton.classList.remove(
             'btn-danger'

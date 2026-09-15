@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Danh mục - ' . $category->name)
+@section('title', 'Đặc sản - ' . $category->name . ' | Tinh Hoa Tây Bắc')
 
 @section('content')
 
@@ -12,18 +12,18 @@
         background:
             radial-gradient(
                 circle at 85% 20%,
-                rgba(59,130,246,.4),
+                rgba(242,193,92,.18),
                 transparent 30%
             ),
             linear-gradient(
                 135deg,
-                #0f172a,
-                #1e293b 50%,
-                #312e81
+                #2c1810,
+                #5f341d 55%,
+                #48633b
             );
 
         box-shadow:
-            0 15px 40px rgba(15,23,42,.16);
+            0 15px 40px rgba(95,52,29,.18);
     }
 
     .category-icon {
@@ -65,7 +65,7 @@
         transform: translateY(-6px);
 
         box-shadow:
-            0 18px 40px rgba(37,99,235,.14);
+            0 18px 40px rgba(95,52,29,.14);
     }
 
     .product-image-wrapper {
@@ -109,6 +109,71 @@
         padding:
             14px 22px;
     }
+
+    /* =====================================================
+       THEME TINH HOA TÂY BẮC
+    ===================================================== */
+    .product-card {
+        border: 1px solid #ead8bf;
+    }
+
+    .product-image-wrapper {
+        background: linear-gradient(180deg, #fffaf0, #f8efe2);
+    }
+
+    .price {
+        color: #a83b2d;
+    }
+
+    .btn-primary {
+        border: none;
+        background: linear-gradient(135deg, #a83b2d, #5f341d);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #8b3025, #3b2114);
+    }
+
+    .btn-outline-primary {
+        color: #5f341d;
+        border-color: #5f341d;
+    }
+
+    .btn-outline-primary:hover {
+        color: #fff;
+        background: #5f341d;
+        border-color: #5f341d;
+    }
+
+    .btn-warning {
+        color: #3b2114;
+        border-color: #f2c15c;
+        background: #f2c15c;
+    }
+
+    .btn-warning:hover {
+        color: #2c1810;
+        border-color: #ffd77d;
+        background: #ffd77d;
+    }
+
+    .btn-outline-secondary {
+        color: #5f341d;
+        border-color: #b99a77;
+    }
+
+    .btn-outline-secondary:hover {
+        color: #fff;
+        border-color: #5f341d;
+        background: #5f341d;
+    }
+
+    .product-card .badge.bg-light {
+        color: #5f341d !important;
+        border-color: #ead8bf !important;
+        background: #f8efe2 !important;
+    }
+
 </style>
 
 
@@ -121,55 +186,52 @@
                 $category->name
             );
 
-        $icon = '⚡';
+        $icon = '🌿';
 
         if (
-            str_contains(
-                $name,
-                'điện thoại'
-            )
+            str_contains($name, 'trâu')
+            || str_contains($name, 'thịt')
+            || str_contains($name, 'gác bếp')
         ) {
-            $icon = '📱';
+            $icon = '🥩';
+        }
+        elseif (str_contains($name, 'lạp xưởng')) {
+            $icon = '🌭';
         }
         elseif (
-            str_contains(
-                $name,
-                'laptop'
-            )
+            str_contains($name, 'mắc khén')
+            || str_contains($name, 'hạt dổi')
+            || str_contains($name, 'chẩm chéo')
+            || str_contains($name, 'gia vị')
         ) {
-            $icon = '💻';
+            $icon = '🌶️';
         }
         elseif (
-            str_contains(
-                $name,
-                'tai nghe'
-            )
+            str_contains($name, 'trà')
+            || str_contains($name, 'thảo mộc')
         ) {
-            $icon = '🎧';
+            $icon = '🍵';
+        }
+        elseif (str_contains($name, 'mật ong')) {
+            $icon = '🍯';
         }
         elseif (
-            str_contains(
-                $name,
-                'sạc'
-            )
+            str_contains($name, 'gạo')
+            || str_contains($name, 'nếp')
         ) {
-            $icon = '🔌';
+            $icon = '🍚';
         }
         elseif (
-            str_contains(
-                $name,
-                'chuột'
-            )
+            str_contains($name, 'quà')
+            || str_contains($name, 'biếu')
         ) {
-            $icon = '🖱️';
+            $icon = '🎁';
         }
         elseif (
-            str_contains(
-                $name,
-                'bàn phím'
-            )
+            str_contains($name, 'khô')
+            || str_contains($name, 'táo mèo')
         ) {
-            $icon = '⌨️';
+            $icon = '🧺';
         }
 
     @endphp
@@ -203,7 +265,7 @@
                         letter-spacing:1px;
                     "
                 >
-                    DANH MỤC SẢN PHẨM
+                    DANH MỤC ĐẶC SẢN
                 </div>
 
 
@@ -221,9 +283,9 @@
                         rgba(255,255,255,.75);
                     "
                 >
-                    Khám phá các sản phẩm thuộc danh mục
+                    Khám phá những đặc sản thuộc danh mục
                     {{ $category->name }}
-                    tại Phương Nam Shop.
+                    tại Tinh Hoa Tây Bắc.
                 </p>
 
             </div>
@@ -351,7 +413,7 @@
                         ) }}"
                         class="btn btn-primary"
                     >
-                        🛍️ Xem sản phẩm khác
+                        🌿 Xem đặc sản khác
                     </a>
 
                 @endif
@@ -445,7 +507,7 @@
                                         font-size:65px;
                                     "
                                 >
-                                    📦
+                                    🧺
                                 </div>
 
                             @else
@@ -459,7 +521,7 @@
                                     "
                                     style="font-size:65px;"
                                 >
-                                    📦
+                                    🧺
                                 </div>
 
                             @endif
@@ -511,7 +573,7 @@
 
                                 {{ \Illuminate\Support\Str::limit(
                                     $product->description
-                                    ?? 'Sản phẩm công nghệ chất lượng tại Phương Nam Shop.',
+                                    ?? 'Sản phẩm công nghệ chất lượng tại Tinh Hoa Tây Bắc.',
                                     80
                                 ) }}
 
@@ -623,7 +685,7 @@
                                                     w-100
                                                 "
                                             >
-                                                🛒 Thêm vào giỏ hàng
+                                                🧺 Thêm vào giỏ hàng
                                             </button>
 
                                         </form>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Danh mục sản phẩm')
+@section('title', 'Danh mục đặc sản | Tinh Hoa Tây Bắc')
 
 @section('content')
 
@@ -15,18 +15,18 @@
         background:
             radial-gradient(
                 circle at 85% 20%,
-                rgba(59, 130, 246, .4),
+                rgba(242, 193, 92, .18),
                 transparent 30%
             ),
             linear-gradient(
                 135deg,
-                #0f172a,
-                #1e293b 50%,
-                #312e81
+                #2c1810,
+                #5f341d 55%,
+                #48633b
             );
 
         box-shadow:
-            0 15px 40px rgba(15, 23, 42, .18);
+            0 15px 40px rgba(95, 52, 29, .18);
     }
 
     .category-hero::after {
@@ -65,7 +65,7 @@
         transform: translateY(-6px);
 
         box-shadow:
-            0 18px 40px rgba(37, 99, 235, .13);
+            0 18px 40px rgba(95, 52, 29, .14);
     }
 
     .category-icon-box {
@@ -95,10 +95,10 @@
             20px;
 
         background:
-            #eef2ff;
+            #f8efe2;
 
         color:
-            #4338ca;
+            #5f341d;
 
         font-weight:
             700;
@@ -134,11 +134,36 @@
         justify-content: center;
 
         background:
-            #eef2ff;
+            #f8efe2;
 
         font-size:
             24px;
     }
+
+    /* Theme Tinh Hoa Tây Bắc */
+    .category-hero .btn-light {
+        color: #3b2114;
+        border: none;
+        background: #f2c15c;
+        box-shadow: 0 8px 20px rgba(44,24,16,.16);
+    }
+    .category-hero .btn-light:hover { color:#2c1810; background:#ffd77d; }
+    .category-card { border:1px solid #ead8bf; }
+    .category-count { background:#f8efe2; color:#5f341d; }
+    .category-btn.btn-primary {
+        border:none;
+        background:linear-gradient(135deg,#a83b2d,#5f341d);
+    }
+    .category-btn.btn-primary:hover {
+        background:linear-gradient(135deg,#8b3025,#3b2114);
+    }
+    .category-btn.btn-outline-primary { color:#5f341d; border-color:#5f341d; }
+    .category-btn.btn-outline-primary:hover {
+        color:#fff; background:#5f341d; border-color:#5f341d;
+    }
+    .section-kicker { color:#48633b !important; letter-spacing:.5px; }
+    .category-total-badge { background:#5f341d !important; }
+
 </style>
 
 
@@ -165,13 +190,13 @@
                         letter-spacing:1px;
                     "
                 >
-                    ⚡ PHƯƠNG NAM SHOP
+                    🌿 TINH HOA TÂY BẮC
                 </div>
 
 
                 <h1 class="fw-bold display-5 mb-3">
 
-                    📂 Danh mục sản phẩm
+                    🧺 Danh mục đặc sản
 
                 </h1>
 
@@ -184,9 +209,9 @@
                         max-width:700px;
                     "
                 >
-                    Khám phá điện thoại, laptop,
-                    tai nghe, phụ kiện và các thiết bị
-                    công nghệ phù hợp với nhu cầu của bạn.
+                    Khám phá thịt gác bếp, lạp xưởng, mắc khén,
+                    hạt dổi, trà Shan Tuyết, mật ong và nhiều
+                    đặc sản đậm đà hương vị núi rừng Tây Bắc.
                 </p>
 
             </div>
@@ -235,7 +260,7 @@
                             fw-bold
                         "
                     >
-                        🛍️ Xem tất cả sản phẩm
+                        🥩 Xem tất cả đặc sản
                     </a>
 
                 @endif
@@ -270,7 +295,7 @@
                         >
 
                             <div class="info-icon">
-                                📂
+                                🧺
                             </div>
 
 
@@ -326,7 +351,7 @@
                         >
 
                             <div class="info-icon">
-                                💻
+                                🌿
                             </div>
 
 
@@ -338,12 +363,12 @@
                                         small
                                     "
                                 >
-                                    Thiết bị công nghệ
+                                    Đặc sản Tây Bắc
                                 </div>
 
 
                                 <h5 class="fw-bold mb-0">
-                                    Đa dạng sản phẩm
+                                    Đậm vị núi rừng
                                 </h5>
 
                             </div>
@@ -373,7 +398,7 @@
                         >
 
                             <div class="info-icon">
-                                🛒
+                                🚚
                             </div>
 
 
@@ -385,12 +410,12 @@
                                         small
                                     "
                                 >
-                                    Mua sắm
+                                    Giao hàng
                                 </div>
 
 
                                 <h5 class="fw-bold mb-0">
-                                    Nhanh chóng, tiện lợi
+                                    Toàn quốc, tận nơi
                                 </h5>
 
                             </div>
@@ -427,19 +452,19 @@
 
             <div
                 class="
-                    text-primary
+                    section-kicker
                     fw-bold
                     small
                     mb-1
                 "
             >
-                KHÁM PHÁ SẢN PHẨM
+                KHÁM PHÁ ĐẶC SẢN
             </div>
 
 
             <h2 class="fw-bold mb-0">
 
-                Chọn danh mục bạn quan tâm
+                Chọn hương vị bạn yêu thích
 
             </h2>
 
@@ -449,7 +474,7 @@
         <span
             class="
                 badge
-                bg-dark
+                category-total-badge
                 fs-6
             "
         >
@@ -487,7 +512,7 @@
 
                 <h4 class="fw-bold mt-3">
 
-                    Chưa có danh mục sản phẩm
+                    Chưa có danh mục đặc sản
 
                 </h4>
 
@@ -549,78 +574,31 @@
                         );
 
 
-                    $icon = '⚡';
+                    $icon = '🌿';
 
-
-                    if (
-                        str_contains(
-                            $name,
-                            'điện thoại'
-                        )
-                    ) {
-
-                        $icon = '📱';
-
+                    if (str_contains($name, 'trâu') || str_contains($name, 'thịt') || str_contains($name, 'gác bếp')) {
+                        $icon = '🥩';
                     }
-                    elseif (
-                        str_contains(
-                            $name,
-                            'laptop'
-                        )
-                    ) {
-
-                        $icon = '💻';
-
+                    elseif (str_contains($name, 'lạp xưởng')) {
+                        $icon = '🌭';
                     }
-                    elseif (
-                        str_contains(
-                            $name,
-                            'tai nghe'
-                        )
-                    ) {
-
-                        $icon = '🎧';
-
+                    elseif (str_contains($name, 'mắc khén') || str_contains($name, 'hạt dổi') || str_contains($name, 'chẩm chéo') || str_contains($name, 'gia vị')) {
+                        $icon = '🌶️';
                     }
-                    elseif (
-                        str_contains(
-                            $name,
-                            'sạc'
-                        )
-                    ) {
-
-                        $icon = '🔌';
-
+                    elseif (str_contains($name, 'trà') || str_contains($name, 'thảo mộc')) {
+                        $icon = '🍵';
                     }
-                    elseif (
-                        str_contains(
-                            $name,
-                            'chuột'
-                        )
-                    ) {
-
-                        $icon = '🖱️';
-
+                    elseif (str_contains($name, 'mật ong')) {
+                        $icon = '🍯';
                     }
-                    elseif (
-                        str_contains(
-                            $name,
-                            'bàn phím'
-                        )
-                    ) {
-
-                        $icon = '⌨️';
-
+                    elseif (str_contains($name, 'gạo') || str_contains($name, 'nếp')) {
+                        $icon = '🍚';
                     }
-                    elseif (
-                        str_contains(
-                            $name,
-                            'phụ kiện'
-                        )
-                    ) {
-
-                        $icon = '🎮';
-
+                    elseif (str_contains($name, 'quà') || str_contains($name, 'biếu')) {
+                        $icon = '🎁';
+                    }
+                    elseif (str_contains($name, 'khô') || str_contains($name, 'táo mèo')) {
+                        $icon = '🧺';
                     }
 
 
@@ -687,7 +665,7 @@
                                 Khám phá các sản phẩm
                                 thuộc danh mục
                                 {{ $category->name }}
-                                tại Phương Nam Shop.
+                                tại Tinh Hoa Tây Bắc.
 
                             </p>
 
@@ -739,7 +717,7 @@
                                         w-100
                                     "
                                 >
-                                    🛍️ Xem sản phẩm
+                                    🌿 Xem đặc sản
                                 </a>
 
                             @endif
