@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 
 class AuthController extends Controller
@@ -113,18 +114,18 @@ class AuthController extends Controller
 
             Mail::raw(
                 "Xin chào {$user->name}!\n\n"
-                . "Cảm ơn bạn đã đăng ký tài khoản tại Phương Nam Shop.\n\n"
+                . "Cảm ơn bạn đã đăng ký tài khoản tại Tinh Hoa Tây Bắc.\n\n"
                 . "Mã xác thực email của bạn là:\n\n"
                 . "{$verificationCode}\n\n"
                 . "Mã này có hiệu lực trong 10 phút.\n\n"
                 . "Nếu bạn không thực hiện đăng ký, vui lòng bỏ qua email này.\n\n"
-                . "Phương Nam Shop",
+                . "Tinh Hoa Tây Bắc",
                 function ($message) use ($user) {
 
                     $message
                         ->to($user->email)
                         ->subject(
-                            'Mã xác thực - Phương Nam Shop'
+                            'Mã xác thực - Tinh Hoa Tây Bắc'
                         );
                 }
             );
@@ -307,120 +308,9 @@ public function verifyEmailCode(Request $request)
         ->route('welcome')
         ->with(
             'success',
-            'Xác thực email thành công! Chào mừng bạn đến với Phương Nam Shop.'
+            'Xác thực email thành công! Chào mừng bạn đến với Tinh Hoa Tây Bắc.'
         );
 }
-
-
-    // =====================================================
-    // XỬ LÝ MÃ OTP
-    // =====================================================
-
-    public function verifyCode(Request $request)
-    {
-        $request->validate([
-            'verification_code' => [
-                'required',
-                'digits:6',
-            ],
-        ], [
-            'verification_code.required' =>
-                'Vui lòng nhập mã xác thực.',
-
-            'verification_code.digits' =>
-                'Mã xác thực phải gồm 6 chữ số.',
-        ]);
-
-
-        if (!Auth::check()) {
-
-            return redirect()
-                ->route('login')
-                ->with(
-                    'error',
-                    'Phiên đăng nhập đã hết hạn.'
-                );
-        }
-
-
-        $user = Auth::user();
-
-
-        // =============================================
-        // ĐÃ XÁC THỰC
-        // =============================================
-
-        if ($user->hasVerifiedEmail()) {
-
-            return redirect()
-                ->route('welcome')
-                ->with(
-                    'success',
-                    'Email đã được xác thực.'
-                );
-        }
-
-
-        // =============================================
-        // KIỂM TRA OTP
-        // =============================================
-
-        if (
-            !$user->verification_code
-            ||
-            $user->verification_code !==
-                $request->verification_code
-        ) {
-
-            return back()
-                ->with(
-                    'error',
-                    'Mã xác thực không chính xác.'
-                );
-        }
-
-
-        // =============================================
-        // KIỂM TRA THỜI HẠN OTP
-        // =============================================
-
-        if (
-            !$user->verification_code_expires_at
-            ||
-            Carbon::parse(
-                $user->verification_code_expires_at
-            )->isPast()
-        ) {
-
-            return back()
-                ->with(
-                    'error',
-                    'Mã xác thực đã hết hạn. Vui lòng yêu cầu mã mới.'
-                );
-        }
-
-
-        // =============================================
-        // XÁC THỰC THÀNH CÔNG
-        // =============================================
-
-        $user->email_verified_at = now();
-
-        $user->verification_code = null;
-
-        $user->verification_code_expires_at = null;
-
-        $user->save();
-
-
-        return redirect()
-            ->route('welcome')
-            ->with(
-                'success',
-                'Xác thực email thành công! Chào mừng bạn đến với Phương Nam Shop.'
-            );
-    }
-
 
     // =====================================================
     // GỬI LẠI MÃ OTP
@@ -477,16 +367,16 @@ public function verifyEmailCode(Request $request)
             // Gửi email
             Mail::raw(
                 "Xin chào {$user->name}!\n\n"
-                . "Mã xác thực mới của bạn tại Phương Nam Shop là:\n\n"
+                . "Mã xác thực mới của bạn tại Tinh Hoa Tây Bắc là:\n\n"
                 . "{$verificationCode}\n\n"
                 . "Mã này có hiệu lực trong 10 phút.\n\n"
-                . "Phương Nam Shop",
+                . "Tinh Hoa Tây Bắc",
                 function ($message) use ($user) {
 
                     $message
                         ->to($user->email)
                         ->subject(
-                            'Mã xác thực mới - Phương Nam Shop'
+                            'Mã xác thực mới - Tinh Hoa Tây Bắc'
                         );
                 }
             );
@@ -689,6 +579,164 @@ public function verifyEmailCode(Request $request)
 
 
     // =====================================================
+    // CẬP NHẬT THÔNG TIN CÁ NHÂN CUSTOMER
+    // =====================================================
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+        ], [
+            'name.required' => 'Vui lòng nhập họ và tên.',
+            'name.max' => 'Họ tên không được vượt quá 255 ký tự.',
+        ]);
+
+        $user->name = trim($request->name);
+        $user->save();
+
+        return back()->with(
+            'success',
+            'Cập nhật thông tin cá nhân thành công!'
+        );
+    }
+
+
+    // =====================================================
+    // CẬP NHẬT ẢNH ĐẠI DIỆN CUSTOMER
+    // =====================================================
+
+    public function updateAvatar(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'avatar' => [
+                'required',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
+        ], [
+            'avatar.required' => 'Vui lòng chọn ảnh đại diện.',
+            'avatar.image' => 'Tệp tải lên phải là hình ảnh.',
+            'avatar.mimes' => 'Ảnh đại diện chỉ hỗ trợ JPG, JPEG, PNG hoặc WEBP.',
+            'avatar.max' => 'Ảnh đại diện không được vượt quá 2MB.',
+        ]);
+
+        if (
+            $user->avatar
+            && Storage::disk('public')->exists($user->avatar)
+        ) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request
+            ->file('avatar')
+            ->store('avatars', 'public');
+
+        $user->avatar = $path;
+        $user->save();
+
+        return back()->with(
+            'success',
+            'Cập nhật ảnh đại diện thành công!'
+        );
+    }
+
+
+    // =====================================================
+    // XÓA ẢNH ĐẠI DIỆN CUSTOMER
+    // =====================================================
+
+    public function deleteAvatar()
+    {
+        $user = Auth::user();
+
+        if (
+            $user->avatar
+            && Storage::disk('public')->exists($user->avatar)
+        ) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->avatar = null;
+        $user->save();
+
+        return back()->with(
+            'success',
+            'Đã xóa ảnh đại diện.'
+        );
+    }
+
+
+    // =====================================================
+    // ĐỔI MẬT KHẨU CUSTOMER
+    // =====================================================
+
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'current_password' => [
+                'required',
+                'string',
+            ],
+
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+            ],
+        ], [
+            'current_password.required' =>
+                'Vui lòng nhập mật khẩu hiện tại.',
+
+            'password.required' =>
+                'Vui lòng nhập mật khẩu mới.',
+
+            'password.min' =>
+                'Mật khẩu mới phải có ít nhất 8 ký tự.',
+
+            'password.confirmed' =>
+                'Xác nhận mật khẩu mới không khớp.',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()
+                ->withErrors([
+                    'current_password' =>
+                        'Mật khẩu hiện tại không chính xác.',
+                ])
+                ->withInput();
+        }
+
+        if (Hash::check($request->password, $user->password)) {
+            return back()
+                ->withErrors([
+                    'password' =>
+                        'Mật khẩu mới phải khác mật khẩu hiện tại.',
+                ]);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return back()->with(
+            'success',
+            'Đổi mật khẩu thành công!'
+        );
+    }
+
+
+    // =====================================================
     // PROFILE ADMIN
     // =====================================================
 
@@ -755,11 +803,15 @@ public function verifyEmailCode(Request $request)
 
 
         // Tổng số tiền đã mua
-        $totalSpent =
-            $orders
-                ->sum(
-                    'total_price'
-                );
+       $totalSpent =
+    $orders
+        ->where(
+            'status',
+            'delivered'
+        )
+        ->sum(
+            'total_price'
+        );
 
 
         // 5 đơn gần nhất

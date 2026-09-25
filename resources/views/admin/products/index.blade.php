@@ -111,7 +111,343 @@
         background: linear-gradient(90deg, #5f341d, #a83b2d);
     }
 
+
+    /* Ghim nhanh ngay dưới tên sản phẩm */
+    .quick-feature-form {
+        margin-top: 7px;
+    }
+
+    .quick-feature-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-width: 108px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        border: 1px solid #f2c15c;
+        background: #fffaf0;
+        color: #6b4700;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.2;
+        transition: .18s ease;
+    }
+
+    .quick-feature-btn:hover {
+        background: #f2c15c;
+        color: #3b2114;
+        transform: translateY(-1px);
+    }
+
+    .quick-feature-btn.is-featured {
+        background: linear-gradient(135deg,#f2c15c,#e7ad2c);
+        border-color: #e7ad2c;
+        color: #3b2114;
+        box-shadow: 0 4px 10px rgba(217,119,6,.16);
+    }
+
+
+    /* =========================================================
+       ADMIN PRODUCTS PREMIUM UI
+       Chỉ nâng giao diện, không đổi route/form/Blade/JS.
+    ========================================================= */
+
+    .admin-products-premium {
+        position: relative;
+        isolation: isolate;
+        padding: 18px 0 70px;
+    }
+
+    .admin-products-premium::before {
+        content: "";
+        position: absolute;
+        z-index: -2;
+        top: -35px;
+        left: 50%;
+        width: min(100vw, 1760px);
+        height: 690px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 7% 8%, rgba(242,193,92,.17), transparent 23%),
+            radial-gradient(circle at 94% 12%, rgba(72,99,59,.12), transparent 28%),
+            linear-gradient(180deg, rgba(255,250,240,.92), rgba(255,255,255,0));
+    }
+
+    .admin-products-premium .admin-products-head {
+        position: relative;
+        overflow: hidden;
+        min-height: 170px;
+        align-items: center !important;
+        padding: 30px 34px;
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 27px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 88% 15%, rgba(242,193,92,.22), transparent 29%),
+            radial-gradient(circle at 12% 120%, rgba(168,59,45,.27), transparent 35%),
+            linear-gradient(135deg,#2c1810 0%,#5f341d 54%,#48633b 100%);
+        box-shadow:
+            0 22px 56px rgba(44,24,16,.18),
+            inset 0 1px 0 rgba(255,255,255,.07);
+    }
+
+    .admin-products-premium .admin-products-head::before {
+        content: "";
+        position: absolute;
+        right: -30px;
+        bottom: -56px;
+        width: 320px;
+        height: 180px;
+        opacity: .10;
+        clip-path: polygon(0 100%,18% 56%,36% 73%,53% 25%,70% 58%,86% 34%,100% 66%,100% 100%);
+        background: linear-gradient(135deg,#fff,#f2c15c);
+        pointer-events: none;
+    }
+
+    .admin-products-premium .admin-products-head > * {
+        position: relative;
+        z-index: 2;
+    }
+
+    .admin-products-premium .admin-products-head h2 {
+        color: #fff;
+        font-size: clamp(30px,3vw,42px);
+        letter-spacing: -.7px;
+        text-shadow: 0 2px 14px rgba(0,0,0,.16);
+    }
+
+    .admin-products-premium .admin-products-head .text-muted {
+        color: rgba(255,255,255,.74) !important;
+        font-size: 15px;
+    }
+
+    .admin-products-premium .admin-products-head .btn-success {
+        min-height: 47px;
+        padding-inline: 20px !important;
+        border: 1px solid rgba(255,255,255,.18);
+        border-radius: 999px;
+        color: #3b2114;
+        background: linear-gradient(135deg,#f8d984,#f2c15c);
+        font-weight: 900;
+        box-shadow: 0 9px 20px rgba(0,0,0,.13);
+    }
+
+    .admin-products-premium .admin-products-head .btn-success:hover {
+        color: #3b2114;
+        background: linear-gradient(135deg,#ffe29c,#f5cb69);
+        transform: translateY(-1px);
+    }
+
+    .admin-products-premium .filter-box {
+        position: relative;
+        overflow: hidden;
+        padding: 25px;
+        border-radius: 22px;
+        border-color: #e5d0b3;
+        background:
+            radial-gradient(circle at 96% 0%, rgba(242,193,92,.10), transparent 24%),
+            linear-gradient(180deg,#fff,#fffdfa);
+        box-shadow:
+            0 16px 40px rgba(95,52,29,.075),
+            inset 0 1px 0 rgba(255,255,255,.95);
+    }
+
+    .admin-products-premium .filter-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 28px;
+        right: 28px;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,#d97706,#f2c15c,#48633b);
+        opacity: .55;
+    }
+
+    .admin-products-premium .filter-label {
+        color: #69442c;
+        font-size: 12px;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+    }
+
+    .admin-products-premium .filter-box .form-control,
+    .admin-products-premium .filter-box .form-select {
+        min-height: 46px;
+        border-radius: 12px;
+        border-color: #dfcbae;
+        background: #fffdf9;
+    }
+
+    .admin-products-premium .filter-box .form-control:focus,
+    .admin-products-premium .filter-box .form-select:focus {
+        border-color: #d3a65f;
+        box-shadow: 0 0 0 .2rem rgba(217,119,6,.09);
+    }
+
+    .admin-products-premium .filter-box .btn {
+        min-height: 44px;
+        border-radius: 11px;
+        font-weight: 800;
+    }
+
+    .admin-products-premium .table-shell {
+        position: relative;
+        border-radius: 22px;
+        border-color: #e5d0b3;
+        box-shadow:
+            0 18px 44px rgba(95,52,29,.08),
+            inset 0 1px 0 rgba(255,255,255,.95);
+    }
+
+    .admin-products-premium .table-shell::before {
+        content: "";
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        left: 8%;
+        right: 8%;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,transparent,#f2c15c,#d97706,#48633b,transparent);
+        opacity: .55;
+    }
+
+    .admin-products-premium .table thead th {
+        padding: 15px 14px;
+        border-bottom-color: #e2ceb0;
+        background: linear-gradient(180deg,#fff8e9,#f8efe2);
+        color: #5f341d;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        white-space: nowrap;
+    }
+
+    .admin-products-premium .table tbody td {
+        padding: 16px 14px;
+        border-color: #f0e4d5;
+        vertical-align: middle;
+    }
+
+    .admin-products-premium .table tbody tr {
+        transition: background .16s ease;
+    }
+
+    .admin-products-premium .table tbody tr:hover {
+        background: #fffaf2;
+    }
+
+    .admin-products-premium .product-thumb,
+    .admin-products-premium .product-fallback {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        border-color: #e5cfad;
+        box-shadow: 0 6px 15px rgba(95,52,29,.07);
+    }
+
+    .admin-products-premium .category-badge,
+    .admin-products-premium .featured-badge,
+    .admin-products-premium .sale-badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 800;
+    }
+
+    .admin-products-premium .price-admin {
+        font-size: 16px;
+        color: #a83b2d;
+    }
+
+    .admin-products-premium .table .btn,
+    .admin-products-premium .quick-feature-btn {
+        border-radius: 10px;
+        font-weight: 800;
+        transition:
+            transform .16s ease,
+            box-shadow .16s ease;
+    }
+
+    .admin-products-premium .table .btn:hover,
+    .admin-products-premium .quick-feature-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .admin-products-premium .promotion-modal .modal-content {
+        border: 1px solid #e5cfad;
+        border-radius: 22px;
+        box-shadow: 0 26px 70px rgba(44,24,16,.24);
+    }
+
+    .admin-products-premium .promotion-modal .modal-header {
+        border: 0;
+        background:
+            radial-gradient(circle at 90% 20%,rgba(242,193,92,.18),transparent 26%),
+            linear-gradient(135deg,#5f341d,#a83b2d);
+    }
+
+    .admin-products-premium .pagination {
+        gap: 6px;
+    }
+
+    .admin-products-premium .page-link {
+        min-width: 40px;
+        min-height: 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px !important;
+        border-color: #e0c9aa;
+        color: #5f341d;
+    }
+
+    .admin-products-premium .page-item.active .page-link {
+        border-color: transparent;
+        background: linear-gradient(135deg,#5f341d,#48633b);
+    }
+
+    @media (max-width: 767.98px) {
+        .admin-products-premium {
+            padding-top: 8px;
+        }
+
+        .admin-products-premium .admin-products-head {
+            align-items: flex-start !important;
+            flex-direction: column;
+            padding: 25px 22px;
+            border-radius: 22px;
+        }
+
+        .admin-products-premium .filter-box,
+        .admin-products-premium .table-shell {
+            border-radius: 18px;
+        }
+    }
+
+
+    /* =========================================================
+       FIX MODAL KHUYẾN MÃI
+       Modal đã được đưa ra ngoài stacking context của bảng.
+    ========================================================= */
+    .promotion-modal {
+        z-index: 1055;
+    }
+
+    .promotion-modal .modal-dialog {
+        pointer-events: auto;
+    }
+
+    .promotion-modal .form-control {
+        pointer-events: auto;
+        user-select: text;
+    }
+
 </style>
+
+<div class="admin-products-premium">
 
 <div class="admin-products-head d-flex justify-content-between align-items-center flex-wrap gap-3">
 
@@ -430,9 +766,28 @@
 
                             @endif
 
-                            <strong>
-                                {{ $product->name }}
-                            </strong>
+                            <div>
+                                <strong class="d-block">
+                                    {{ $product->name }}
+                                </strong>
+
+                                <form
+                                    action="{{ route('admin.products.toggleFeatured', $product) }}"
+                                    method="POST"
+                                    class="quick-feature-form"
+                                >
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <button
+                                        type="submit"
+                                        class="quick-feature-btn {{ $product->is_featured ? 'is-featured' : '' }}"
+                                        title="{{ $product->is_featured ? 'Bấm để bỏ ghim sản phẩm' : 'Bấm để ghim sản phẩm nổi bật' }}"
+                                    >
+                                        {{ $product->is_featured ? '★ Đã ghim' : '☆ Ghim nổi bật' }}
+                                    </button>
+                                </form>
+                            </div>
 
                         </div>
 
@@ -617,6 +972,57 @@
 
                 </tr>
 
+
+            @empty
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="text-center py-5"
+                    >
+
+                        <div style="font-size:46px;">
+                            🔎
+                        </div>
+
+                        <div class="fw-bold mt-2">
+                            Không tìm thấy sản phẩm phù hợp
+                        </div>
+
+                        <a
+                            href="{{ route('admin.products.index') }}"
+                            class="btn btn-outline-primary btn-sm mt-3"
+                        >
+                            Xóa bộ lọc
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            @endforelse
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+
+<div class="d-flex justify-content-center mt-4">
+    {{ $products->links() }}
+</div>
+
+</div>
+
+{{-- =========================================================
+     MODAL KHUYẾN MÃI
+     Đặt ngoài table-responsive + ngoài .admin-products-premium
+     để Bootstrap backdrop không chặn click/focus vào input.
+========================================================= --}}
+@foreach($products as $product)
                 {{-- ==========================================
                     🔥 MODAL THIẾT LẬP KHUYẾN MÃI
                 =========================================== --}}
@@ -762,45 +1168,6 @@
                     </div>
                 </div>
 
-            @empty
-
-                <tr>
-
-                    <td
-                        colspan="8"
-                        class="text-center py-5"
-                    >
-
-                        <div style="font-size:46px;">
-                            🔎
-                        </div>
-
-                        <div class="fw-bold mt-2">
-                            Không tìm thấy sản phẩm phù hợp
-                        </div>
-
-                        <a
-                            href="{{ route('admin.products.index') }}"
-                            class="btn btn-outline-primary btn-sm mt-3"
-                        >
-                            Xóa bộ lọc
-                        </a>
-
-                    </td>
-
-                </tr>
-
-            @endforelse
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-<div class="d-flex justify-content-center mt-4">
-    {{ $products->links() }}
-</div>
+@endforeach
 
 @endsection

@@ -14,22 +14,48 @@ class CheckoutFlowTest extends TestCase
 
     public function test_customer_can_place_order_from_cart(): void
     {
-        $customer = User::factory()->create(['role' => 'customer']);
-        $category = Category::create(['name' => 'Điện tử']);
+        $customer = User::factory()->create([
+            'role' => 'customer',
+            'email_verified_at' => now(),
+        ]);
+
+        $category = Category::create([
+            'name' => 'Đặc sản Tây Bắc',
+        ]);
+
         $product = Product::create([
-            'name' => 'Máy tính',
-            'description' => 'Laptop test checkout',
+            'name' => 'Thịt trâu gác bếp',
+            'description' => 'Sản phẩm test checkout',
             'quantity' => 10,
-            'price' => 20000000,
+            'price' => 350000,
             'category_id' => $category->id,
         ]);
 
-        $this->actingAs($customer)->post(route('cart.add', $product));
+        $this
+            ->actingAs($customer)
+            ->post(route('cart.add', $product));
 
-        $response = $this->actingAs($customer)->post(route('checkout.place'));
+        $response = $this
+    ->actingAs($customer)
+    ->post(route('checkout.process'), [
+        'customer_name' => 'Nguyen Van Test',
+        'customer_phone' => '0912345678',
+        'shipping_address' => '123 Duong Test, Ha Noi',
+        'notes' => 'Don hang test',
+        'shipping_method' => 'standard',
+        'payment_method' => 'cod',
+    ]);
 
         $response->assertRedirect(route('orders.index'));
-        $this->assertDatabaseHas('orders', ['user_id' => $customer->id, 'status' => 'pending']);
-        $this->assertDatabaseHas('order_items', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $customer->id,
+            'status' => 'pending',
+        ]);
+
+        $this->assertDatabaseHas('order_items', [
+            'product_id' => $product->id,
+            'quantity' => 1,
+        ]);
     }
 }

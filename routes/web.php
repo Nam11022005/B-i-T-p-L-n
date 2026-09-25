@@ -114,7 +114,33 @@ Route::post('/logout', [
 // =====================================================
 // USER ĐÃ ĐĂNG NHẬP
 // =====================================================
+// =====================================================
+// 🛍️ SẢN PHẨM CÔNG KHAI
+// Guest / Customer / Admin đều có thể xem
+// =====================================================
 
+Route::get('/products-search-suggestions', [
+    ProductController::class,
+    'searchSuggestions'
+])->name('products.searchSuggestions');
+
+
+Route::get('/products', [
+    ProductController::class,
+    'userIndex'
+])->name('products.index');
+
+
+Route::get('/products/{product}', [
+    ProductController::class,
+    'show_normal'
+])->name('products.show');
+
+
+Route::get('/khuyen-mai', [
+    ProductController::class,
+    'promotions'
+])->name('products.promotions');
 Route::middleware('auth')->group(function () {
 
     // =================================================
@@ -135,6 +161,27 @@ Route::middleware('auth')->group(function () {
         AuthController::class,
         'profile'
     ])->name('profile');
+
+
+    Route::patch('/profile', [
+        AuthController::class,
+        'updateProfile'
+    ])->name('profile.update');
+
+    Route::post('/profile/avatar', [
+        AuthController::class,
+        'updateAvatar'
+    ])->name('profile.avatar.update');
+
+    Route::delete('/profile/avatar', [
+        AuthController::class,
+        'deleteAvatar'
+    ])->name('profile.avatar.delete');
+
+    Route::patch('/profile/password', [
+        AuthController::class,
+        'updatePassword'
+    ])->name('profile.password.update');
 
 
     // =================================================
@@ -196,6 +243,22 @@ Route::middleware(['auth', 'admin'])
             AdminController::class,
             'dashboard'
         ])->name('dashboard');
+
+
+
+        // =================================================
+        // 👥 QUẢN LÝ KHÁCH HÀNG
+        // =================================================
+
+        Route::get('/customers', [
+            AdminController::class,
+            'customers'
+        ])->name('customers.index');
+
+        Route::get('/customers/{customer}', [
+            AdminController::class,
+            'customerShow'
+        ])->name('customers.show');
 
 
         // =================================================
@@ -356,40 +419,10 @@ Route::middleware(['auth', 'verified'])
 
 
         // =================================================
-        // 🔥 KHUYẾN MÃI USER
+        // 🛍️ SẢN PHẨM
+        // Route xem/tìm kiếm sản phẩm đã đặt ở khu vực public phía trên.
+        // Guest / Customer / Admin đều có thể xem.
         // =================================================
-
-        Route::get('/khuyen-mai', [
-            ProductController::class,
-            'promotions'
-        ])->name('products.promotions');
-
-
-        // =================================================
-        // 🛍️ SẢN PHẨM USER
-        // =================================================
-
-        // =================================================
-        // 🔎 GỢI Ý TÌM KIẾM SẢN PHẨM
-        // Phải đặt trước /products/{product}
-        // =================================================
-
-        Route::get('/products-search-suggestions', [
-            ProductController::class,
-            'searchSuggestions'
-        ])->name('products.searchSuggestions');
-
-
-        Route::get('/products', [
-            ProductController::class,
-            'userIndex'
-        ])->name('products.index');
-
-
-        Route::get('/products/{product}', [
-            ProductController::class,
-            'show_normal'
-        ])->name('products.show');
 
         // =================================================
         // 📍 ĐỊA CHỈ KHÁCH HÀNG

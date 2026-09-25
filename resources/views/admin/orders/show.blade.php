@@ -75,15 +75,239 @@
     .product-table th {
         white-space: nowrap;
     }
+
+    /* =========================================================
+       ADMIN ORDER DETAIL PREMIUM UI
+       Chỉ nâng giao diện, không đổi route/form/status/payment logic.
+    ========================================================= */
+
+    .admin-order-show-premium {
+        position: relative;
+        isolation: isolate;
+        padding-top: 30px;
+        padding-bottom: 72px;
+    }
+
+    .admin-order-show-premium::before {
+        content: "";
+        position: absolute;
+        z-index: -2;
+        top: -35px;
+        left: 50%;
+        width: min(100vw,1760px);
+        height: 760px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 7% 8%, rgba(242,193,92,.17), transparent 23%),
+            radial-gradient(circle at 94% 12%, rgba(72,99,59,.12), transparent 28%),
+            linear-gradient(180deg,rgba(255,250,240,.92),rgba(255,255,255,0));
+    }
+
+    .admin-order-show-head {
+        position: relative;
+        overflow: hidden;
+        min-height: 170px;
+        padding: 30px 34px;
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 27px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 88% 15%, rgba(242,193,92,.22), transparent 29%),
+            radial-gradient(circle at 12% 120%, rgba(168,59,45,.27), transparent 35%),
+            linear-gradient(135deg,#2c1810 0%,#5f341d 54%,#48633b 100%);
+        box-shadow:
+            0 22px 56px rgba(44,24,16,.18),
+            inset 0 1px 0 rgba(255,255,255,.07);
+    }
+
+    .admin-order-show-head::before {
+        content: "";
+        position: absolute;
+        right: -30px;
+        bottom: -56px;
+        width: 320px;
+        height: 180px;
+        opacity: .10;
+        clip-path: polygon(0 100%,18% 56%,36% 73%,53% 25%,70% 58%,86% 34%,100% 66%,100% 100%);
+        background: linear-gradient(135deg,#fff,#f2c15c);
+        pointer-events: none;
+    }
+
+    .admin-order-show-head > * {
+        position: relative;
+        z-index: 2;
+    }
+
+    .admin-order-show-head h2 {
+        color: #fff;
+        font-size: clamp(29px,3vw,41px);
+        letter-spacing: -.7px;
+        text-shadow: 0 2px 14px rgba(0,0,0,.16);
+    }
+
+    .admin-order-show-head .text-muted {
+        color: rgba(255,255,255,.74) !important;
+    }
+
+    .admin-order-show-head .btn-outline-secondary {
+        min-height: 44px;
+        padding-inline: 17px;
+        border-radius: 999px;
+        border-color: rgba(255,255,255,.26);
+        color: #fff;
+        background: rgba(255,255,255,.08);
+        font-weight: 800;
+        backdrop-filter: blur(10px);
+    }
+
+    .admin-order-show-head .btn-outline-secondary:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,.4);
+        background: rgba(255,255,255,.15);
+    }
+
+    .admin-order-show-premium .order-detail-card {
+        position: relative;
+        border: 1px solid #e5d0b3 !important;
+        border-radius: 22px;
+        background:
+            linear-gradient(180deg,#fff,#fffdfa);
+        box-shadow:
+            0 17px 42px rgba(95,52,29,.08),
+            inset 0 1px 0 rgba(255,255,255,.94);
+    }
+
+    .admin-order-show-premium .order-detail-card::before {
+        content: "";
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        left: 8%;
+        right: 8%;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,transparent,#f2c15c,#d97706,#48633b,transparent);
+        opacity: .55;
+    }
+
+    .admin-order-show-premium .order-detail-card .card-header {
+        border-bottom-color: #ead8bf;
+    }
+
+    .admin-order-show-premium .info-label {
+        color: #837268;
+        font-weight: 600;
+    }
+
+    .admin-order-show-premium .info-value {
+        color: #392820;
+    }
+
+    .admin-order-show-premium .status-current {
+        box-shadow: 0 6px 14px rgba(0,0,0,.08);
+    }
+
+    .admin-order-show-premium .timeline-item {
+        position: relative;
+        padding: 10px 12px;
+        border-radius: 13px;
+        transition: background .16s ease, transform .16s ease;
+    }
+
+    .admin-order-show-premium .timeline-item:hover {
+        background: #fff9ef;
+        transform: translateX(2px);
+    }
+
+    .admin-order-show-premium .timeline-circle {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #fff;
+        box-shadow:
+            0 5px 13px rgba(95,52,29,.08),
+            0 0 0 1px #ead8bf;
+    }
+
+    .admin-order-show-premium .timeline-active {
+        background: linear-gradient(135deg,#48633b,#5d8b4f);
+    }
+
+    .admin-order-show-premium .timeline-current {
+        background: linear-gradient(135deg,#a83b2d,#d97706);
+    }
+
+    .admin-order-show-premium .product-table thead th {
+        padding: 14px 15px;
+        border-bottom-color: #e3ceb0;
+        background: linear-gradient(180deg,#fff8e9,#f8efe2);
+        color: #5f341d;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+    }
+
+    .admin-order-show-premium .product-table tbody td {
+        padding: 15px;
+        border-color: #f0e4d5;
+    }
+
+    .admin-order-show-premium .product-table tbody tr:hover {
+        background: #fffaf2;
+    }
+
+    .admin-order-show-premium .form-select,
+    .admin-order-show-premium .form-control {
+        min-height: 45px;
+        border-radius: 11px;
+        border-color: #dfcbae;
+        background: #fffdf9;
+    }
+
+    .admin-order-show-premium .form-select:focus,
+    .admin-order-show-premium .form-control:focus {
+        border-color: #d3a65f;
+        box-shadow: 0 0 0 .2rem rgba(217,119,6,.09);
+    }
+
+    .admin-order-show-premium .btn {
+        border-radius: 11px;
+        font-weight: 800;
+    }
+
+    .admin-order-show-premium .alert {
+        border-radius: 14px;
+        box-shadow: 0 7px 18px rgba(95,52,29,.05);
+    }
+
+    .admin-order-show-premium .badge {
+        border-radius: 999px;
+        padding: 7px 10px;
+    }
+
+    @media (max-width: 767.98px) {
+        .admin-order-show-head {
+            flex-direction: column;
+            align-items: flex-start !important;
+            padding: 25px 22px;
+            border-radius: 22px;
+        }
+
+        .admin-order-show-premium .order-detail-card {
+            border-radius: 18px;
+        }
+    }
+
 </style>
 
 
-<div class="container-fluid">
+<div class="container-fluid admin-order-show-premium">
 
     {{-- ==========================================
         HEADER
     ========================================== --}}
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div class="admin-order-show-head d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
 
         <div>
 
@@ -119,7 +343,7 @@
     ========================================== --}}
     @if(session('success'))
 
-        <div class="alert alert-success alert-dismissible fade show shadow-sm">
+        <div class="alert alert-success alert-dismissible fade show shadow-sm auto-dismiss-alert">
 
             ✅ {{ session('success') }}
 
@@ -923,7 +1147,7 @@
                         <strong>
 
                             {{ number_format(
-                                max($order->total_price - 30000, 0),
+                                $order->subtotal ?? 0,
                                 0,
                                 ',',
                                 '.'
@@ -941,10 +1165,37 @@
                         </span>
 
                         <strong>
-                            30.000 đ
+                            {{ number_format(
+                                $order->shipping_fee ?? 0,
+                                0,
+                                ',',
+                                '.'
+                            ) }} đ
                         </strong>
 
                     </div>
+
+
+                    @if(($order->discount ?? 0) > 0)
+
+                        <div class="d-flex justify-content-between mb-3">
+
+                            <span class="text-muted">
+                                Giảm giá:
+                            </span>
+
+                            <strong class="text-success">
+                                -{{ number_format(
+                                    $order->discount,
+                                    0,
+                                    ',',
+                                    '.'
+                                ) }} đ
+                            </strong>
+
+                        </div>
+
+                    @endif
 
 
                     <hr>

@@ -20,15 +20,34 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.app', function ($view) {
 
-            $menuCategories = Category::with([
-                'products' => function ($query) {
-                    $query->orderBy('name', 'asc');
-                }
-            ])
-            ->orderBy('name', 'asc')
-            ->get();
+            $menuCategories = Category::query()
+                ->select([
+                    'id',
+                    'name',
+                ])
+                ->with([
+                    'products' => function ($query) {
+                        $query
+                            ->select([
+                                'id',
+                                'category_id',
+                                'name',
+                                'image',
+                                'price',
+                                'sale_price',
+                                'sale_start',
+                                'sale_end',
+                            ])
+                            ->orderBy('name', 'asc');
+                    }
+                ])
+                ->orderBy('name', 'asc')
+                ->get();
 
-            $view->with('menuCategories', $menuCategories);
+            $view->with(
+                'menuCategories',
+                $menuCategories
+            );
         });
     }
 }

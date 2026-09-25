@@ -305,6 +305,182 @@ class AdminController extends Controller
         );
     }
 
+
+    // ==========================================
+    // 👥 DANH SÁCH KHÁCH HÀNG
+    // ==========================================
+    public function customers(Request $request)
+    {
+        $query = User::query()
+            ->where('role', 'customer')
+            ->withCount('orders')
+            ->withSum([
+                'orders as delivered_total_spent' => function ($orderQuery) {
+                    $orderQuery->where('status', 'delivered');
+                },
+            ], 'total_price')
+            ->withMax('orders', 'created_at');
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->search);
+
+            $query->where(function ($customerQuery) use ($search) {
+                $customerQuery
+                    ->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+
+                if (is_numeric($search)) {
+                    $customerQuery->orWhere('id', (int) $search);
+                }
+            });
+        }
+
+        if ($request->verified === 'yes') {
+            $query->whereNotNull('email_verified_at');
+        } elseif ($request->verified === 'no') {
+            $query->whereNull('email_verified_at');
+        }
+
+        switch ($request->sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+
+            case 'name_asc':
+                $query->orderBy('name');
+                break;
+
+            case 'name_desc':
+                $query->orderByDesc('name');
+                break;
+
+            case 'orders_desc':
+                $query->orderByDesc('orders_count');
+                break;
+
+            case 'spent_desc':
+                $query->orderByDesc('delivered_total_spent');
+                break;
+
+            default:
+                $query->latest();
+                break;
+        }
+
+        $customers = $query
+            ->paginate(12)
+            ->withQueryString();
+
+        $totalCustomers = User::where(
+            'role',
+            'customer'
+        )->count();
+
+        $verifiedCustomers = User::where(
+            'role',
+            'customer'
+        )
+            ->whereNotNull('email_verified_at')
+            ->count();
+
+        $customersWithOrders = User::where(
+            'role',
+            'customer'
+        )
+            ->whereHas('orders')
+            ->count();
+
+        return view(
+            'admin.customers.index',
+            compact(
+                'customers',
+                'totalCustomers',
+                'verifiedCustomers',
+                'customersWithOrders'
+            )
+        );
+    }
+
+    // ==========================================
+    // 👤 CHI TIẾT KHÁCH HÀNG
+    // ==========================================
+    public function customerShow(User $customer)
+    {
+        abort_unless(
+            $customer->role === 'customer',
+            404
+        );
+
+        $baseOrders = Order::query()
+            ->where('user_id', $customer->id);
+
+        $totalOrders = (clone $baseOrders)->count();
+
+        $pendingOrders = (clone $baseOrders)
+            ->whereIn('status', [
+                'pending',
+                'confirmed',
+                'shipped',
+            ])
+            ->count();
+
+        $deliveredOrders = (clone $baseOrders)
+            ->where('status', 'delivered')
+            ->count();
+
+        $totalSpent = (clone $baseOrders)
+            ->where('status', 'delivered')
+            ->sum('total_price');
+
+        $latestOrder = (clone $baseOrders)
+            ->latest()
+            ->first();
+
+        $orders = (clone $baseOrders)
+            ->latest()
+            ->paginate(10);
+
+        // ==========================================
+        // ĐỊA CHỈ KHÁCH HÀNG ĐÃ LƯU
+        // ==========================================
+        // Không hard-code tên bảng "addresses".
+        // Dùng đúng Eloquent model đang có trong project để Laravel
+        // tự lấy đúng tên bảng mà model đó cấu hình.
+        $addresses = collect();
+
+        $addressModelClass = null;
+
+        if (class_exists(\App\Models\Address::class)) {
+            $addressModelClass = \App\Models\Address::class;
+        } elseif (class_exists(\App\Models\UserAddress::class)) {
+            $addressModelClass = \App\Models\UserAddress::class;
+        } elseif (class_exists(\App\Models\CustomerAddress::class)) {
+            $addressModelClass = \App\Models\CustomerAddress::class;
+        }
+
+        if ($addressModelClass) {
+            $addresses = $addressModelClass::query()
+                ->where('user_id', $customer->id)
+                ->orderByDesc('is_default')
+                ->orderByDesc('id')
+                ->get();
+        }
+
+        return view(
+            'admin.customers.show',
+            compact(
+                'customer',
+                'addresses',
+                'orders',
+                'totalOrders',
+                'pendingOrders',
+                'deliveredOrders',
+                'totalSpent',
+                'latestOrder'
+            )
+        );
+    }
+
     // ==========================================
     // 🔔 ĐỌC MỘT THÔNG BÁO
     // ==========================================

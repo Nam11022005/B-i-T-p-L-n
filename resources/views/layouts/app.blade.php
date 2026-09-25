@@ -12,12 +12,15 @@
         rel="stylesheet"
     >
 
+    @stack('styles')
+
     <style>
         :root {
             --tb-brown: #5f341d;
             --tb-brown-dark: #2c1810;
             --tb-green: #48633b;
             --tb-red: #a83b2d;
+            --tb-orange: #d97706;
             --tb-gold: #f2c15c;
             --tb-cream: #fffaf0;
             --tb-soft: #f8efe2;
@@ -956,7 +959,635 @@
         }
 
 
+        /* =====================================================
+           COMPACT HEADER: LUÔN 1 DÒNG
+           Logo + Search + Menu + Thông báo + Tài khoản
+        ===================================================== */
+        #customerCompactHeader {
+            overflow: visible;
+        }
+
+        #customerCompactHeader .customer-compact-inner {
+            width: 100%;
+            flex-wrap: nowrap !important;
+            white-space: nowrap;
+            overflow: visible;
+        }
+
+        #customerCompactHeader .customer-compact-search {
+            min-width: 180px;
+        }
+
+        #customerCompactHeader .customer-compact-actions {
+            min-width: 0;
+            flex-wrap: nowrap !important;
+            white-space: nowrap;
+        }
+
+        #customerCompactHeader .compact-right-start {
+            margin-left: auto;
+        }
+
+        /* =====================================================
+           ADMIN COMPACT: 1 DÒNG + SEARCH GỌN + MEGA MENU SẢN PHẨM
+        ===================================================== */
+        @media (min-width: 992px) {
+            #customerCompactHeader .customer-compact-inner {
+                max-width: 1540px;
+                flex-wrap: nowrap !important;
+                gap: 10px;
+                padding-left: 22px;
+                padding-right: 22px;
+            }
+
+            #customerCompactHeader .customer-compact-brand {
+                flex: 0 0 auto;
+            }
+
+            #customerCompactHeader .customer-compact-search {
+                flex: 0 1 300px;
+                width: 300px;
+                max-width: 300px;
+                min-width: 180px;
+                margin: 0;
+            }
+
+            #customerCompactHeader .customer-compact-actions {
+                flex: 1 1 auto;
+                min-width: 0;
+                display: flex;
+                align-items: center;
+                flex-wrap: nowrap !important;
+                gap: 4px;
+                white-space: nowrap;
+            }
+
+            #customerCompactHeader .compact-admin-menu-link {
+                flex: 0 0 auto;
+            }
+
+            #customerCompactHeader .compact-admin-mega {
+                position: relative;
+                flex: 0 0 auto;
+            }
+
+            #customerCompactHeader .compact-admin-mega-menu {
+                top: 100%;
+                left: 0;
+                z-index: 6000;
+            }
+
+            #customerCompactHeader .compact-admin-mega:hover > .compact-admin-mega-menu,
+            #customerCompactHeader .compact-admin-mega:focus-within > .compact-admin-mega-menu,
+            #customerCompactHeader .compact-admin-mega.mega-open > .compact-admin-mega-menu {
+                display: flex;
+            }
+
+        }
+
+
+        @media (min-width: 992px) {
+            #customerCompactHeader .compact-customer-mega {
+                position: relative;
+                flex: 0 0 auto;
+            }
+
+            #customerCompactHeader .compact-customer-mega-menu {
+                top: 100%;
+                left: 0;
+                z-index: 6000;
+            }
+
+            #customerCompactHeader .compact-customer-mega:hover > .compact-customer-mega-menu,
+            #customerCompactHeader .compact-customer-mega:focus-within > .compact-customer-mega-menu,
+            #customerCompactHeader .compact-customer-mega.mega-open > .compact-customer-mega-menu {
+                display: flex;
+            }
+        }
+
+        /* Dropdown tài khoản compact: hover/click đều mở */
+        #customerCompactHeader .compact-account-dropdown {
+            position: relative;
+            flex: 0 0 auto;
+        }
+        #customerCompactHeader .compact-account-dropdown > .dropdown-menu {
+            top: 100%;
+            right: 0;
+            left: auto;
+            margin-top: 0;
+            min-width: 250px;
+            z-index: 6500;
+        }
+        @media (min-width: 992px) {
+            #customerCompactHeader .compact-account-dropdown:hover > .dropdown-menu,
+            #customerCompactHeader .compact-account-dropdown:focus-within > .dropdown-menu,
+            #customerCompactHeader .compact-account-dropdown > .dropdown-menu.show {
+                display: block;
+            }
+        }
+
+        /* Giảm chữ trước khi cho phép xuống dòng: compact luôn chỉ có 1 hàng */
+        @media (min-width: 992px) and (max-width: 1250px) {
+            #customerCompactHeader .customer-compact-inner {
+                gap: 6px;
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            #customerCompactHeader .customer-compact-search {
+                flex-basis: 230px;
+                width: 230px;
+                max-width: 230px;
+                min-width: 160px;
+            }
+
+            #customerCompactHeader .customer-compact-action {
+                padding-left: 7px;
+                padding-right: 7px;
+                gap: 3px;
+            }
+
+            #customerCompactHeader .customer-compact-brand {
+                font-size: 0;
+            }
+
+            #customerCompactHeader .customer-compact-brand::before {
+                content: "🌿";
+                font-size: 24px;
+            }
+        }
+
     </style>
+
+    <style>
+        /* =========================================================
+           GLOBAL UI UPGRADE ONLY
+           Chỉ nâng cấp giao diện layout/navbar/dropdown/compact.
+           KHÔNG sửa route, form, Blade logic, JS hay chức năng.
+        ========================================================= */
+
+        body {
+            background:
+                radial-gradient(circle at 8% 10%, rgba(242,193,92,.07), transparent 24%),
+                radial-gradient(circle at 92% 8%, rgba(72,99,59,.055), transparent 22%),
+                linear-gradient(180deg, #fffaf2 0%, #fff 38%, #fffaf4 100%);
+            background-attachment: fixed;
+        }
+
+        /* NAVBAR CHÍNH */
+        .navbar {
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,.10);
+            box-shadow:
+                0 10px 30px rgba(44,24,16,.14),
+                inset 0 -1px 0 rgba(255,255,255,.04);
+        }
+
+        .navbar::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            height: 1px;
+            pointer-events: none;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(242,193,92,.45),
+                transparent
+            );
+        }
+
+        .navbar-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            letter-spacing: .25px;
+            transition: transform .2s ease, color .2s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: translateY(-1px);
+        }
+
+        .nav-link,
+        .admin-link {
+            position: relative;
+            transition:
+                background-color .18s ease,
+                color .18s ease,
+                transform .18s ease;
+        }
+
+        .nav-link:hover,
+        .admin-link:hover {
+            transform: translateY(-1px);
+        }
+
+        /* SEARCH */
+        .customer-search-form,
+        .customer-compact-search {
+            box-shadow:
+                0 8px 22px rgba(44,24,16,.10),
+                inset 0 0 0 1px rgba(255,255,255,.55);
+            transition:
+                box-shadow .2s ease,
+                transform .2s ease;
+        }
+
+        .customer-search-form:focus-within,
+        .customer-compact-search:focus-within {
+            box-shadow:
+                0 10px 28px rgba(44,24,16,.16),
+                0 0 0 3px rgba(242,193,92,.15);
+            transform: translateY(-1px);
+        }
+
+        .customer-search-input,
+        .customer-compact-search input {
+            font-weight: 500;
+        }
+
+        .customer-search-button,
+        .customer-compact-search button {
+            transition:
+                transform .18s ease,
+                filter .18s ease;
+        }
+
+        .customer-search-button:hover,
+        .customer-compact-search button:hover {
+            transform: scale(1.05);
+            filter: brightness(1.04);
+        }
+
+        /* DROPDOWN */
+        .dropdown-menu {
+            padding: 8px;
+            border: 1px solid #efe1cf !important;
+            border-radius: 16px !important;
+            background: rgba(255,255,255,.98);
+            box-shadow:
+                0 18px 48px rgba(44,24,16,.14),
+                0 2px 10px rgba(44,24,16,.05);
+            backdrop-filter: blur(14px);
+        }
+
+        .dropdown-item {
+            border-radius: 10px;
+            font-weight: 600;
+            color: #46352b;
+            transition:
+                background-color .16s ease,
+                color .16s ease,
+                transform .16s ease;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background: var(--tb-soft);
+            color: var(--tb-brown-dark);
+            transform: translateX(2px);
+        }
+
+        .dropdown-divider {
+            border-color: #eee0cd;
+            margin: 6px 0;
+        }
+
+        /* MEGA MENU */
+        .category-mega-menu,
+        .compact-admin-mega-menu,
+        .compact-customer-mega-menu {
+            border: 1px solid #ead8bf;
+            border-radius: 18px;
+            box-shadow:
+                0 22px 56px rgba(44,24,16,.16),
+                0 2px 8px rgba(44,24,16,.05);
+            overflow: hidden;
+            background: rgba(255,255,255,.99);
+            backdrop-filter: blur(14px);
+        }
+
+        .category-mega-left {
+            background:
+                linear-gradient(180deg, #fffaf2 0%, #f8efe2 100%);
+            border-right: 1px solid #ead8bf;
+        }
+
+        .category-mega-category {
+            border-radius: 10px;
+            transition:
+                background-color .16s ease,
+                color .16s ease,
+                transform .16s ease;
+        }
+
+        .category-mega-category:hover,
+        .category-mega-category.active {
+            transform: translateX(2px);
+        }
+
+        .category-product-card {
+            border-radius: 12px;
+            transition:
+                transform .18s ease,
+                box-shadow .18s ease,
+                border-color .18s ease;
+        }
+
+        .category-product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(95,52,29,.10);
+        }
+
+        /* COMPACT HEADER */
+        .customer-compact-header {
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(53,24,13,.985) 0%,
+                    rgba(102,57,31,.985) 55%,
+                    rgba(72,99,59,.985) 100%
+                );
+            box-shadow:
+                0 10px 30px rgba(44,24,16,.20),
+                inset 0 -1px 0 rgba(255,255,255,.06);
+            backdrop-filter: blur(14px);
+        }
+
+        .customer-compact-inner {
+            min-height: 68px;
+        }
+
+        .customer-compact-brand {
+            transition: transform .18s ease, color .18s ease;
+        }
+
+        .customer-compact-brand:hover {
+            transform: translateY(-1px);
+            color: var(--tb-gold) !important;
+        }
+
+        .customer-compact-action {
+            border-radius: 10px;
+            transition:
+                background-color .17s ease,
+                transform .17s ease,
+                color .17s ease;
+        }
+
+        .customer-compact-action:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,.11);
+        }
+
+        .customer-compact-badge {
+            box-shadow: 0 3px 10px rgba(0,0,0,.18);
+        }
+
+        /* SEARCH SUGGESTIONS */
+        .product-search-suggestions {
+            border-radius: 0 0 16px 16px;
+            overflow: hidden;
+            box-shadow: 0 18px 38px rgba(44,24,16,.14);
+        }
+
+        /* ALERT */
+        .alert {
+            border-radius: 14px !important;
+            box-shadow: 0 8px 22px rgba(44,24,16,.07);
+        }
+
+        /* GLOBAL BUTTON POLISH */
+        .btn {
+            border-radius: 11px;
+            font-weight: 700;
+            transition:
+                transform .17s ease,
+                box-shadow .17s ease,
+                filter .17s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary,
+        .btn-success,
+        .btn-warning,
+        .btn-danger {
+            box-shadow: 0 6px 16px rgba(44,24,16,.08);
+        }
+
+        /* FORM ELEMENTS */
+        .form-control,
+        .form-select {
+            border-radius: 11px;
+            border-color: #e4d3bc;
+            transition:
+                border-color .18s ease,
+                box-shadow .18s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #d2ad77;
+            box-shadow: 0 0 0 .2rem rgba(217,119,6,.10);
+        }
+
+        /* MOBILE */
+        @media (max-width: 991.98px) {
+            .navbar {
+                box-shadow: 0 8px 24px rgba(44,24,16,.15);
+            }
+
+            .navbar-collapse {
+                margin-top: 10px;
+                padding: 10px;
+                border-radius: 14px;
+                background: rgba(255,255,255,.055);
+            }
+
+            .nav-link {
+                margin: 2px 0;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .navbar-brand {
+                font-size: 18px;
+            }
+
+            .dropdown-menu {
+                border-radius: 13px !important;
+            }
+        }
+    </style>
+
+
+    <style>
+        /* =========================================================
+           SEARCH BOX FIX - UI ONLY
+           Bỏ khung vuông bên ngoài, giữ ô tìm kiếm dạng pill gọn hơn.
+        ========================================================= */
+
+        /* Form chỉ làm khung định vị, không tạo viền/box-shadow riêng */
+        .customer-search-form,
+        .customer-compact-search {
+            background: transparent !important;
+            border: 0 !important;
+            border-radius: 999px !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        .customer-search-form:focus-within,
+        .customer-compact-search:focus-within {
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        /* Ô tìm kiếm chính */
+        .customer-search-input {
+            height: 46px;
+            padding: 0 58px 0 20px;
+            border: 1px solid rgba(242, 193, 92, .65) !important;
+            border-radius: 999px !important;
+            background: #fffaf0 !important;
+            color: var(--tb-brown-dark);
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow:
+                0 5px 16px rgba(44,24,16,.08),
+                inset 0 1px 0 rgba(255,255,255,.95) !important;
+        }
+
+        .customer-search-input::placeholder {
+            color: #9a8172;
+            font-weight: 500;
+            opacity: 1;
+        }
+
+        .customer-search-input:focus {
+            background: #ffffff !important;
+            border-color: var(--tb-gold) !important;
+            box-shadow:
+                0 7px 20px rgba(44,24,16,.10),
+                0 0 0 3px rgba(242,193,92,.16) !important;
+        }
+
+        /* Nút kính lúp nhỏ gọn, nằm hoàn toàn trong pill */
+        .customer-search-button {
+            top: 50%;
+            right: 5px;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 0 !important;
+            border-radius: 50% !important;
+            transform: translateY(-50%) !important;
+            background:
+                linear-gradient(135deg, #f6c75f 0%, #e9aa3d 100%) !important;
+            color: var(--tb-brown-dark) !important;
+            font-size: 17px;
+            box-shadow: 0 4px 10px rgba(95,52,29,.16);
+        }
+
+        .customer-search-button:hover {
+            transform: translateY(-50%) scale(1.04) !important;
+            background:
+                linear-gradient(135deg, #ffd87c 0%, #f2c15c 100%) !important;
+            box-shadow: 0 5px 13px rgba(95,52,29,.20);
+        }
+
+        /* Search chính trên desktop: gọn, không tạo cảm giác kéo quá sát mép */
+        @media (min-width: 1200px) {
+            .customer-main-search {
+                max-width: 720px;
+            }
+        }
+
+        /* Compact search vẫn đồng bộ nhưng thấp hơn một chút */
+        #customerCompactHeader .customer-search-input {
+            height: 42px;
+            padding-left: 17px;
+            padding-right: 52px;
+            font-size: 14px;
+            box-shadow:
+                0 3px 11px rgba(0,0,0,.08),
+                inset 0 1px 0 rgba(255,255,255,.9) !important;
+        }
+
+        #customerCompactHeader .customer-search-button {
+            width: 32px;
+            height: 32px;
+            right: 5px;
+            font-size: 15px;
+        }
+    
+        /* =====================================================
+           ADMIN NAV SYNC
+           Hai navbar dùng cùng dữ liệu/menu.
+        ===================================================== */
+        @media (min-width: 992px) {
+            .navbar > .container-fluid > .customer-two-row-nav > .customer-menu-row {
+                gap: clamp(8px, 1.15vw, 18px);
+            }
+
+            .navbar > .container-fluid > .customer-two-row-nav > .customer-menu-row .nav-link {
+                padding-left: clamp(8px, .8vw, 13px) !important;
+                padding-right: clamp(8px, .8vw, 13px) !important;
+                font-size: clamp(13px, .86vw, 15px);
+            }
+        }
+
+        @media (min-width: 992px) and (max-width: 1450px) {
+            #customerCompactHeader .customer-compact-search {
+                flex-basis: 220px;
+                width: 220px;
+                max-width: 220px;
+            }
+
+            #customerCompactHeader .customer-compact-actions {
+                gap: 2px;
+            }
+
+            #customerCompactHeader .customer-compact-action {
+                padding-left: 7px;
+                padding-right: 7px;
+                font-size: 12px;
+            }
+        }
+
+
+        /* =====================================================
+           SINGLE ADMIN NAVBAR
+           Thứ tự thống nhất:
+           Trang chủ -> Sản phẩm -> Dashboard -> Khách hàng
+           -> Danh mục -> Đơn hàng -> Voucher
+        ===================================================== */
+        @media (min-width: 992px) {
+            .customer-two-row-nav .customer-menu-row {
+                justify-content: flex-start;
+            }
+
+            .customer-two-row-nav .customer-menu-row > .nav-item:first-child {
+                margin-left: 0;
+            }
+        }
+
+        @media (min-width: 992px) and (max-width: 1380px) {
+            .customer-two-row-nav .customer-menu-row .nav-link {
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+                font-size: 13px;
+            }
+        }
+
+</style>
+
 </head>
 <body>
 
@@ -1099,7 +1730,7 @@
     <li class="nav-item category-mega-item" id="adminProductMega">
         <a
             class="nav-link admin-link {{ request()->routeIs('products.index') || request()->routeIs('products.show') || request()->routeIs('admin.products.*') ? 'active' : '' }}"
-            href="{{ route('products.index') }}"
+            href="{{ route('admin.products.index') }}"
             id="adminProductMegaToggle"
             aria-expanded="false"
         >
@@ -1212,6 +1843,31 @@
     </li>
 
 
+
+    {{-- DASHBOARD --}}
+    <li class="nav-item">
+        <a
+            class="nav-link admin-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+            href="{{ route('admin.dashboard') }}"
+        >
+            📊 Dashboard
+        </a>
+    </li>
+
+
+    {{-- KHÁCH HÀNG --}}
+    <li class="nav-item">
+        <a
+            class="nav-link admin-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}"
+            href="{{ route('admin.customers.index') }}"
+        >
+            👥 Khách hàng
+        </a>
+    </li>
+
+
+
+
     {{-- DANH MỤC --}}
     <li class="nav-item">
         <a
@@ -1267,16 +1923,6 @@
             href="{{ route('admin.vouchers.index') }}"
         >
             🎟️ Voucher
-        </a>
-    </li>
-
-    {{-- TỔNG QUAN - ĐƯA SANG CUỐI MENU ADMIN --}}
-    <li class="nav-item">
-        <a
-            class="nav-link admin-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-            href="{{ route('admin.dashboard') }}"
-        >
-            📊 Tổng Quan
         </a>
     </li>
 
@@ -2070,7 +2716,7 @@
     🔎 HEADER THU GỌN KHI CUỘN
     Không thay thế navbar cũ; chỉ hiện sau khi scroll > 120px.
 ===================================================== --}}
-@if(Auth::check())
+@auth
     @php
         $compactIsAdmin = Auth::user()->role === 'admin';
 
@@ -2146,39 +2792,163 @@
                 @if($compactIsAdmin)
 
                     <a
-                        href="{{ route('admin.dashboard') }}"
-                        class="customer-compact-action"
-                        title="Tổng Quan Admin"
+                        href="{{ url('/') }}"
+                        class="customer-compact-action compact-admin-menu-link"
+                        title="Trang chủ"
                     >
-                        📊
-                        <span class="action-text">Tổng Quan</span>
+                        🏠 <span class="action-text">Trang chủ</span>
+                    </a>
+
+                    {{-- SẢN PHẨM - thanh compact, hover vẫn mở mega menu như navbar chính --}}
+                    <div class="compact-admin-mega category-mega-item" id="compactAdminProductMega">
+                        <a
+                            href="{{ route('admin.products.index') }}"
+                            class="customer-compact-action compact-admin-menu-link"
+                            id="compactAdminProductMegaToggle"
+                            aria-expanded="false"
+                        >
+                            🥩 <span class="action-text">Sản phẩm</span>
+                            <span class="ms-1 small">▾</span>
+                        </a>
+
+                        @php
+                            $compactAdminNavCategories = $menuCategories ?? collect();
+                        @endphp
+
+                        <div class="category-mega-menu compact-admin-mega-menu" id="compactAdminProductMegaMenu">
+                            <div class="category-mega-left">
+                                <div class="category-mega-title">Sản phẩm đã thêm</div>
+
+                                @forelse($compactAdminNavCategories as $category)
+                                    <button
+                                        type="button"
+                                        class="category-mega-category {{ $loop->first ? 'active' : '' }}"
+                                        data-compact-admin-category-panel="compact-admin-mega-category-{{ $category->id }}"
+                                    >
+                                        <span>{{ $category->name }}</span>
+                                        <span>›</span>
+                                    </button>
+                                @empty
+                                    <div class="px-3 py-4 text-muted small">Chưa có danh mục.</div>
+                                @endforelse
+                            </div>
+
+                            <div class="category-mega-right">
+                                @forelse($compactAdminNavCategories as $category)
+                                    <div
+                                        class="category-product-panel compact-admin-category-product-panel {{ $loop->first ? 'active' : '' }}"
+                                        id="compact-admin-mega-category-{{ $category->id }}"
+                                    >
+                                        <div class="category-product-heading">
+                                            <strong>🥩 {{ $category->name }}</strong>
+                                            <a href="{{ route('products.index', ['category_id' => $category->id]) }}">Xem tất cả →</a>
+                                        </div>
+
+                                        @if($category->products->isNotEmpty())
+                                            <div class="category-product-grid">
+                                                @foreach($category->products as $product)
+                                                    <a
+                                                        class="category-product-card"
+                                                        href="{{ route('products.show', $product) }}"
+                                                        title="Mở sản phẩm với quyền Admin"
+                                                    >
+                                                        @php
+                                                            $compactAdminMegaImage = $product->image
+                                                                ? (str_starts_with($product->image, 'http')
+                                                                    ? $product->image
+                                                                    : asset('storage/' . ltrim($product->image, '/')))
+                                                                : null;
+                                                        @endphp
+
+                                                        @if($compactAdminMegaImage)
+                                                            <img
+                                                                src="{{ $compactAdminMegaImage }}"
+                                                                alt="{{ $product->name }}"
+                                                                class="category-product-image"
+                                                                loading="lazy"
+                                                            >
+                                                        @else
+                                                            <div class="category-product-image d-flex align-items-center justify-content-center fs-2">🥩</div>
+                                                        @endif
+
+                                                        <div class="category-product-name">{{ $product->name }}</div>
+                                                        <div class="small fw-bold mt-1" style="color: var(--tb-red);">
+                                                            {{ number_format((float) $product->getCurrentPrice(), 0, ',', '.') }}đ
+                                                        </div>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="category-product-empty">📦 Danh mục này chưa có sản phẩm.</div>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <div class="category-product-empty">📂 Chưa có dữ liệu sản phẩm.</div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+
+                    <a
+                        href="{{ route('admin.dashboard') }}"
+                        class="customer-compact-action compact-admin-menu-link"
+                        title="Dashboard"
+                    >
+                        📊 <span class="action-text">Dashboard</span>
+                    </a>
+
+                    <a
+                        href="{{ route('admin.customers.index') }}"
+                        class="customer-compact-action compact-admin-menu-link"
+                        title="Khách hàng"
+                    >
+                        👥 <span class="action-text">Khách hàng</span>
+                    </a>
+
+
+
+                    <a
+                        href="{{ route('admin.categories.index') }}"
+                        class="customer-compact-action compact-admin-menu-link"
+                        title="Danh mục"
+                    >
+                        🧺 <span class="action-text">Danh mục</span>
                     </a>
 
                     <a
                         href="{{ route('admin.orders.index') }}"
-                        class="customer-compact-action"
+                        class="customer-compact-action compact-admin-menu-link"
                         title="Đơn hàng"
                     >
-                        📦
-                        <span class="action-text">Đơn hàng</span>
+                        📦 <span class="action-text">Đơn hàng</span>
+
+                        @php
+                            $compactPendingAdminOrders = $pendingAdminOrders
+                                ?? \App\Models\Order::where('status', 'pending')->count();
+                        @endphp
+
+                        @if($compactPendingAdminOrders > 0)
+                            <span class="customer-compact-badge">
+                                {{ $compactPendingAdminOrders > 99 ? '99+' : $compactPendingAdminOrders }}
+                            </span>
+                        @endif
                     </a>
 
                     <a
-                        href="{{ route('admin.products.index') }}"
-                        class="customer-compact-action"
-                        title="Quản lý sản phẩm"
+                        href="{{ route('admin.vouchers.index') }}"
+                        class="customer-compact-action compact-admin-menu-link"
+                        title="Voucher"
                     >
-                        🥩
-                        <span class="action-text">Sản phẩm</span>
+                        🎟️ <span class="action-text">Voucher</span>
                     </a>
 
+                    {{-- THÔNG BÁO ADMIN - đẩy sang góc phải --}}
                     <a
                         href="{{ route('admin.orders.index') }}"
-                        class="customer-compact-action"
+                        class="customer-compact-action compact-right-start"
                         title="Thông báo"
                     >
-                        🔔
-                        <span class="action-text">Thông báo</span>
+                        🔔 <span class="action-text">Thông báo</span>
 
                         @if($compactUnreadCount > 0)
                             <span class="customer-compact-badge">
@@ -2187,49 +2957,140 @@
                         @endif
                     </a>
 
-                    <a
-                        href="{{ route('admin.profile') }}"
-                        class="customer-compact-action"
-                        title="Hồ sơ Admin"
-                    >
-                        👑
-                        <span class="action-text">{{ $compactUserLastName }}</span>
-                    </a>
+                    {{-- TÀI KHOẢN ADMIN --}}
+                    <div class="dropdown compact-account-dropdown">
+                        <a href="#"
+                           class="customer-compact-action dropdown-toggle"
+                           id="compactAdminAccountDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            👑 <span class="action-text">{{ $compactUserLastName }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="compactAdminAccountDropdown">
+                            <li><a class="dropdown-item" href="{{ url('/') }}">🏠 Trang chủ</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.products.index') }}">🥩 Quản lý sản phẩm</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">📊 Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.customers.index') }}">👥 Quản lý khách hàng</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.categories.index') }}">🧺 Quản lý danh mục</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.orders.index') }}">📦 Quản lý đơn hàng</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.vouchers.index') }}">🎟️ Quản lý Voucher</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.profile') }}">👤 Hồ sơ Admin</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">🚪 Đăng xuất</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
 
                 @else
+                    {{-- USER COMPACT: Danh mục + Khuyến mãi + Giỏ hàng --}}
 
-                    <a
-                        href="{{ route('orders.index') }}"
-                        class="customer-compact-action"
-                        title="Đơn hàng của tôi"
-                    >
-                        📋
-                        <span class="action-text">Đơn hàng</span>
+                    <div class="compact-customer-mega category-mega-item" id="compactCustomerCategoryMega">
+                        <a href="{{ route('categories.index') }}"
+                           class="customer-compact-action"
+                           id="compactCustomerCategoryMegaToggle"
+                           aria-expanded="false"
+                           title="Danh mục">
+                            📂 <span class="action-text">Danh mục</span>
+                            <span class="ms-1 small">▾</span>
+                        </a>
+
+                        @php
+                            $compactCustomerCategories = $menuCategories ?? collect();
+                        @endphp
+
+                        <div class="category-mega-menu compact-customer-mega-menu">
+                            <div class="category-mega-left">
+                                <div class="category-mega-title">Danh mục sản phẩm</div>
+
+                                @forelse($compactCustomerCategories as $category)
+                                    <button type="button"
+                                            class="category-mega-category {{ $loop->first ? 'active' : '' }}"
+                                            data-compact-customer-category-panel="compact-customer-category-{{ $category->id }}">
+                                        <span>{{ $category->name }}</span>
+                                        <span>›</span>
+                                    </button>
+                                @empty
+                                    <div class="px-3 py-4 text-muted small">Chưa có danh mục.</div>
+                                @endforelse
+                            </div>
+
+                            <div class="category-mega-right">
+                                @forelse($compactCustomerCategories as $category)
+                                    <div class="category-product-panel compact-customer-category-product-panel {{ $loop->first ? 'active' : '' }}"
+                                         id="compact-customer-category-{{ $category->id }}">
+                                        <div class="category-product-heading">
+                                            <strong>🥩 {{ $category->name }}</strong>
+                                            <a href="{{ route('products.index', ['category_id' => $category->id]) }}">
+                                                Xem tất cả →
+                                            </a>
+                                        </div>
+
+                                        @if($category->products->isNotEmpty())
+                                            <div class="category-product-grid">
+                                                @foreach($category->products as $product)
+                                                    <a class="category-product-card"
+                                                       href="{{ route('products.show', $product) }}">
+                                                        @php
+                                                            $compactCustomerImage = $product->image
+                                                                ? (str_starts_with($product->image, 'http')
+                                                                    ? $product->image
+                                                                    : asset('storage/' . ltrim($product->image, '/')))
+                                                                : null;
+                                                        @endphp
+
+                                                        @if($compactCustomerImage)
+                                                            <img src="{{ $compactCustomerImage }}"
+                                                                 alt="{{ $product->name }}"
+                                                                 class="category-product-image"
+                                                                 loading="lazy">
+                                                        @else
+                                                            <div class="category-product-image d-flex align-items-center justify-content-center fs-2">🥩</div>
+                                                        @endif
+
+                                                        <div class="category-product-name">{{ $product->name }}</div>
+                                                        <div class="small fw-bold mt-1" style="color: var(--tb-red);">
+                                                            {{ number_format((float) $product->getCurrentPrice(), 0, ',', '.') }}đ
+                                                        </div>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="category-product-empty">📦 Danh mục này chưa có sản phẩm.</div>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <div class="category-product-empty">📂 Chưa có dữ liệu danh mục.</div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('products.promotions') }}"
+                       class="customer-compact-action"
+                       title="Khuyến mãi">
+                        🔥 <span class="action-text">Khuyến mãi</span>
                     </a>
 
-                    <a
-                        href="{{ route('cart.index') }}"
-                        class="customer-compact-action"
-                        title="Giỏ hàng"
-                    >
-                        🛒
-                        <span class="action-text">Giỏ hàng</span>
-
+                    <a href="{{ route('cart.index') }}"
+                       class="customer-compact-action"
+                       title="Giỏ hàng">
+                        🛒 <span class="action-text">Giỏ hàng</span>
                         @if($compactCartCount > 0)
-                            <span class="customer-compact-badge">
-                                {{ $compactCartCount }}
-                            </span>
+                            <span class="customer-compact-badge">{{ $compactCartCount }}</span>
                         @endif
                     </a>
 
-                    <a
-                        href="{{ route('orders.index') }}"
-                        class="customer-compact-action"
-                        title="Thông báo"
-                    >
-                        🔔
-                        <span class="action-text">Thông báo</span>
-
+                    {{-- Góc phải giữ nguyên --}}
+                    <a href="{{ route('orders.index') }}"
+                       class="customer-compact-action compact-right-start"
+                       title="Thông báo">
+                        🔔 <span class="action-text">Thông báo</span>
                         @if($compactUnreadCount > 0)
                             <span class="customer-compact-badge">
                                 {{ $compactUnreadCount > 99 ? '99+' : $compactUnreadCount }}
@@ -2237,14 +3098,33 @@
                         @endif
                     </a>
 
-                    <a
-                        href="{{ route('profile') }}"
-                        class="customer-compact-action"
-                        title="Tài khoản"
-                    >
-                        👤
-                        <span class="action-text">{{ $compactUserLastName }}</span>
-                    </a>
+                    {{-- TÀI KHOẢN USER --}}
+                    <div class="dropdown compact-account-dropdown">
+                        <a href="#"
+                           class="customer-compact-action dropdown-toggle"
+                           id="compactCustomerAccountDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            👤 <span class="action-text">{{ $compactUserLastName }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="compactCustomerAccountDropdown">
+                            <li><a class="dropdown-item" href="{{ url('/') }}">🏠 Trang chủ</a></li>
+                            <li><a class="dropdown-item" href="{{ route('dashboard') }}">📊 Tổng quan</a></li>
+                            <li><a class="dropdown-item" href="{{ route('orders.index') }}">📋 Đơn hàng của tôi</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('profile') }}">👤 Hồ sơ cá nhân</a></li>
+                            <li><a class="dropdown-item" href="{{ route('addresses.index') }}">📍 Địa chỉ của tôi</a></li>
+                            <li><a class="dropdown-item" href="{{ route('cart.index') }}">🛒 Giỏ hàng</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">🚪 Đăng xuất</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
 
                 @endif
 
@@ -2252,7 +3132,192 @@
 
         </div>
     </div>
-@endif
+
+@else
+    {{-- =====================================================
+        GUEST COMPACT HEADER
+        Chưa đăng nhập vẫn có thanh compact khi cuộn xuống
+    ===================================================== --}}
+    <div
+        class="customer-compact-header"
+        id="customerCompactHeader"
+        aria-hidden="true"
+    >
+        <div class="customer-compact-inner">
+
+            <a href="{{ url('/') }}" class="customer-compact-brand">
+                🌿 <span>Tinh Hoa Tây Bắc</span>
+            </a>
+
+            <form
+                action="{{ route('products.index') }}"
+                method="GET"
+                class="customer-compact-search"
+                role="search"
+            >
+                <input
+                    type="search"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Tìm sản phẩm..."
+                    autocomplete="off"
+                >
+                <button type="submit" title="Tìm kiếm">🔍</button>
+            </form>
+
+            <div class="customer-compact-actions">
+
+                <div
+                    class="compact-customer-mega category-mega-item"
+                    id="compactGuestCategoryMega"
+                >
+                    <a
+                        href="{{ route('categories.index') }}"
+                        class="customer-compact-action"
+                        id="compactGuestCategoryMegaToggle"
+                        aria-expanded="false"
+                        title="Danh mục"
+                    >
+                        📂 <span class="action-text">Danh mục</span>
+                        <span class="ms-1 small">▾</span>
+                    </a>
+
+                    @php
+                        $compactGuestCategories = $menuCategories ?? collect();
+                    @endphp
+
+                    <div class="category-mega-menu compact-customer-mega-menu">
+                        <div class="category-mega-left">
+                            <div class="category-mega-title">Danh mục sản phẩm</div>
+
+                            @forelse($compactGuestCategories as $category)
+                                <button
+                                    type="button"
+                                    class="category-mega-category {{ $loop->first ? 'active' : '' }}"
+                                    data-compact-guest-category-panel="compact-guest-category-{{ $category->id }}"
+                                >
+                                    <span>{{ $category->name }}</span>
+                                    <span>›</span>
+                                </button>
+                            @empty
+                                <div class="px-3 py-4 text-muted small">
+                                    Chưa có danh mục.
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <div class="category-mega-right">
+                            @forelse($compactGuestCategories as $category)
+                                <div
+                                    class="category-product-panel compact-guest-category-product-panel {{ $loop->first ? 'active' : '' }}"
+                                    id="compact-guest-category-{{ $category->id }}"
+                                >
+                                    <div class="category-product-heading">
+                                        <strong>🥩 {{ $category->name }}</strong>
+                                        <a href="{{ route('products.index', ['category_id' => $category->id]) }}">
+                                            Xem tất cả →
+                                        </a>
+                                    </div>
+
+                                    @if($category->products->isNotEmpty())
+                                        <div class="category-product-grid">
+                                            @foreach($category->products as $product)
+                                                <a
+                                                    class="category-product-card"
+                                                    href="{{ route('products.show', $product) }}"
+                                                >
+                                                    @php
+                                                        $compactGuestImage = $product->image
+                                                            ? (str_starts_with($product->image, 'http')
+                                                                ? $product->image
+                                                                : asset('storage/' . ltrim($product->image, '/')))
+                                                            : null;
+                                                    @endphp
+
+                                                    @if($compactGuestImage)
+                                                        <img
+                                                            src="{{ $compactGuestImage }}"
+                                                            alt="{{ $product->name }}"
+                                                            class="category-product-image"
+                                                            loading="lazy"
+                                                        >
+                                                    @else
+                                                        <div class="category-product-image d-flex align-items-center justify-content-center fs-2">
+                                                            🥩
+                                                        </div>
+                                                    @endif
+
+                                                    <div class="category-product-name">
+                                                        {{ $product->name }}
+                                                    </div>
+
+                                                    <div class="small fw-bold mt-1" style="color: var(--tb-red);">
+                                                        {{ number_format((float) $product->getCurrentPrice(), 0, ',', '.') }}đ
+                                                    </div>
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="category-product-empty">
+                                            📦 Danh mục này chưa có sản phẩm.
+                                        </div>
+                                    @endif
+                                </div>
+                            @empty
+                                <div class="category-product-empty">
+                                    📂 Chưa có dữ liệu danh mục.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <a
+                    href="{{ route('products.promotions') }}"
+                    class="customer-compact-action"
+                    title="Khuyến mãi"
+                >
+                    🔥 <span class="action-text">Khuyến mãi</span>
+                </a>
+
+                @php
+                    $compactGuestCartCount = count(session('cart', []));
+                @endphp
+
+                <a
+                    href="{{ route('cart.index') }}"
+                    class="customer-compact-action"
+                    title="Giỏ hàng"
+                >
+                    🛒 <span class="action-text">Giỏ hàng</span>
+
+                    @if($compactGuestCartCount > 0)
+                        <span class="customer-compact-badge">
+                            {{ $compactGuestCartCount }}
+                        </span>
+                    @endif
+                </a>
+
+                <a
+                    href="{{ route('login') }}"
+                    class="customer-compact-action compact-right-start"
+                    title="Đăng nhập"
+                >
+                    🔐 <span class="action-text">Đăng nhập</span>
+                </a>
+
+                <a
+                    href="{{ route('register') }}"
+                    class="customer-compact-action"
+                    title="Đăng ký"
+                >
+                    ✍️ <span class="action-text">Đăng ký</span>
+                </a>
+
+            </div>
+        </div>
+    </div>
+@endauth
 
 
 {{-- =====================================================
@@ -2272,7 +3337,9 @@
                 fade
                 show
                 shadow-sm
+                auto-dismiss-alert
             "
+            role="alert"
         >
             ✅ {{ session('success') }}
 
@@ -2280,6 +3347,7 @@
                 type="button"
                 class="btn-close"
                 data-bs-dismiss="alert"
+                aria-label="Đóng"
             >
             </button>
         </div>
@@ -2351,6 +3419,21 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Tự động ẩn thông báo thành công sau 3 giây.
+    // Thông báo lỗi và validation vẫn giữ nguyên để người dùng có thời gian đọc.
+    document.querySelectorAll('.auto-dismiss-alert').forEach(function (alertElement) {
+        window.setTimeout(function () {
+            if (!document.body.contains(alertElement)) {
+                return;
+            }
+
+            const alertInstance =
+                bootstrap.Alert.getOrCreateInstance(alertElement);
+
+            alertInstance.close();
+        }, 3000);
+    });
+
     const compactHeader = document.getElementById('customerCompactHeader');
 
     if (compactHeader) {
@@ -2402,6 +3485,107 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         mega.classList.toggle('mega-open');
         toggle.setAttribute('aria-expanded', mega.classList.contains('mega-open') ? 'true' : 'false');
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!mega.contains(event.target)) {
+            mega.classList.remove('mega-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mega = document.getElementById('compactGuestCategoryMega');
+    const toggle = document.getElementById('compactGuestCategoryMegaToggle');
+
+    if (!mega || !toggle) return;
+
+    const buttons = mega.querySelectorAll(
+        '.category-mega-category[data-compact-guest-category-panel]'
+    );
+
+    const panels = mega.querySelectorAll(
+        '.compact-guest-category-product-panel'
+    );
+
+    function showGuestPanel(button) {
+        const targetId = button.dataset.compactGuestCategoryPanel;
+
+        buttons.forEach(item => item.classList.remove('active'));
+        panels.forEach(panel => panel.classList.remove('active'));
+
+        button.classList.add('active');
+
+        const target = document.getElementById(targetId);
+        if (target) target.classList.add('active');
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', () => showGuestPanel(button));
+        button.addEventListener('click', () => showGuestPanel(button));
+    });
+
+    toggle.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        mega.classList.toggle('mega-open');
+
+        toggle.setAttribute(
+            'aria-expanded',
+            mega.classList.contains('mega-open') ? 'true' : 'false'
+        );
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!mega.contains(event.target)) {
+            mega.classList.remove('mega-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mega = document.getElementById('compactCustomerCategoryMega');
+    const toggle = document.getElementById('compactCustomerCategoryMegaToggle');
+
+    if (!mega || !toggle) return;
+
+    const buttons = mega.querySelectorAll(
+        '.category-mega-category[data-compact-customer-category-panel]'
+    );
+    const panels = mega.querySelectorAll(
+        '.compact-customer-category-product-panel'
+    );
+
+    function showPanel(button) {
+        const targetId = button.dataset.compactCustomerCategoryPanel;
+
+        buttons.forEach(item => item.classList.remove('active'));
+        panels.forEach(panel => panel.classList.remove('active'));
+
+        button.classList.add('active');
+
+        const target = document.getElementById(targetId);
+        if (target) target.classList.add('active');
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', () => showPanel(button));
+        button.addEventListener('click', () => showPanel(button));
+    });
+
+    toggle.addEventListener('click', function (event) {
+        event.preventDefault();
+        mega.classList.toggle('mega-open');
+        toggle.setAttribute(
+            'aria-expanded',
+            mega.classList.contains('mega-open') ? 'true' : 'false'
+        );
     });
 
     document.addEventListener('click', function (event) {
@@ -2488,6 +3672,55 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const compactAdminMega = document.getElementById('compactAdminProductMega');
+    const compactAdminToggle = document.getElementById('compactAdminProductMegaToggle');
+
+    if (!compactAdminMega || !compactAdminToggle) return;
+
+    const categoryButtons = compactAdminMega.querySelectorAll(
+        '.category-mega-category[data-compact-admin-category-panel]'
+    );
+    const panels = compactAdminMega.querySelectorAll(
+        '.compact-admin-category-product-panel'
+    );
+
+    function showCompactAdminPanel(button) {
+        const targetId = button.dataset.compactAdminCategoryPanel;
+        categoryButtons.forEach(item => item.classList.remove('active'));
+        panels.forEach(panel => panel.classList.remove('active'));
+        button.classList.add('active');
+
+        const target = document.getElementById(targetId);
+        if (target) target.classList.add('active');
+    }
+
+    categoryButtons.forEach(button => {
+        button.addEventListener('mouseenter', () => showCompactAdminPanel(button));
+        button.addEventListener('click', () => showCompactAdminPanel(button));
+    });
+
+    compactAdminToggle.addEventListener('click', function (event) {
+        if (window.innerWidth < 992) {
+            event.preventDefault();
+            compactAdminMega.classList.toggle('mega-open');
+            compactAdminToggle.setAttribute(
+                'aria-expanded',
+                compactAdminMega.classList.contains('mega-open') ? 'true' : 'false'
+            );
+        }
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!compactAdminMega.contains(event.target)) {
+            compactAdminMega.classList.remove('mega-open');
+            compactAdminToggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -2791,6 +4024,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+@stack('scripts')
 
 @include('layouts.partials.footer')
 </body>

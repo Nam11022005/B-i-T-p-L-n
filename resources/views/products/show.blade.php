@@ -558,9 +558,417 @@
         font-weight: 900;
     }
 
+
+    /* =========================================================
+       PREMIUM PRODUCT DETAIL UI - GIAO DIỆN ONLY
+       Không thay route / form / Blade logic / JS.
+    ========================================================= */
+
+    .product-detail-page {
+        position: relative;
+        isolation: isolate;
+        padding-top: 34px !important;
+        padding-bottom: 70px !important;
+    }
+
+    /* Nền trang mang cảm giác núi rừng, chỉ bằng CSS */
+    .product-detail-page::before {
+        content: "";
+        position: absolute;
+        z-index: -2;
+        top: -30px;
+        left: 50%;
+        width: min(100vw, 1680px);
+        height: 620px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 8% 12%, rgba(242,193,92,.17), transparent 24%),
+            radial-gradient(circle at 90% 16%, rgba(72,99,59,.14), transparent 27%),
+            linear-gradient(180deg, rgba(255,250,240,.96), rgba(255,255,255,0));
+    }
+
+    .product-detail-page::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        top: 40px;
+        right: -30px;
+        width: 230px;
+        height: 230px;
+        opacity: .17;
+        pointer-events: none;
+        border-radius: 42% 58% 64% 36% / 48% 42% 58% 52%;
+        background:
+            radial-gradient(circle at 32% 34%, #f2c15c 0 5px, transparent 6px),
+            repeating-radial-gradient(circle at 50% 50%, rgba(95,52,29,.17) 0 1px, transparent 1px 13px);
+        transform: rotate(16deg);
+    }
+
+    /* Nút quay lại / admin */
+    .product-detail-page > .row > .col-12 > .d-flex:first-child .btn {
+        min-height: 42px;
+        border-radius: 999px;
+        padding-inline: 18px;
+        font-weight: 800;
+        box-shadow: 0 5px 14px rgba(95,52,29,.07);
+    }
+
+    /* Khối sản phẩm chính */
+    .product-detail-page .product-detail-card {
+        position: relative;
+        border: 1px solid rgba(226,199,159,.78);
+        border-radius: 30px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,253,248,.98));
+        box-shadow:
+            0 26px 70px rgba(73,43,25,.12),
+            0 3px 12px rgba(73,43,25,.04);
+        overflow: visible;
+    }
+
+    .product-detail-page .product-detail-card::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: 5%;
+        right: 5%;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, transparent, #f2c15c 24%, #d97706 52%, #48633b 78%, transparent);
+        opacity: .82;
+    }
+
+    /* Khung ảnh */
+    .product-detail-page .product-image-wrapper {
+        border-radius: 26px;
+        border: 1px solid #ead8bf;
+        background:
+            radial-gradient(circle at 78% 20%, rgba(242,193,92,.24), transparent 26%),
+            radial-gradient(circle at 18% 82%, rgba(72,99,59,.09), transparent 28%),
+            linear-gradient(145deg, #fffdf9 0%, #fff7e9 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.95),
+            0 14px 34px rgba(95,52,29,.08);
+    }
+
+    .product-detail-page .product-image-wrapper::before,
+    .product-detail-page .product-image-wrapper::after {
+        content: "";
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border: 1px solid rgba(95,52,29,.09);
+        pointer-events: none;
+    }
+
+    .product-detail-page .product-image-wrapper::before {
+        top: 18px;
+        left: 18px;
+        border-right: 0;
+        border-bottom: 0;
+        border-radius: 18px 0 0 0;
+    }
+
+    .product-detail-page .product-image-wrapper::after {
+        right: 18px;
+        bottom: 18px;
+        border-left: 0;
+        border-top: 0;
+        border-radius: 0 0 18px 0;
+    }
+
+    .product-detail-page .product-image {
+        transition: transform .42s ease, filter .42s ease;
+        filter: drop-shadow(0 14px 20px rgba(95,52,29,.10));
+    }
+
+    .product-detail-page .product-image-wrapper:hover .product-image {
+        transform: scale(1.035);
+        filter: drop-shadow(0 18px 26px rgba(95,52,29,.14));
+    }
+
+    /* Danh mục + tiêu đề + rating */
+    .product-detail-page .product-category-badge {
+        background: linear-gradient(180deg,#fff9ed,#fff3db);
+        border-color: #e9cfaa;
+        box-shadow: 0 5px 14px rgba(95,52,29,.06);
+    }
+
+    .product-detail-page .product-title-new {
+        letter-spacing: -.8px;
+        text-wrap: balance;
+        text-shadow: 0 1px 0 #fff;
+    }
+
+    .product-detail-page .rating-row-new {
+        background: linear-gradient(90deg, rgba(255,250,240,.8), transparent);
+        padding: 11px 14px;
+        border: 1px solid #f1e3d1;
+        border-radius: 14px;
+    }
+
+    .product-detail-page .sold-pill-new {
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.7);
+    }
+
+    /* Giá và khu mua hàng */
+    .product-detail-page .commerce-panel {
+        border-radius: 24px;
+        border-color: #e6d0b3;
+        box-shadow:
+            0 16px 38px rgba(95,52,29,.09),
+            inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .product-detail-page .commerce-price {
+        position: relative;
+        overflow: hidden;
+        padding: 23px 24px;
+    }
+
+    .product-detail-page .commerce-price::after {
+        content: "🌿";
+        position: absolute;
+        right: 18px;
+        bottom: -16px;
+        font-size: 70px;
+        opacity: .055;
+        transform: rotate(-16deg);
+        pointer-events: none;
+    }
+
+    .product-detail-page .price-main {
+        font-size: clamp(30px,3vw,40px);
+        letter-spacing: -.8px;
+        text-shadow: 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    .product-detail-page .sale-badge-new {
+        border-radius: 999px;
+        box-shadow: 0 5px 12px rgba(168,59,45,.16);
+    }
+
+    .product-detail-page .stock-pill {
+        border: 1px solid #cfe5c7;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .product-detail-page .stock-pill.out {
+        border-color: #f0ccc7;
+    }
+
+    .product-detail-page .benefit-strip {
+        background: linear-gradient(180deg,#fff,#fffdf9);
+    }
+
+    .product-detail-page .benefit-strip-item {
+        transition: background .18s ease, color .18s ease;
+    }
+
+    .product-detail-page .benefit-strip-item:hover {
+        background: #fff7e8;
+        color: #a83b2d;
+    }
+
+    .product-detail-page .purchase-area {
+        background:
+            radial-gradient(circle at 92% 85%, rgba(72,99,59,.05), transparent 28%),
+            #fff;
+    }
+
+    .product-detail-page .quantity-control-new {
+        box-shadow: 0 7px 18px rgba(95,52,29,.07);
+    }
+
+    .product-detail-page .quantity-control-new button {
+        transition: background .17s ease, color .17s ease, transform .17s ease;
+    }
+
+    .product-detail-page .quantity-control-new button:hover {
+        background: #5f341d;
+        color: #fff;
+    }
+
+    .product-detail-page .order-total-new {
+        background:
+            linear-gradient(135deg,#fff9e9,#fff4d9);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .product-detail-page .btn-cart-new {
+        position: relative;
+        overflow: hidden;
+        letter-spacing: .2px;
+        box-shadow: 0 10px 22px rgba(168,59,45,.18);
+        transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .product-detail-page .btn-cart-new::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -120%;
+        width: 70%;
+        height: 100%;
+        transform: skewX(-20deg);
+        background: linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+        transition: left .45s ease;
+    }
+
+    .product-detail-page .btn-cart-new:hover::after {
+        left: 145%;
+    }
+
+    .product-detail-page .trust-item-new,
+    .product-detail-page .product-fact {
+        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .product-detail-page .trust-item-new:hover,
+    .product-detail-page .product-fact:hover {
+        transform: translateY(-2px);
+        border-color: #ddc29d;
+        box-shadow: 0 8px 20px rgba(95,52,29,.07);
+    }
+
+    /* Các section dưới */
+    .product-detail-page .product-content-section,
+    .product-detail-page .review-section,
+    .product-detail-page .related-section {
+        border-radius: 28px;
+        border-color: #ead8bf;
+        box-shadow: 0 18px 48px rgba(95,52,29,.075);
+        background:
+            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
+    }
+
+    .product-detail-page .product-content-title {
+        position: relative;
+        border-bottom: 0;
+        padding-bottom: 16px;
+    }
+
+    .product-detail-page .product-content-title::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 92px;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,#d97706,#a83b2d,#48633b);
+    }
+
+    .product-detail-page .review-summary {
+        border-radius: 20px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .product-detail-page .review-form-box {
+        border-radius: 20px;
+        background:
+            radial-gradient(circle at 96% 10%, rgba(242,193,92,.11), transparent 24%),
+            #fffdf9;
+    }
+
+    .product-detail-page .review-item {
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 8px;
+        border-bottom: 0;
+        transition: background .18s ease, transform .18s ease;
+    }
+
+    .product-detail-page .review-item:hover {
+        background: #fffaf2;
+        transform: translateX(2px);
+    }
+
+    .product-detail-page .review-avatar {
+        box-shadow: 0 7px 16px rgba(95,52,29,.14);
+    }
+
+    .product-detail-page .related-card {
+        border-radius: 20px;
+        box-shadow: 0 7px 22px rgba(95,52,29,.055);
+    }
+
+    .product-detail-page .related-card:hover {
+        transform: translateY(-7px);
+        border-color: #dfc39c;
+        box-shadow: 0 18px 36px rgba(95,52,29,.13);
+    }
+
+    .product-detail-page .related-image {
+        transition: transform .32s ease;
+    }
+
+    .product-detail-page .related-card:hover .related-image {
+        transform: scale(1.05);
+    }
+
+    /* Form controls/detail */
+    .product-detail-page .form-control,
+    .product-detail-page .form-select {
+        border-radius: 13px;
+        border-color: #e4d3bc;
+    }
+
+    .product-detail-page .form-control:focus,
+    .product-detail-page .form-select:focus {
+        border-color: #d9ad6a;
+        box-shadow: 0 0 0 .2rem rgba(217,119,6,.10);
+    }
+
+    @media (max-width: 991.98px) {
+        .product-detail-page {
+            padding-top: 22px !important;
+        }
+
+        .product-detail-page .product-detail-card {
+            border-radius: 24px;
+        }
+
+        .product-detail-page .product-image-wrapper {
+            min-height: 360px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .product-detail-page::after {
+            display: none;
+        }
+
+        .product-detail-page .product-detail-card,
+        .product-detail-page .product-content-section,
+        .product-detail-page .review-section,
+        .product-detail-page .related-section {
+            border-radius: 20px;
+        }
+
+        .product-detail-page .product-image-wrapper {
+            min-height: 300px;
+            border-radius: 20px;
+        }
+
+        .product-detail-page .rating-row-new {
+            padding: 10px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .product-detail-page *,
+        .product-detail-page *::before,
+        .product-detail-page *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+
 </style>
 
-<div class="container py-4">
+<div class="product-detail-page container py-4">
     <div class="row justify-content-center">
         <div class="col-12">
 

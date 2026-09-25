@@ -164,10 +164,333 @@
     .section-kicker { color:#48633b !important; letter-spacing:.5px; }
     .category-total-badge { background:#5f341d !important; }
 
+
+
+    /* =========================================================
+       CATEGORY INDEX PREMIUM UI
+       Chỉ nâng giao diện - không đổi route / Blade / dữ liệu.
+    ========================================================= */
+
+    .categories-premium-page {
+        position: relative;
+        isolation: isolate;
+        padding-top: 34px !important;
+        padding-bottom: 76px !important;
+    }
+
+    .categories-premium-page::before {
+        content: "";
+        position: absolute;
+        z-index: -3;
+        top: -38px;
+        left: 50%;
+        width: min(100vw, 1700px);
+        height: 760px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 7% 8%, rgba(242,193,92,.19), transparent 24%),
+            radial-gradient(circle at 94% 11%, rgba(72,99,59,.14), transparent 28%),
+            radial-gradient(circle at 48% 25%, rgba(168,59,45,.045), transparent 31%),
+            linear-gradient(180deg, rgba(255,250,240,.98), rgba(255,255,255,0));
+    }
+
+    .categories-premium-page::after {
+        content: "";
+        position: absolute;
+        z-index: -2;
+        top: 210px;
+        right: -55px;
+        width: 220px;
+        height: 220px;
+        opacity: .105;
+        pointer-events: none;
+        border-radius: 50%;
+        background:
+            repeating-radial-gradient(
+                circle at center,
+                rgba(95,52,29,.36) 0 1px,
+                transparent 1px 13px
+            );
+    }
+
+    .categories-premium-page .category-hero {
+        min-height: 245px;
+        padding: 46px 44px;
+        border-radius: 30px;
+        border: 1px solid rgba(255,255,255,.09);
+        box-shadow:
+            0 25px 62px rgba(44,24,16,.19),
+            inset 0 1px 0 rgba(255,255,255,.07);
+        background:
+            radial-gradient(circle at 86% 16%, rgba(242,193,92,.24), transparent 28%),
+            radial-gradient(circle at 10% 120%, rgba(168,59,45,.28), transparent 35%),
+            linear-gradient(135deg,#2c1810 0%,#5f341d 54%,#48633b 100%);
+    }
+
+    .categories-premium-page .category-hero::before {
+        content: "";
+        position: absolute;
+        right: -40px;
+        bottom: -70px;
+        width: 360px;
+        height: 210px;
+        opacity: .11;
+        clip-path: polygon(
+            0 100%,
+            18% 56%,
+            36% 73%,
+            53% 25%,
+            70% 58%,
+            86% 34%,
+            100% 66%,
+            100% 100%
+        );
+        background: linear-gradient(135deg,#fff,#f2c15c);
+        pointer-events: none;
+    }
+
+    .categories-premium-page .category-hero::after {
+        width: 260px;
+        height: 260px;
+        right: -85px;
+        top: -95px;
+        background: rgba(255,255,255,.045);
+    }
+
+    .categories-premium-page .category-hero h1 {
+        font-size: clamp(34px,4vw,52px);
+        letter-spacing: -.9px;
+        text-shadow: 0 2px 16px rgba(0,0,0,.16);
+    }
+
+    .categories-premium-page .category-hero .lead {
+        line-height: 1.7;
+        max-width: 760px !important;
+    }
+
+    .categories-premium-page .category-hero .btn {
+        min-height: 49px;
+        padding-inline: 22px;
+        border-radius: 999px;
+        font-weight: 900;
+        box-shadow: 0 9px 20px rgba(0,0,0,.13);
+        transition:
+            transform .17s ease,
+            box-shadow .17s ease,
+            background .17s ease;
+    }
+
+    .categories-premium-page .category-hero .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 13px 26px rgba(0,0,0,.17);
+    }
+
+    /* Thống kê */
+    .categories-premium-page .info-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e6d1b5;
+        border-radius: 21px;
+        background:
+            radial-gradient(circle at 100% 0%, rgba(242,193,92,.09), transparent 30%),
+            linear-gradient(180deg,#fff,#fffdfa);
+        box-shadow:
+            0 14px 36px rgba(95,52,29,.07),
+            inset 0 1px 0 rgba(255,255,255,.94);
+        transition:
+            transform .18s ease,
+            box-shadow .18s ease,
+            border-color .18s ease;
+    }
+
+    .categories-premium-page .info-card:hover {
+        transform: translateY(-4px);
+        border-color: #dec092;
+        box-shadow: 0 20px 43px rgba(95,52,29,.11);
+    }
+
+    .categories-premium-page .info-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 17px;
+        border: 1px solid #ead2aa;
+        background:
+            radial-gradient(circle at 35% 25%,rgba(255,255,255,.9),transparent 30%),
+            linear-gradient(135deg,#fff0ca,#f7dfaf);
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.9),
+            0 7px 15px rgba(95,52,29,.06);
+    }
+
+    /* Tiêu đề khu danh mục */
+    .categories-premium-page .section-kicker {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border: 1px solid #dbe5d5;
+        border-radius: 999px;
+        background: #f3f8f0;
+        color: #48633b !important;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: .06em;
+    }
+
+    .categories-premium-page .category-total-badge {
+        padding: 8px 12px;
+        border-radius: 999px;
+        box-shadow: 0 5px 12px rgba(95,52,29,.10);
+    }
+
+    /* Card danh mục */
+    .categories-premium-page .category-card {
+        position: relative;
+        border-radius: 23px;
+        border-color: #e6d1b5;
+        background:
+            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
+        box-shadow:
+            0 10px 28px rgba(95,52,29,.065),
+            inset 0 1px 0 rgba(255,255,255,.94);
+        transition:
+            transform .24s ease,
+            box-shadow .24s ease,
+            border-color .24s ease;
+    }
+
+    .categories-premium-page .category-card::before {
+        content: "";
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        left: 18%;
+        right: 18%;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,transparent,#f2c15c,#48633b,transparent);
+        opacity: 0;
+        transition: opacity .20s ease;
+    }
+
+    .categories-premium-page .category-card:hover {
+        transform: translateY(-8px);
+        border-color: #ddbd8e;
+        box-shadow: 0 23px 50px rgba(95,52,29,.14);
+    }
+
+    .categories-premium-page .category-card:hover::before {
+        opacity: .9;
+    }
+
+    .categories-premium-page .category-icon-box {
+        position: relative;
+        overflow: hidden;
+        height: 170px;
+        background:
+            radial-gradient(circle at 78% 18%, rgba(242,193,92,.22), transparent 28%),
+            radial-gradient(circle at 15% 88%, rgba(72,99,59,.08), transparent 30%),
+            linear-gradient(145deg,#fffdf8,#fff5e3);
+        border-bottom: 1px solid #efdfca;
+        font-size: 76px;
+        text-shadow: 0 8px 18px rgba(95,52,29,.11);
+    }
+
+    .categories-premium-page .category-icon-box::after {
+        content: "";
+        position: absolute;
+        inset: 18px;
+        border: 1px solid rgba(95,52,29,.07);
+        border-radius: 18px;
+        pointer-events: none;
+    }
+
+    .categories-premium-page .category-count {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #e7d0ac;
+        background: linear-gradient(180deg,#fff9ed,#fff3dd);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .categories-premium-page .category-card h4 {
+        color: #34251d;
+        letter-spacing: -.25px;
+    }
+
+    .categories-premium-page .category-card p {
+        line-height: 1.65;
+        color: #73665e !important;
+    }
+
+    .categories-premium-page .category-btn {
+        min-height: 43px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition:
+            transform .16s ease,
+            box-shadow .16s ease;
+    }
+
+    .categories-premium-page .category-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 7px 16px rgba(95,52,29,.10);
+    }
+
+    .categories-premium-page .pagination {
+        gap: 6px;
+    }
+
+    .categories-premium-page .page-link {
+        min-width: 41px;
+        min-height: 41px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px !important;
+        border-color: #e3ceb0;
+        color: #5f341d;
+    }
+
+    .categories-premium-page .page-item.active .page-link {
+        border-color: transparent;
+        background: linear-gradient(135deg,#5f341d,#48633b);
+    }
+
+    @media (max-width: 767.98px) {
+        .categories-premium-page {
+            padding-top: 22px !important;
+        }
+
+        .categories-premium-page::after {
+            display: none;
+        }
+
+        .categories-premium-page .category-hero {
+            min-height: 0;
+            padding: 30px 24px;
+            border-radius: 22px;
+        }
+
+        .categories-premium-page .category-card {
+            border-radius: 19px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .categories-premium-page *,
+        .categories-premium-page *::before,
+        .categories-premium-page *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+
 </style>
 
 
-<div class="container py-4">
+<div class="categories-premium-page container py-4">
 
 
     {{-- ==========================================

@@ -62,29 +62,43 @@ class ProductController extends Controller
             $query->where('is_featured', false);
         }
 
+        // Lọc theo giá bán thực tế: sale đang hiệu lực thì dùng sale_price.
+        $currentPriceSql = "CASE
+    WHEN sale_price IS NOT NULL
+        AND sale_price < price
+        AND (sale_start IS NULL OR sale_start <= ?)
+        AND (sale_end IS NULL OR sale_end >= ?)
+    THEN sale_price
+    ELSE price
+END";
+
         if ($request->filled('min_price')) {
-            $query->where(
-                'price',
-                '>=',
-                $request->min_price
+            $query->whereRaw(
+                $currentPriceSql . ' >= ?',
+                [now(), now(), (float) $request->min_price]
             );
         }
 
         if ($request->filled('max_price')) {
-            $query->where(
-                'price',
-                '<=',
-                $request->max_price
+            $query->whereRaw(
+                $currentPriceSql . ' <= ?',
+                [now(), now(), (float) $request->max_price]
             );
         }
 
         switch ($request->sort) {
             case 'price_asc':
-                $query->orderBy('price', 'asc');
+                $query->orderByRaw(
+                    $currentPriceSql . ' ASC',
+                    [now(), now()]
+                );
                 break;
 
             case 'price_desc':
-                $query->orderBy('price', 'desc');
+                $query->orderByRaw(
+                    $currentPriceSql . ' DESC',
+                    [now(), now()]
+                );
                 break;
 
             case 'name_asc':
@@ -524,19 +538,27 @@ public function removePromotion(Product $product)
             );
         }
 
+        // Lọc theo giá bán thực tế: sale đang hiệu lực thì dùng sale_price.
+       $currentPriceSql = "CASE
+    WHEN sale_price IS NOT NULL
+        AND sale_price < price
+        AND (sale_start IS NULL OR sale_start <= ?)
+        AND (sale_end IS NULL OR sale_end >= ?)
+    THEN sale_price
+    ELSE price
+END";
+
         if ($request->filled('min_price')) {
-            $query->where(
-                'price',
-                '>=',
-                $request->min_price
+            $query->whereRaw(
+                $currentPriceSql . ' >= ?',
+                [now(), now(), (float) $request->min_price]
             );
         }
 
         if ($request->filled('max_price')) {
-            $query->where(
-                'price',
-                '<=',
-                $request->max_price
+            $query->whereRaw(
+                $currentPriceSql . ' <= ?',
+                [now(), now(), (float) $request->max_price]
             );
         }
 
@@ -548,11 +570,17 @@ public function removePromotion(Product $product)
 
         switch ($request->sort) {
             case 'price_asc':
-                $query->orderBy('price', 'asc');
+                $query->orderByRaw(
+                    $currentPriceSql . ' ASC',
+                    [now(), now()]
+                );
                 break;
 
             case 'price_desc':
-                $query->orderBy('price', 'desc');
+                $query->orderByRaw(
+                    $currentPriceSql . ' DESC',
+                    [now(), now()]
+                );
                 break;
 
             case 'name_asc':
@@ -591,12 +619,28 @@ public function removePromotion(Product $product)
 
 // ==========================================
 // 🔥 SẢN PHẨM KHUYẾN MÃI
+// Tự động lấy sản phẩm có giá sale thấp hơn giá gốc
 // ==========================================
-
 public function promotions()
 {
+    $now = now();
+
     $products = Product::with('category')
-        ->onSale()
+        ->whereNotNull('sale_price')
+        ->whereColumn('sale_price', '<', 'price')
+
+        // Không nhập ngày bắt đầu = có hiệu lực ngay
+        ->where(function ($query) use ($now) {
+            $query->whereNull('sale_start')
+                ->orWhere('sale_start', '<=', $now);
+        })
+
+        // Không nhập ngày kết thúc = không giới hạn thời gian
+        ->where(function ($query) use ($now) {
+            $query->whereNull('sale_end')
+                ->orWhere('sale_end', '>=', $now);
+        })
+
         ->latest()
         ->paginate(12);
 

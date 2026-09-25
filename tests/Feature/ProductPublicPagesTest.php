@@ -12,28 +12,32 @@ class ProductPublicPagesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_can_view_public_product_listing_and_detail_pages(): void
-    {
-        $user = User::factory()->create();
-        $category = Category::create(['name' => 'Điện tử']);
-        $product = Product::create([
-            'name' => 'Laptop test',
-            'description' => 'Mô tả mẫu',
-            'quantity' => 10,
-            'price' => 15000000,
-            'category_id' => $category->id,
-        ]);
+   public function test_guest_can_view_public_product_listing_and_detail_pages(): void
+{
+    $category = Category::create([
+        'name' => 'Đặc sản Tây Bắc',
+    ]);
 
-        $this->actingAs($user)
-            ->get(route('products.index'))
-            ->assertOk()
-            ->assertViewIs('products.index');
+    $product = Product::create([
+        'name' => 'Thịt trâu gác bếp',
+        'description' => 'Đặc sản Tây Bắc dùng để test',
+        'quantity' => 10,
+        'price' => 350000,
+        'category_id' => $category->id,
+    ]);
 
-        $this->actingAs($user)
-            ->get(route('products.show', $product))
-            ->assertOk()
-            ->assertViewIs('products.show');
-    }
+    $this
+        ->get(route('products.index'))
+        ->assertOk()
+        ->assertViewIs('products.index')
+        ->assertSee('Thịt trâu gác bếp');
+
+    $this
+        ->get(route('products.show', $product))
+        ->assertOk()
+        ->assertViewIs('products.show')
+        ->assertSee('Thịt trâu gác bếp');
+}
 
     public function test_customer_cannot_access_create_product_page(): void
     {
@@ -59,6 +63,9 @@ class ProductPublicPagesTest extends TestCase
             'quantity' => 7,
             'price' => 18000000,
             'category_id' => $category->id,
+            'unit' => 'kg',
+            'min_quantity' => 1,
+            'quantity_step' => 1,
         ]);
 
         $response->assertRedirect(route('admin.products.index'));

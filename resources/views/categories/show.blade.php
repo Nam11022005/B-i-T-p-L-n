@@ -174,10 +174,293 @@
         background: #f8efe2 !important;
     }
 
+
+
+    /* =========================================================
+       CATEGORY SHOW PREMIUM UI
+       Chỉ nâng giao diện - không đổi route / Blade / dữ liệu.
+    ========================================================= */
+
+    .category-show-premium-page {
+        position: relative;
+        isolation: isolate;
+        padding-top: 34px !important;
+        padding-bottom: 76px !important;
+    }
+
+    .category-show-premium-page::before {
+        content: "";
+        position: absolute;
+        z-index: -3;
+        top: -38px;
+        left: 50%;
+        width: min(100vw,1700px);
+        height: 760px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 7% 8%, rgba(242,193,92,.19), transparent 24%),
+            radial-gradient(circle at 94% 11%, rgba(72,99,59,.14), transparent 28%),
+            linear-gradient(180deg,rgba(255,250,240,.98),rgba(255,255,255,0));
+    }
+
+    .category-show-premium-page::after {
+        content: "";
+        position: absolute;
+        z-index: -2;
+        top: 220px;
+        right: -55px;
+        width: 220px;
+        height: 220px;
+        opacity: .10;
+        pointer-events: none;
+        border-radius: 50%;
+        background:
+            repeating-radial-gradient(circle at center,rgba(95,52,29,.36) 0 1px,transparent 1px 13px);
+    }
+
+    .category-show-premium-page .category-header {
+        position: relative;
+        overflow: hidden;
+        min-height: 205px;
+        padding: 38px 40px;
+        border-radius: 29px;
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow:
+            0 24px 60px rgba(44,24,16,.18),
+            inset 0 1px 0 rgba(255,255,255,.07);
+        background:
+            radial-gradient(circle at 87% 17%, rgba(242,193,92,.23), transparent 28%),
+            radial-gradient(circle at 10% 120%, rgba(168,59,45,.27), transparent 35%),
+            linear-gradient(135deg,#2c1810 0%,#5f341d 54%,#48633b 100%);
+    }
+
+    .category-show-premium-page .category-header::before {
+        content: "";
+        position: absolute;
+        right: -35px;
+        bottom: -62px;
+        width: 330px;
+        height: 190px;
+        opacity: .10;
+        clip-path: polygon(0 100%,18% 56%,36% 73%,53% 25%,70% 58%,86% 34%,100% 66%,100% 100%);
+        background: linear-gradient(135deg,#fff,#f2c15c);
+        pointer-events: none;
+    }
+
+    .category-show-premium-page .category-header > .row {
+        position: relative;
+        z-index: 2;
+    }
+
+    .category-show-premium-page .category-icon {
+        width: 82px;
+        height: 82px;
+        border-radius: 23px;
+        border-color: rgba(255,255,255,.18);
+        background: rgba(255,255,255,.08);
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.08),
+            0 10px 24px rgba(0,0,0,.12);
+        backdrop-filter: blur(10px);
+    }
+
+    .category-show-premium-page .category-header h1 {
+        font-size: clamp(32px,3.8vw,48px);
+        letter-spacing: -.8px;
+        text-shadow: 0 2px 15px rgba(0,0,0,.16);
+    }
+
+    .category-show-premium-page .category-count-box {
+        min-width: 118px;
+        padding: 16px 22px;
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 18px;
+        background: rgba(255,255,255,.075);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Thanh thao tác */
+    .category-show-premium-page > .d-flex.justify-content-between {
+        padding: 10px 12px;
+        border: 1px solid #ead8bf;
+        border-radius: 16px;
+        background: rgba(255,255,255,.80);
+        box-shadow: 0 9px 24px rgba(95,52,29,.05);
+        backdrop-filter: blur(10px);
+    }
+
+    .category-show-premium-page > .d-flex.justify-content-between .btn {
+        min-height: 41px;
+        border-radius: 999px;
+        padding-inline: 16px;
+        font-weight: 800;
+    }
+
+    /* Empty state */
+    .category-show-premium-page > .card.border-0.shadow-sm {
+        overflow: hidden;
+        border: 1px dashed #dcbf95 !important;
+        border-radius: 25px !important;
+        background:
+            radial-gradient(circle at 50% 0%, rgba(242,193,92,.14), transparent 31%),
+            linear-gradient(180deg,#fffdf9,#fff9ee);
+        box-shadow: 0 16px 38px rgba(95,52,29,.065) !important;
+    }
+
+    /* Product card */
+    .category-show-premium-page .product-card {
+        position: relative;
+        border-radius: 22px;
+        border-color: #e6d1b5;
+        background:
+            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
+        box-shadow:
+            0 10px 28px rgba(95,52,29,.065),
+            inset 0 1px 0 rgba(255,255,255,.94);
+        transition:
+            transform .24s ease,
+            box-shadow .24s ease,
+            border-color .24s ease;
+    }
+
+    .category-show-premium-page .product-card::before {
+        content: "";
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        left: 18%;
+        right: 18%;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,transparent,#f2c15c,#48633b,transparent);
+        opacity: 0;
+        transition: opacity .20s ease;
+    }
+
+    .category-show-premium-page .product-card:hover {
+        transform: translateY(-8px);
+        border-color: #ddbd8e;
+        box-shadow: 0 23px 50px rgba(95,52,29,.14);
+    }
+
+    .category-show-premium-page .product-card:hover::before {
+        opacity: .9;
+    }
+
+    .category-show-premium-page .product-image-wrapper {
+        height: 245px;
+        overflow: hidden;
+        border-bottom: 1px solid #efdfca;
+        background:
+            radial-gradient(circle at 82% 18%, rgba(242,193,92,.19), transparent 27%),
+            linear-gradient(145deg,#fffdf8,#fff6e6);
+    }
+
+    .category-show-premium-page .product-image {
+        transition:
+            transform .34s ease,
+            filter .34s ease;
+        filter: drop-shadow(0 8px 14px rgba(95,52,29,.08));
+    }
+
+    .category-show-premium-page .product-card:hover .product-image {
+        transform: scale(1.055);
+        filter: drop-shadow(0 12px 18px rgba(95,52,29,.12));
+    }
+
+    .category-show-premium-page .stock-badge {
+        top: 13px;
+        right: 13px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        box-shadow: 0 5px 12px rgba(0,0,0,.09);
+    }
+
+    .category-show-premium-page .product-card .badge.bg-light {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: linear-gradient(180deg,#fff9ed,#fff3dd) !important;
+        border-color: #e6ceaa !important;
+    }
+
+    .category-show-premium-page .product-card h5 {
+        color: #34251d;
+        line-height: 1.35;
+        letter-spacing: -.15px;
+    }
+
+    .category-show-premium-page .product-card p {
+        line-height: 1.65;
+        color: #74665e !important;
+    }
+
+    .category-show-premium-page .price {
+        font-size: 24px;
+        letter-spacing: -.45px;
+        color: #a83b2d;
+    }
+
+    .category-show-premium-page .product-card .btn {
+        min-height: 42px;
+        border-radius: 11px;
+        font-weight: 800;
+        transition:
+            transform .16s ease,
+            box-shadow .16s ease;
+    }
+
+    .category-show-premium-page .product-card .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 7px 16px rgba(95,52,29,.10);
+    }
+
+    @media (max-width: 767.98px) {
+        .category-show-premium-page {
+            padding-top: 22px !important;
+        }
+
+        .category-show-premium-page::after {
+            display: none;
+        }
+
+        .category-show-premium-page .category-header {
+            min-height: 0;
+            padding: 29px 23px;
+            border-radius: 22px;
+        }
+
+        .category-show-premium-page > .d-flex.justify-content-between {
+            align-items: stretch !important;
+        }
+
+        .category-show-premium-page > .d-flex.justify-content-between .btn {
+            width: 100%;
+        }
+
+        .category-show-premium-page .product-card {
+            border-radius: 19px;
+        }
+
+        .category-show-premium-page .product-image-wrapper {
+            height: 220px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .category-show-premium-page *,
+        .category-show-premium-page *::before,
+        .category-show-premium-page *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+
 </style>
 
 
-<div class="container py-4">
+<div class="category-show-premium-page container py-4">
 
     @php
 

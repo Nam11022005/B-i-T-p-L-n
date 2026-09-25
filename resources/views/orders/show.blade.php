@@ -175,27 +175,495 @@
         color: #f59e0b;
     }
 
+
+
+    /* =========================================================
+       ORDER DETAIL PREMIUM UI
+       CHỈ NÂNG GIAO DIỆN - KHÔNG ĐỔI ROUTE / DATA / JS / FORM
+    ========================================================= */
+
+    .order-detail-premium-page {
+        position: relative;
+        isolation: isolate;
+        padding-top: 34px;
+        padding-bottom: 76px;
+    }
+
+    .order-detail-premium-page::before {
+        content: "";
+        position: absolute;
+        z-index: -3;
+        top: -30px;
+        left: 50%;
+        width: min(100vw, 1680px);
+        height: 800px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 7% 8%, rgba(242,193,92,.18), transparent 24%),
+            radial-gradient(circle at 94% 12%, rgba(72,99,59,.13), transparent 28%),
+            linear-gradient(180deg,rgba(255,250,240,.98),rgba(255,255,255,0));
+    }
+
+    .order-detail-premium-page::after {
+        content: "";
+        position: absolute;
+        z-index: -2;
+        top: 145px;
+        right: -55px;
+        width: 215px;
+        height: 215px;
+        opacity: .10;
+        pointer-events: none;
+        border-radius: 50%;
+        background:
+            repeating-radial-gradient(
+                circle at center,
+                rgba(95,52,29,.35) 0 1px,
+                transparent 1px 13px
+            );
+    }
+
+    /* HERO */
+    .order-detail-hero {
+        position: relative;
+        overflow: hidden;
+        min-height: 170px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        padding: 32px 35px;
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 28px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 88% 16%, rgba(242,193,92,.22), transparent 29%),
+            radial-gradient(circle at 12% 120%, rgba(168,59,45,.28), transparent 35%),
+            linear-gradient(135deg,#2c1810 0%,#5f341d 53%,#48633b 100%);
+        box-shadow:
+            0 23px 58px rgba(44,24,16,.18),
+            inset 0 1px 0 rgba(255,255,255,.07);
+    }
+
+    .order-detail-hero::before {
+        content: "";
+        position: absolute;
+        right: -26px;
+        bottom: -50px;
+        width: 310px;
+        height: 174px;
+        opacity: .10;
+        pointer-events: none;
+        clip-path: polygon(0 100%,18% 57%,35% 73%,54% 25%,70% 58%,86% 33%,100% 66%,100% 100%);
+        background: linear-gradient(135deg,#fff,#f2c15c);
+    }
+
+    .order-detail-hero > * {
+        position: relative;
+        z-index: 2;
+    }
+
+    .order-detail-kicker {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 11px;
+        margin-bottom: 9px;
+        border: 1px solid rgba(242,193,92,.30);
+        border-radius: 999px;
+        color: #f6d98c;
+        background: rgba(255,255,255,.055);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: .09em;
+    }
+
+    .order-detail-hero h2 {
+        color: #fff;
+        font-size: clamp(29px,3vw,42px);
+        letter-spacing: -.7px;
+        text-shadow: 0 2px 14px rgba(0,0,0,.16);
+    }
+
+    .order-detail-hero p {
+        color: rgba(255,255,255,.76);
+        line-height: 1.65;
+    }
+
+    .order-back-btn {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        padding: 9px 17px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,.26);
+        color: #fff;
+        background: rgba(255,255,255,.08);
+        font-weight: 800;
+        backdrop-filter: blur(10px);
+        transition:
+            background .18s ease,
+            transform .18s ease,
+            border-color .18s ease;
+    }
+
+    .order-back-btn:hover {
+        color: #fff;
+        background: rgba(255,255,255,.15);
+        border-color: rgba(255,255,255,.40);
+        transform: translateY(-1px);
+    }
+
+    /* AUTO PAYMENT */
+    .auto-payment-premium-card {
+        overflow: hidden;
+        border: 1px solid #dcc096 !important;
+        border-radius: 24px !important;
+        box-shadow: 0 18px 45px rgba(95,52,29,.10) !important;
+    }
+
+    .auto-payment-premium-card > .card-header {
+        border: 0;
+        padding: 15px 20px !important;
+        background:
+            linear-gradient(135deg,#5f341d,#48633b) !important;
+    }
+
+    .auto-payment-premium-card .bg-white.border.rounded-4 {
+        border-color: #ead8bf !important;
+        box-shadow: 0 13px 30px rgba(95,52,29,.10) !important;
+    }
+
+    .auto-payment-premium-card .input-group {
+        border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(95,52,29,.05);
+    }
+
+    /* ORDER MAIN CARD */
+    .order-detail-premium-page .order-card {
+        position: relative;
+        border: 1px solid #e5d0b3 !important;
+        border-radius: 26px;
+        background:
+            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
+        box-shadow:
+            0 20px 52px rgba(95,52,29,.09) !important,
+            inset 0 1px 0 rgba(255,255,255,.94);
+    }
+
+    .order-detail-premium-page .order-card::before {
+        content: "";
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        left: 7%;
+        right: 7%;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,transparent,#f2c15c,#d97706,#48633b,transparent);
+        opacity: .60;
+    }
+
+    .order-detail-premium-page .order-card:hover {
+        transform: none;
+        box-shadow:
+            0 24px 58px rgba(95,52,29,.115) !important;
+    }
+
+    .order-detail-premium-page .order-header {
+        padding: 24px !important;
+        border-bottom-color: #ead8bf;
+        background:
+            radial-gradient(circle at 94% 10%, rgba(242,193,92,.14), transparent 24%),
+            linear-gradient(90deg,#fffaf0,#f8efe2);
+    }
+
+    .order-detail-premium-page .status-badge {
+        box-shadow: 0 6px 14px rgba(0,0,0,.08);
+    }
+
+    /* TRACKING */
+    .order-detail-premium-page .tracking-wrapper {
+        margin-top: 32px;
+        padding: 24px 10px 8px;
+        border: 1px solid #ead8bf;
+        border-radius: 20px;
+        background:
+            linear-gradient(180deg,#fffdf9,#fff9ef);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.95);
+    }
+
+    .order-detail-premium-page .tracking-line {
+        top: 47px;
+        height: 5px;
+        border-radius: 999px;
+        background: #eee3d5;
+    }
+
+    .order-detail-premium-page .tracking-progress {
+        top: 47px;
+        height: 5px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,#48633b,#68a15a);
+        box-shadow: 0 0 0 2px rgba(72,99,59,.06);
+    }
+
+    .order-detail-premium-page .tracking-circle {
+        width: 52px;
+        height: 52px;
+        border: 5px solid #fff;
+        background: #eee7df;
+        color: #8e8177;
+        box-shadow:
+            0 5px 15px rgba(95,52,29,.09),
+            0 0 0 1px #ead8bf;
+        transition:
+            transform .2s ease,
+            box-shadow .2s ease;
+    }
+
+    .order-detail-premium-page .tracking-circle.active {
+        background: linear-gradient(135deg,#48633b,#5f8b4d);
+    }
+
+    .order-detail-premium-page .tracking-circle.current {
+        background: linear-gradient(135deg,#a83b2d,#d97706);
+        box-shadow:
+            0 7px 18px rgba(168,59,45,.18),
+            0 0 0 5px rgba(242,193,92,.12);
+        transform: scale(1.06);
+    }
+
+    .order-detail-premium-page .tracking-label.active {
+        color: #48633b;
+    }
+
+    .order-detail-premium-page .tracking-label.current {
+        color: #a83b2d;
+    }
+
+    /* INFO BOXES */
+    .order-detail-premium-page .info-box {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #ead8bf;
+        border-radius: 18px;
+        background:
+            radial-gradient(circle at 100% 0%, rgba(242,193,92,.10), transparent 28%),
+            linear-gradient(180deg,#fffdf9,#fff9f1);
+        box-shadow: 0 8px 22px rgba(95,52,29,.055);
+    }
+
+    .order-detail-premium-page .info-box::after {
+        content: "🌿";
+        position: absolute;
+        right: 13px;
+        bottom: -8px;
+        font-size: 60px;
+        opacity: .035;
+        transform: rotate(-14deg);
+        pointer-events: none;
+    }
+
+    .order-detail-premium-page .info-box h5 {
+        position: relative;
+        padding-bottom: 11px;
+        color: #392820;
+    }
+
+    .order-detail-premium-page .info-box h5::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 62px;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,#d97706,#48633b);
+    }
+
+    .order-detail-premium-page .info-box .badge {
+        padding: 7px 10px;
+        border-radius: 999px;
+    }
+
+    /* PRODUCT TABLE */
+    .order-detail-premium-page .table-responsive {
+        overflow: hidden;
+        border: 1px solid #ead8bf;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(95,52,29,.055);
+    }
+
+    .order-detail-premium-page .product-table thead th {
+        padding: 15px 16px;
+        border-bottom-color: #e8d7c0;
+        background: linear-gradient(180deg,#fff8ea,#f8efe2);
+        color: #5f341d;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+    }
+
+    .order-detail-premium-page .product-table tbody td {
+        padding: 17px 16px;
+        border-color: #f0e4d5;
+    }
+
+    .order-detail-premium-page .product-table tbody tr {
+        transition: background .17s ease;
+    }
+
+    .order-detail-premium-page .product-table tbody tr:hover {
+        background: #fffaf2;
+    }
+
+    .order-detail-premium-page .product-table .badge.bg-light {
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: #fff8eb !important;
+        border-color: #e6cfad !important;
+    }
+
+    /* REVIEW */
+    .order-detail-premium-page .review-action-btn {
+        border-radius: 999px;
+        padding: 7px 12px;
+    }
+
+    .order-detail-premium-page .order-review-box {
+        border-radius: 18px;
+        border-color: #e4c99e;
+        background:
+            radial-gradient(circle at 96% 8%, rgba(242,193,92,.12), transparent 25%),
+            linear-gradient(180deg,#fffaf0,#fff6e7);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .order-detail-premium-page .order-review-stars label {
+        transition: transform .14s ease, color .14s ease;
+    }
+
+    .order-detail-premium-page .order-review-stars label:hover {
+        transform: scale(1.10);
+    }
+
+    /* FOOTER */
+    .order-detail-premium-page .order-card .card-footer {
+        padding: 16px 20px !important;
+        border-top-color: #ead8bf !important;
+        background:
+            linear-gradient(180deg,#fffaf4,#f8efe2) !important;
+    }
+
+    .order-detail-premium-page .order-card .card-footer .btn-primary {
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg,#a83b2d,#5f341d);
+        font-weight: 800;
+        box-shadow: 0 8px 18px rgba(168,59,45,.15);
+    }
+
+    /* ALERTS */
+    .order-detail-premium-page .alert {
+        border-radius: 15px;
+        border-width: 1px;
+    }
+
+    @media (max-width: 768px) {
+        .order-detail-premium-page {
+            padding-top: 22px;
+        }
+
+        .order-detail-premium-page::after {
+            display: none;
+        }
+
+        .order-detail-hero {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 25px 22px;
+            border-radius: 22px;
+        }
+
+        .order-detail-premium-page .order-card {
+            border-radius: 20px;
+        }
+
+        .order-detail-premium-page .tracking-wrapper {
+            padding-inline: 2px;
+        }
+
+        .order-detail-premium-page .tracking-line,
+        .order-detail-premium-page .tracking-progress {
+            top: 43px;
+        }
+
+        .order-detail-premium-page .tracking-circle {
+            width: 44px;
+            height: 44px;
+            font-size: 16px;
+        }
+
+        .order-detail-premium-page .table-responsive {
+            border-radius: 15px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .order-detail-premium-page .tracking-label {
+            font-size: 10px;
+        }
+
+        .order-detail-premium-page .tracking-circle {
+            width: 40px;
+            height: 40px;
+            border-width: 4px;
+        }
+
+        .order-detail-premium-page .tracking-line,
+        .order-detail-premium-page .tracking-progress {
+            top: 41px;
+        }
+
+        .order-detail-premium-page .info-box {
+            padding: 16px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .order-detail-premium-page *,
+        .order-detail-premium-page *::before,
+        .order-detail-premium-page *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+
 </style>
 
-<div class="row justify-content-center">
+<div class="order-detail-premium-page row justify-content-center">
     <div class="col-xl-11 col-lg-12">
 
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <section class="order-detail-hero mb-4">
             <div>
-                <h2 class="fw-bold mb-1">
+                <div class="order-detail-kicker">🌿 TINH HOA TÂY BẮC</div>
+
+                <h2 class="fw-bold mb-2">
                     📦 Chi tiết đơn hàng
                     #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}
                 </h2>
 
-                <p class="text-muted mb-0">
-                    Theo dõi trạng thái, thanh toán và sản phẩm trong đơn hàng.
+                <p class="mb-0">
+                    Theo dõi trạng thái, thanh toán và toàn bộ sản phẩm trong đơn hàng.
                 </p>
             </div>
 
-            <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
-                ← Quay lại danh sách đơn hàng
+            <a href="{{ route('orders.index') }}" class="order-back-btn btn">
+                ← Quay lại danh sách
             </a>
-        </div>
+        </section>
 
         @php
             $statusClass = [
@@ -233,7 +701,7 @@
 
         @if($order->payment_method === 'bank')
             <div
-                class="card shadow-sm border-0 mb-4"
+                class="card shadow-sm border-0 mb-4 auto-payment-premium-card"
                 id="autoPaymentCard"
                 data-payment-status-url="{{ route('orders.paymentStatus', $order->id) }}"
             >

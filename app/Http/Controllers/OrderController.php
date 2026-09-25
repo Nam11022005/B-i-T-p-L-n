@@ -105,45 +105,47 @@ class OrderController extends Controller
 
 
     // ==========================================
-    // ADMIN - DANH SÁCH TẤT CẢ ĐƠN HÀNG
+// ADMIN - DANH SÁCH TẤT CẢ ĐƠN HÀNG
+// ==========================================
+public function adminIndex()
+{
     // ==========================================
-    public function adminIndex()
-    {
-        $orders = Order::with([
-                'items.product',
-                'user'
-            ])
-            ->latest()
-            ->get();
+    // THỐNG KÊ TOÀN BỘ ĐƠN HÀNG
+    // Không bị ảnh hưởng bởi phân trang
+    // ==========================================
+
+    $totalRevenue = Order::where('status', 'delivered')
+        ->sum('total_price');
+
+    $totalOrders = Order::count();
+
+    $totalProducts = Product::count();
 
 
-        // Chỉ tính đơn giao thành công
-        $totalRevenue = $orders
-            ->where(
-                'status',
-                'delivered'
-            )
-            ->sum('total_price');
+    // ==========================================
+    // DANH SÁCH ĐƠN HÀNG
+    // Chỉ tải dữ liệu của trang hiện tại
+    // ==========================================
+
+    $orders = Order::with([
+            'items.product',
+            'user'
+        ])
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
 
-        $totalOrders =
-            $orders->count();
-
-
-        $totalProducts =
-            Product::count();
-
-
-        return view(
-            'admin.orders.index',
-            compact(
-                'orders',
-                'totalRevenue',
-                'totalOrders',
-                'totalProducts'
-            )
-        );
-    }
+    return view(
+        'admin.orders.index',
+        compact(
+            'orders',
+            'totalRevenue', 
+            'totalOrders',
+            'totalProducts'
+        )
+    );
+}
 
 
     // ==========================================

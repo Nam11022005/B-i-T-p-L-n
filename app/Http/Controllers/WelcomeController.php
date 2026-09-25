@@ -37,12 +37,20 @@ class WelcomeController extends Controller
 
         // =====================================================
         // 🔥 TOP SẢN PHẨM BÁN CHẠY
-        // Chỉ tính đơn đã giao thành công.
-        // Không có dữ liệu bán thì section sẽ tự ẩn ở Blade.
+        // Chỉ tính sản phẩm thuộc đơn đã giao thành công.
+        //
+        // whereHas() dùng để loại sản phẩm chưa bán.
+        // withSoldQuantity() vẫn tính tổng số lượng đã bán.
+        //
+        // Cách này tương thích cả MySQL và SQLite khi test.
         // =====================================================
         $bestSellingProducts = Product::with('category')
             ->withSoldQuantity()
-            ->having('sold_quantity', '>', 0)
+            ->whereHas('orderItems', function ($query) {
+                $query->whereHas('order', function ($orderQuery) {
+                    $orderQuery->where('status', 'delivered');
+                });
+            })
             ->orderByDesc('sold_quantity')
             ->take(8)
             ->get();

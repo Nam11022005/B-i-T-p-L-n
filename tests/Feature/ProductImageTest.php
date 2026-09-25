@@ -38,6 +38,9 @@ class ProductImageTest extends TestCase
             'quantity' => 5,
             'price' => 25000000,
             'category_id' => $category->id,
+            'unit' => 'kg',
+            'min_quantity' => 1,
+            'quantity_step' => 1,
             'image' => $uploadedFile,
         ]);
 
