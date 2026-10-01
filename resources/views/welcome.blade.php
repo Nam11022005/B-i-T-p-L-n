@@ -1,1996 +1,2886 @@
 @extends('layouts.app')
 
-@section('title', 'Tinh Hoa Tây Bắc | Đặc sản núi rừng chính hiệu')
+@section('title', 'Tinh Hoa Tây Bắc | Đặc sản Tây Bắc chính hiệu')
 
 @section('content')
 
+@php
+    $featuredList =
+        isset($featuredProducts)
+        ? $featuredProducts->take(5)
+        : collect();
+
+    $bestSellerList =
+        isset($bestSellingProducts)
+        ? $bestSellingProducts->take(5)
+        : collect();
+
+    $newProductList =
+        $products->take(10);
+
+
+@endphp
+
+
 <style>
-    :root {
-        --tb-brown: #5f341d;
-        --tb-brown-dark: #3b2114;
-        --tb-red: #a83b2d;
-        --tb-orange: #d97706;
-        --tb-gold: #f2c15c;
-        --tb-green: #48633b;
-        --tb-cream: #fffaf0;
-        --tb-soft: #f8efe2;
+    /* =========================================================
+       TINH HOA TAY BAC - ECOMMERCE HOME
+    ========================================================= */
+
+    .shop-home {
+        --shop-green: #36562f;
+        --shop-green-dark: #274323;
+
+        --shop-brown: #62361f;
+        --shop-brown-dark: #3f2417;
+
+        --shop-red: #b43e2e;
+        --shop-red-dark: #8e2e22;
+
+        --shop-gold: #e7ad42;
+        --shop-gold-soft: #fff1cc;
+
+        --shop-bg: #f7f7f5;
+        --shop-card: #ffffff;
+
+        --shop-border: #e8e2d9;
+
+        --shop-text: #29241f;
+        --shop-muted: #746d67;
+
+        --shop-shadow:
+            0 8px 28px rgba(56, 42, 30, .07);
+
+        --shop-shadow-hover:
+            0 17px 40px rgba(56, 42, 30, .13);
+
+        color: var(--shop-text);
     }
 
-    .hero-taybac {
-        position: relative;
-        overflow: hidden;
-        border-radius: 30px;
-        padding: 58px;
-        color: white;
 
-        background:
-            radial-gradient(
-                circle at 80% 20%,
-                rgba(242,193,92,.25),
-                transparent 28%
-            ),
-            radial-gradient(
-                circle at 15% 85%,
-                rgba(168,59,45,.28),
-                transparent 30%
-            ),
-            linear-gradient(
-                135deg,
-                #2c1810 0%,
-                #5f341d 48%,
-                #48633b 100%
-            );
+    .shop-home * {
+        box-sizing: border-box;
+    }
+
+
+    .shop-home a {
+        text-decoration: none;
+    }
+
+
+    /* =========================================================
+       GENERAL
+    ========================================================= */
+
+    .shop-section {
+        margin-top: 42px;
+    }
+
+
+    .shop-section-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        gap: 18px;
+
+        margin-bottom: 18px;
+    }
+
+
+    .shop-section-label {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 7px;
+
+        margin-bottom: 5px;
+
+        color: var(--shop-red);
+
+        font-size: 11px;
+        font-weight: 900;
+
+        letter-spacing: .08em;
+
+        text-transform: uppercase;
+    }
+
+
+    .shop-section-title {
+        margin: 0;
+
+        color: var(--shop-text);
+
+        font-size:
+            clamp(24px, 2.4vw, 32px);
+
+        line-height: 1.2;
+
+        font-weight: 950;
+
+        letter-spacing: -.035em;
+    }
+
+
+    .shop-section-subtitle {
+        margin-top: 5px;
+
+        color: var(--shop-muted);
+
+        font-size: 12px;
+
+        line-height: 1.55;
+    }
+
+
+    .shop-more-link {
+        flex: 0 0 auto;
+
+        display: inline-flex;
+        align-items: center;
+
+        gap: 5px;
+
+        color: #68412a;
+
+        font-size: 12px;
+
+        font-weight: 900;
+    }
+
+
+    .shop-more-link:hover {
+        color: var(--shop-red);
+    }
+
+
+    /* =========================================================
+       TOP MARKETPLACE
+    ========================================================= */
+
+    .market-layout {
+        display: grid;
+
+        grid-template-columns:
+            220px
+            minmax(0, 1fr)
+            245px;
+
+        gap: 14px;
+    }
+
+
+    /* =========================================================
+       CATEGORY SIDEBAR
+    ========================================================= */
+
+    .market-categories {
+        overflow: hidden;
+
+        border:
+            1px solid var(--shop-border);
+
+        border-radius: 15px;
+
+        background: #fff;
 
         box-shadow:
-            0 22px 55px rgba(59,33,20,.22);
+            var(--shop-shadow);
     }
 
-    .hero-taybac::after {
-        content: '';
-        position: absolute;
-        width: 420px;
-        height: 420px;
-        border-radius: 50%;
-        right: -140px;
-        top: -160px;
-        border: 1px solid rgba(255,255,255,.08);
-        background: rgba(255,255,255,.03);
+
+    .market-category-title {
+        min-height: 49px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
+
+        padding:
+            0 15px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--shop-green-dark),
+                var(--shop-green)
+            );
+
+        font-size: 13px;
+
+        font-weight: 900;
     }
 
-    .hero-label {
+
+    .market-category-list {
+        margin: 0;
+        padding: 6px 0;
+
+        list-style: none;
+    }
+
+
+    .market-category-list li {
+        border-bottom:
+            1px solid #f0ece7;
+    }
+
+
+    .market-category-list li:last-child {
+        border-bottom: 0;
+    }
+
+
+    .market-category-link {
+        min-height: 42px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 9px;
+
+        padding:
+            7px 13px;
+
+        color: #514940;
+
+        font-size: 11px;
+
+        font-weight: 750;
+
+        transition:
+            background .17s ease,
+            color .17s ease,
+            padding-left .17s ease;
+    }
+
+
+    .market-category-link:hover {
+        color: var(--shop-red);
+
+        background:
+            #fff8ed;
+
+        padding-left: 17px;
+    }
+
+
+    .market-category-link-icon {
+        width: 25px;
+        height: 25px;
+
+        flex: 0 0 25px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 7px;
+
+        background:
+            #fff0cd;
+
+        font-size: 14px;
+    }
+
+
+    .market-category-link-arrow {
+        margin-left: auto;
+
+        color: #b4aaa0;
+    }
+
+
+    .market-category-all {
+        display: block;
+
+        padding:
+            12px 13px;
+
+        border-top:
+            1px solid var(--shop-border);
+
+        color: var(--shop-green);
+
+        font-size: 11px;
+
+        font-weight: 900;
+
+        text-align: center;
+    }
+
+
+    /* =========================================================
+       HERO BANNER
+    ========================================================= */
+
+    .market-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+        position: relative;
+        overflow: hidden;
+        min-height: 360px;
+        padding: 0;
+        border: 1px solid #e5d9c3;
+        border-radius: 0;
+        background: #faf3e6;
+        box-shadow: var(--shop-shadow);
+    }
+
+    .market-hero-copy {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        padding: clamp(22px, 2.4vw, 42px);
+        color: #29432e;
+    }
+
+    .market-hero-eyebrow {
+        margin: 0 0 20px;
+        color: #7b5939;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+    }
+
+    .market-hero-title {
+        margin: 0;
+        color: #29432e;
+        font-size: clamp(27px, 2.6vw, 44px);
+        font-weight: 800;
+        line-height: 1.18;
+        letter-spacing: -.035em;
+        text-wrap: balance;
+    }
+
+    .market-hero-title span {
+        display: block;
+        margin-top: 12px;
+        color: #8b5432;
+        font-size: .72em;
+        line-height: 1.3;
+        font-weight: 600;
+        letter-spacing: -.02em;
+    }
+
+    .market-hero-description {
+        margin: 20px 0 26px;
+        color: #6a6254;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .market-hero-cta {
         display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-height: 46px;
+        padding: 12px 18px;
+        color: #fff;
+        background: #314e34;
+        font-size: 13px;
+        font-weight: 750;
+        line-height: 1.4;
+        text-decoration: none;
+    }
+
+    .market-hero-cta:hover {
+        color: #fff;
+        background: #243d27;
+    }
+
+    .market-hero-cta:focus-visible {
+        outline: 3px solid #b47032;
+        outline-offset: 4px;
+    }
+
+    .market-hero-visual {
+        position: relative;
+        min-width: 0;
+        margin: 0;
+        overflow: hidden;
+        background: #d7c69c;
+    }
+
+    .market-hero-visual img {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 52% center;
+    }
+
+    .taybac-discovery {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+        align-items: center;
+        overflow: hidden;
+        border: 1px solid #e5d9c3;
+        background: #faf3e6;
+    }
+
+    .taybac-discovery-copy {
+        padding: clamp(24px, 4vw, 56px);
+    }
+
+    .taybac-discovery-label {
+        margin: 0 0 12px;
+        color: #8b5432;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .taybac-discovery h2 {
+        margin: 0 0 14px;
+        color: #29432e;
+        font-size: clamp(24px, 2.4vw, 36px);
+        font-weight: 800;
+    }
+
+    .taybac-discovery-description {
+        margin: 0;
+        color: #6a6254;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .taybac-discovery-credit {
+        display: inline-block;
+        margin-top: 20px;
+        color: #6a6254;
+        font-size: 11px;
+        text-decoration: underline;
+    }
+
+    .taybac-discovery video {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        max-height: 390px;
+        background: #18271c;
+        object-fit: contain;
+    }
+
+    html[data-theme="dark"] .market-hero,
+    html[data-theme="dark"] .taybac-discovery {
+        background: #252d25;
+        border-color: #465344;
+    }
+
+    html[data-theme="dark"] .market-hero-title,
+    html[data-theme="dark"] .taybac-discovery h2 {
+        color: #f1eadb;
+    }
+
+    html[data-theme="dark"] .market-hero-eyebrow,
+    html[data-theme="dark"] .market-hero-title span,
+    html[data-theme="dark"] .taybac-discovery-label {
+        color: #dec28c;
+    }
+
+    html[data-theme="dark"] .market-hero-description,
+    html[data-theme="dark"] .taybac-discovery-description,
+    html[data-theme="dark"] .taybac-discovery-credit {
+        color: #cecbbb;
+    }
+
+    html[data-theme="dark"] .market-hero-cta {
+        background: #e0c389;
+        color: #243d27;
+    }
+
+    html[data-theme="dark"] .market-hero-cta:hover {
+        background: #eed6a7;
+    }
+
+
+
+    /* =========================================================
+       SIDE PROMOS
+    ========================================================= */
+
+    .market-side {
+        display: grid;
+
+        grid-template-rows:
+            auto auto;
+
+        gap: 14px;
+    }
+
+
+    .side-banner {
+        position: relative;
+
+        overflow: hidden;
+
+        min-height: 198px;
+
+        padding: 21px;
+
+        border-radius: 15px;
+
+        box-shadow:
+            var(--shop-shadow);
+    }
+
+
+    .side-banner.sale {
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                #9d3528,
+                #632519
+            );
+    }
+
+
+    .side-banner.gift {
+        color: #2f4029;
+
+        background:
+            linear-gradient(
+                135deg,
+                #f8e5b3,
+                #e9c66e
+            );
+    }
+
+
+    .side-banner.best-sellers {
+        color: #263b2b;
+        background: linear-gradient(135deg, #f8e5b3, #e9c66e);
+    }
+
+    .side-banner.best-sellers .side-banner-title {
+        max-width: 230px;
+        font-size: 18px;
+    }
+
+    .best-seller-side-list {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        gap: 8px;
+        margin-top: 13px;
+    }
+
+    .best-seller-side-item {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr);
         gap: 8px;
         align-items: center;
-        padding: 8px 16px;
-        border-radius: 30px;
-        border: 1px solid rgba(255,255,255,.25);
-        background: rgba(255,255,255,.09);
-        font-weight: 700;
+        color: inherit;
+        padding-bottom: 7px;
+        border-bottom: 1px solid rgba(47,64,41,.16);
     }
 
-    .hero-title {
-        font-weight: 850;
-        line-height: 1.12;
-        max-width: 760px;
+    .best-seller-side-item:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
     }
 
-    .hero-subtitle {
-        max-width: 680px;
-        color: rgba(255,255,255,.8);
+    .best-seller-side-rank {
+        width: 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #fff;
+        background: #a13a2a;
+        font-size: 11px;
+        font-weight: 950;
     }
 
-    .hero-food {
-        min-height: 320px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
+    .best-seller-side-info {
+        min-width: 0;
     }
 
-    .food-card {
-        width: 300px;
-        min-height: 255px;
-        border-radius: 32px;
-        border: 1px solid rgba(255,255,255,.16);
-
-        background:
-            linear-gradient(
-                145deg,
-                rgba(255,255,255,.14),
-                rgba(255,255,255,.05)
-            );
-
-        box-shadow:
-            0 30px 50px rgba(0,0,0,.2);
-
-        backdrop-filter: blur(10px);
-
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        transform: rotate(-3deg);
-    }
-
-    .food-icon {
-        font-size: 92px;
-        line-height: 1;
-    }
-
-    .stat-box {
-        background: white;
-        border-radius: 19px;
-        padding: 22px;
-        height: 100%;
-        border: 1px solid #f3e8d7;
-        box-shadow: 0 8px 25px rgba(95,52,29,.06);
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--tb-soft);
-        font-size: 24px;
-        margin-bottom: 13px;
-    }
-
-    .section-kicker {
-        color: var(--tb-red);
-        font-weight: 800;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: .09em;
-    }
-
-    .category-box {
+    .best-seller-side-name {
         display: block;
-        background: white;
-        border-radius: 19px;
-        border: 1px solid #f1e4d5;
-        padding: 22px;
-        height: 100%;
-        color: #2f241e;
-        text-decoration: none;
-        transition: .22s ease;
-    }
-
-    .category-box:hover {
-        transform: translateY(-5px);
-        color: #2f241e;
-        border-color: #e5c79f;
-        box-shadow: 0 16px 35px rgba(95,52,29,.12);
-    }
-
-    .category-icon {
-        width: 58px;
-        height: 58px;
-        border-radius: 17px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #fff4db, #f4dfc0);
-        font-size: 28px;
-        margin-bottom: 15px;
-    }
-
-    .promo-card {
         overflow: hidden;
-        border-radius: 26px;
-        color: white;
+        color: inherit;
+        font-size: 11px;
+        font-weight: 850;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .best-seller-side-meta {
+        display: block;
+        margin-top: 2px;
+        color: #a13a2a;
+        font-size: 10px;
+        font-weight: 900;
+    }
+
+    .best-seller-side-empty {
+        position: relative;
+        z-index: 2;
+        margin: 14px 0 0;
+        font-size: 10px;
+        line-height: 1.5;
+        opacity: .76;
+    }
+
+
+    .side-banner::after {
+        content: "";
+
+        position: absolute;
+
+        right: -35px;
+        bottom: -35px;
+
+        width: 130px;
+        height: 130px;
+
+        border-radius: 50%;
 
         background:
-            radial-gradient(
-                circle at 90% 20%,
-                rgba(242,193,92,.18),
-                transparent 28%
-            ),
-            linear-gradient(
-                135deg,
-                #4b2817,
-                #852f27
-            );
+            rgba(255,255,255,.10);
     }
 
-    .promo-badge {
-        background: var(--tb-gold);
-        color: #3b2114;
+
+    .side-banner-label {
+        position: relative;
+
+        z-index: 2;
+
+        font-size: 9px;
+
+        font-weight: 900;
+
+        letter-spacing: .11em;
+
+        text-transform: uppercase;
+    }
+
+
+    .side-banner-title {
+        position: relative;
+
+        z-index: 2;
+
+        max-width: 160px;
+
+        margin-top: 8px;
+
+        font-size: 22px;
+
+        line-height: 1.12;
+
+        font-weight: 950;
+
+        letter-spacing: -.03em;
+    }
+
+
+    .side-banner-text {
+        position: relative;
+
+        z-index: 2;
+
+        max-width: 160px;
+
+        margin-top: 7px;
+
+        font-size: 10px;
+
+        line-height: 1.5;
+
+        opacity: .75;
+    }
+
+
+    .side-banner-link {
+        position: absolute;
+
+        z-index: 3;
+
+        left: 21px;
+        bottom: 18px;
+
+        color: inherit;
+
+        font-size: 10px;
+
+        font-weight: 900;
+    }
+
+
+    /* Keep side links below their content as the hero becomes more compact. */
+    .market-side .side-banner-link {
+        position: relative;
+        display: inline-flex;
+        left: auto;
+        bottom: auto;
+        margin-top: 12px;
+    }
+
+    .market-side .side-banner-text {
+        max-width: none;
+    }
+
+    .shop-home .market-side .side-banner-title {
+        max-width: none;
+        font-size: 20px !important;
+        line-height: 1.22 !important;
+    }
+
+    .shop-home .market-hero h1.market-hero-title {
+        font-size: clamp(27px, 2.6vw, 44px) !important;
+        line-height: 1.18 !important;
+    }
+
+    /* =========================================================
+       SERVICE STRIP
+    ========================================================= */
+
+    .shop-service-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-top: 18px;
+        overflow: hidden;
+        border: 1px solid #d8c6a7;
+        border-top: 3px solid #47643c;
+        border-radius: 14px;
+        background: #fff9ed;
+        box-shadow: 0 8px 22px rgba(73, 58, 32, .09);
+    }
+
+    .shop-service {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-height: 92px;
+        padding: 20px 22px;
+    }
+
+    .shop-service:not(:last-child) {
+        border-right: 1px solid #e3d5bf;
+    }
+
+    .shop-service-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 46px;
+        width: 46px;
+        height: 46px;
+        border: 1px solid #efcf8b;
+        border-radius: 10px;
+        background: #ffe9b8;
+        font-size: 23px;
+    }
+
+    .shop-service strong {
+        display: block;
+        color: #30492e;
+        font-size: 15px;
         font-weight: 800;
     }
 
-    .product-card-tb {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        border: none;
-        border-radius: 21px;
-        overflow: hidden;
-        background: white;
-
-        box-shadow:
-            0 9px 28px rgba(95,52,29,.07);
-
-        transition: .25s ease;
+    .shop-service span {
+        display: block;
+        margin-top: 5px;
+        color: #70624f;
+        font-size: 12.5px;
     }
 
-    .product-card-tb:hover {
-        transform: translateY(-6px);
-
-        box-shadow:
-            0 18px 42px rgba(95,52,29,.14);
+    html[data-theme="dark"] .shop-service-strip {
+        border-color: #4b6045;
+        border-top-color: #c6aa6b;
+        background: #253025;
     }
 
-    .product-image-wrap {
-        height: 230px;
-        position: relative;
+    html[data-theme="dark"] .shop-service-strip .shop-service {
+        border-color: #465440;
+    }
+
+    html[data-theme="dark"] .shop-service strong {
+        color: #f3e5c7;
+    }
+
+    html[data-theme="dark"] .shop-service span {
+        color: #c9c4b4;
+    }
+
+    html[data-theme="dark"] .shop-service-icon {
+        border-color: #897043;
+        background: #574729;
+    }
+
+
+    /* =========================================================
+       FLASH SALE
+    ========================================================= */
+
+    .flash-box {
         overflow: hidden;
+
+        border:
+            1px solid #efd6d0;
+
+        border-radius: 17px;
 
         background:
             linear-gradient(
                 180deg,
-                #fffdf8,
-                #f8efe2
+                #fff,
+                #fff8f6
             );
+
+        box-shadow:
+            var(--shop-shadow);
     }
 
-    .product-image {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        padding: 18px;
-        transition: transform .25s ease;
-    }
 
-    .product-card-tb:hover .product-image {
-        transform: scale(1.05);
-    }
-
-    .stock-badge {
-        position: absolute;
-        top: 14px;
-        right: 14px;
-        z-index: 3;
-    }
-
-    .price-text {
-        color: #b42318;
-        font-weight: 850;
-        font-size: 21px;
-    }
-
-    /* Giữ nội dung và nút của mọi card thẳng hàng */
-    .product-card-tb .card-body {
-        flex: 1 1 auto;
+    .flash-header {
         display: flex;
-        flex-direction: column;
-    }
+        align-items: center;
+        justify-content: space-between;
 
-    .product-title-tb {
-        min-height: 48px;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        overflow: hidden;
-    }
+        gap: 16px;
 
-    .product-description-tb {
-        min-height: 60px;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 3;
-        overflow: hidden;
-    }
+        padding:
+            17px 19px;
 
-    .product-price-stock-tb {
-        margin-top: auto;
-    }
+        color: #fff;
 
-    .product-actions-tb {
-        margin-top: 0;
-    }
-
-    .feature-strip {
-        border-radius: 24px;
-        border: 1px solid #ead8bf;
         background:
             linear-gradient(
                 135deg,
-                #fffaf0,
-                #f8efe2
+                #b33d2d,
+                #7f2b20
             );
     }
 
-    .btn-taybac {
-        background: var(--tb-red);
-        border-color: var(--tb-red);
-        color: white;
-    }
 
-    .btn-taybac:hover {
-        background: #8f3025;
-        border-color: #8f3025;
-        color: white;
-    }
-
-    .btn-outline-taybac {
-        border-color: var(--tb-red);
-        color: var(--tb-red);
-    }
-
-    .btn-outline-taybac:hover {
-        background: var(--tb-red);
-        color: white;
-    }
-
-    @media(max-width: 768px) {
-        .hero-taybac {
-            padding: 32px 24px;
-        }
-
-        .hero-title {
-            font-size: 37px;
-        }
-
-        .hero-food {
-            min-height: 230px;
-        }
-
-        .food-card {
-            width: 235px;
-            min-height: 200px;
-        }
-
-        .food-icon {
-            font-size: 68px;
-        }
-    }
-.category-scroll-wrapper {
-    position: relative;
-}
-
-.category-scroll {
-    display: flex;
-    gap: 18px;
-
-    overflow-x: auto;
-    overflow-y: hidden;
-
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-
-    padding: 4px 2px 18px;
-
-    scrollbar-width: thin;
-    scrollbar-color: #d8b98f transparent;
-}
-
-.category-scroll::-webkit-scrollbar {
-    height: 8px;
-}
-
-.category-scroll::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.category-scroll::-webkit-scrollbar-thumb {
-    background: #d8b98f;
-    border-radius: 20px;
-}
-
-.category-scroll::-webkit-scrollbar-thumb:hover {
-    background: #b98b58;
-}
-
-.category-scroll-item {
-    flex: 0 0 220px;
-    scroll-snap-align: start;
-}
-
-.category-scroll-item .category-box {
-    min-height: 180px;
-}
-
-.category-scroll-btn {
-    width: 44px;
-    height: 44px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-
-    z-index: 5;
-
-    border: 1px solid #ead8bf;
-    border-radius: 50%;
-
-    background: #ffffff;
-    color: #5f341d;
-
-    font-size: 22px;
-    font-weight: bold;
-
-    box-shadow: 0 8px 20px rgba(95, 52, 29, .14);
-
-    transition: .2s ease;
-}
-
-.category-scroll-btn:hover {
-    background: #5f341d;
-    color: #ffffff;
-}
-
-.category-scroll-btn.left {
-    left: -20px;
-}
-
-.category-scroll-btn.right {
-    right: -20px;
-}
-
-@media (max-width: 768px) {
-    .category-scroll-item {
-        flex-basis: 185px;
-    }
-
-    .category-scroll-btn {
-        display: none;
-    }
-}
-
-/* =========================================================
-   HOME REDESIGN 2026
-   Chỉ thay đổi bố cục/giao diện, giữ nguyên toàn bộ logic Blade.
-========================================================= */
-.home-redesign {
-    --home-card: #ffffff;
-    --home-shadow: 0 14px 38px rgba(73, 43, 25, .09);
-}
-
-/* Nhịp khoảng cách thống nhất */
-.home-redesign > section {
-    margin-bottom: 64px !important;
-}
-
-.home-redesign .hero-taybac {
-    padding: 54px 58px;
-    border-radius: 28px;
-    min-height: 470px;
-    display: flex;
-    align-items: center;
-}
-
-.home-redesign .hero-title {
-    font-size: clamp(42px, 4.5vw, 68px);
-    letter-spacing: -1.5px;
-    margin-top: 12px;
-}
-
-.home-redesign .hero-subtitle {
-    font-size: 18px;
-    line-height: 1.75;
-    max-width: 650px;
-}
-
-.home-redesign .hero-food {
-    min-height: 330px;
-}
-
-.home-redesign .food-card {
-    width: 320px;
-    min-height: 285px;
-    position: relative;
-    overflow: hidden;
-}
-
-.home-redesign .food-card::before {
-    content: "";
-    position: absolute;
-    width: 190px;
-    height: 190px;
-    border-radius: 50%;
-    background: rgba(242,193,92,.12);
-    top: -70px;
-    right: -55px;
-}
-
-.home-redesign .food-card::after {
-    content: "TÂY BẮC";
-    position: absolute;
-    bottom: 18px;
-    right: 22px;
-    font-size: 11px;
-    letter-spacing: .2em;
-    font-weight: 800;
-    color: rgba(255,255,255,.28);
-}
-
-/* Thống kê thành một dải gọn thay vì 4 ô quá rời */
-.home-redesign .stats-home-row {
-    background: #fff;
-    border: 1px solid var(--tb-border);
-    border-radius: 24px;
-    padding: 10px;
-    box-shadow: var(--home-shadow);
-}
-
-.home-redesign .stat-box {
-    box-shadow: none;
-    border: 0;
-    border-radius: 18px;
-    position: relative;
-}
-
-.home-redesign .stats-home-row > div:not(:last-child) .stat-box::after {
-    content: "";
-    position: absolute;
-    top: 18%;
-    right: -6px;
-    width: 1px;
-    height: 64%;
-    background: #eee1cf;
-}
-
-.home-redesign .stat-icon {
-    margin-bottom: 10px;
-}
-
-/* Tiêu đề section */
-.home-redesign .section-heading-home {
-    position: relative;
-    padding-left: 17px;
-}
-
-.home-redesign .section-heading-home::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 4px;
-    bottom: 4px;
-    width: 5px;
-    border-radius: 10px;
-    background: linear-gradient(var(--tb-orange), var(--tb-red));
-}
-
-.home-redesign .section-heading-home h2 {
-    font-size: clamp(27px, 2.5vw, 36px);
-    color: var(--tb-brown-dark);
-}
-
-/* Danh mục: nổi bật hơn nhưng vẫn giữ thanh cuộn cũ */
-.home-redesign .category-scroll {
-    gap: 20px;
-    padding: 8px 5px 24px;
-}
-
-.home-redesign .category-scroll-item {
-    flex-basis: 235px;
-}
-
-.home-redesign .category-box {
-    min-height: 190px !important;
-    border-radius: 22px;
-    padding: 24px;
-    box-shadow: 0 7px 24px rgba(95,52,29,.055);
-    position: relative;
-    overflow: hidden;
-}
-
-.home-redesign .category-box::after {
-    content: "→";
-    position: absolute;
-    right: 20px;
-    bottom: 18px;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: var(--tb-soft);
-    color: var(--tb-brown);
-    font-weight: 800;
-    transition: .2s ease;
-}
-
-.home-redesign .category-box:hover::after {
-    background: var(--tb-brown);
-    color: white;
-}
-
-.home-redesign .category-icon {
-    width: 66px;
-    height: 66px;
-    font-size: 31px;
-}
-
-/* Card sản phẩm kiểu shop thương mại điện tử gọn hơn */
-.home-redesign .product-card-tb {
-    border: 1px solid #f0e1cf;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(95,52,29,.055);
-}
-
-.home-redesign .product-image-wrap {
-    height: 245px;
-    background: #fffaf3;
-}
-
-.home-redesign .product-image {
-    padding: 12px;
-    object-fit: cover;
-}
-
-.home-redesign .product-card-tb .card-body {
-    padding: 20px !important;
-}
-
-.home-redesign .product-title-tb {
-    font-size: 17px;
-    min-height: 43px;
-}
-
-.home-redesign .product-description-tb {
-    min-height: 42px;
-    -webkit-line-clamp: 2;
-}
-
-.home-redesign .price-text {
-    font-size: 20px;
-}
-
-/* Banner ưu đãi */
-.home-redesign .promo-card {
-    border-radius: 28px;
-    box-shadow: 0 18px 44px rgba(95,52,29,.15);
-    position: relative;
-}
-
-.home-redesign .promo-card::after {
-    content: "🎁";
-    position: absolute;
-    right: 7%;
-    top: 50%;
-    transform: translateY(-50%) rotate(-8deg);
-    font-size: 100px;
-    opacity: .13;
-    pointer-events: none;
-}
-
-.home-redesign .promo-card .row {
-    position: relative;
-    z-index: 2;
-}
-
-/* Lợi ích cuối trang */
-.home-redesign .feature-strip {
-    background: #fff;
-    box-shadow: var(--home-shadow);
-    border-radius: 24px;
-    padding: 30px !important;
-}
-
-.home-redesign .feature-strip .col-md-3 {
-    position: relative;
-}
-
-.home-redesign .feature-strip .col-md-3:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 10%;
-    height: 80%;
-    width: 1px;
-    background: var(--tb-border);
-}
-
-.home-redesign .feature-strip .fs-2 {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 12px !important;
-    border-radius: 17px;
-    display: grid;
-    place-items: center;
-    background: var(--tb-soft);
-}
-
-/* Nút đồng bộ */
-.home-redesign .btn {
-    border-radius: 11px;
-}
-
-.home-redesign .btn-lg {
-    border-radius: 13px;
-}
-
-/* Mobile */
-@media (max-width: 991.98px) {
-    .home-redesign > section {
-        margin-bottom: 45px !important;
-    }
-
-    .home-redesign .hero-taybac {
-        padding: 38px 30px;
-        min-height: auto;
-    }
-
-    .home-redesign .hero-title {
-        font-size: 45px;
-    }
-
-    .home-redesign .hero-food {
-        min-height: 250px;
-        margin-top: 18px;
-    }
-
-    .home-redesign .stats-home-row > div .stat-box::after {
-        display: none;
-    }
-
-    .home-redesign .feature-strip .col-md-3::after {
-        display: none;
-    }
-}
-
-@media (max-width: 575.98px) {
-    .home-redesign .hero-taybac {
-        padding: 30px 22px;
-        border-radius: 22px;
-    }
-
-    .home-redesign .hero-title {
-        font-size: 37px;
-        letter-spacing: -.7px;
-    }
-
-    .home-redesign .hero-subtitle {
-        font-size: 16px;
-    }
-
-    .home-redesign .hero-food {
-        display: none;
-    }
-
-    .home-redesign .category-scroll-item {
-        flex-basis: 190px;
-    }
-
-    .home-redesign .product-image-wrap {
-        height: 220px;
-    }
-}
-
-
-    /* =========================================================
-       🔥 BÁN CHẠY + ĐÃ BÁN
-    ========================================================= */
-    .sold-count-tb {
-        display: inline-flex;
+    .flash-title {
+        display: flex;
         align-items: center;
-        gap: 6px;
-        color: #7a5a48;
-        font-size: 13px;
-        font-weight: 700;
+
+        gap: 8px;
+
+        font-size: 20px;
+
+        font-weight: 950;
+
+        letter-spacing: -.025em;
     }
 
-    .best-seller-badge {
-        position: absolute;
-        top: 14px;
-        left: 14px;
-        z-index: 4;
-        padding: 7px 10px;
-        border-radius: 999px;
-        background: linear-gradient(135deg,#a83b2d,#d97706);
-        color: #fff;
-        font-size: 12px;
-        font-weight: 900;
-        box-shadow: 0 6px 16px rgba(168,59,45,.22);
+
+    .flash-title span {
+        color: #ffd47c;
     }
 
-    .best-seller-card {
-        border: 1px solid #ecd4b5 !important;
-        background:
-            linear-gradient(#fff,#fff) padding-box,
-            linear-gradient(135deg,#f2c15c,#a83b2d) border-box;
+
+    .flash-note {
+        color:
+            rgba(255,255,255,.72);
+
+        font-size: 10px;
     }
 
+
+    .flash-products {
+        display: grid;
+
+        grid-template-columns:
+            repeat(5, minmax(0, 1fr));
+
+        gap: 0;
+    }
+
+
+    .flash-products
+    .commerce-card {
+        border: 0;
+
+        border-radius: 0;
+
+        box-shadow: none;
+    }
+
+
+    .flash-products
+    .commerce-card:not(:last-child) {
+        border-right:
+            1px solid #eee5de;
+    }
 
 
     /* =========================================================
-       UI UPGRADE ONLY - 2026
-       CHỈ NÂNG CẤP GIAO DIỆN, KHÔNG ĐỔI LOGIC / ROUTE / FORM
+       CATEGORY GRID
     ========================================================= */
 
-    .home-redesign {
-        position: relative;
-    }
+    .category-grid {
+        display: grid;
 
-    .home-redesign::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: -1;
-        background:
-            radial-gradient(circle at 8% 8%, rgba(242,193,92,.08), transparent 24%),
-            radial-gradient(circle at 90% 18%, rgba(72,99,59,.07), transparent 22%),
-            linear-gradient(180deg, #fffdf8 0%, #fff 35%, #fffaf3 100%);
-    }
+        grid-template-columns:
+            repeat(8, minmax(0, 1fr));
 
-    /* HERO */
-    .home-redesign .hero-taybac {
-        border: 1px solid rgba(255,255,255,.10);
-        isolation: isolate;
-    }
-
-    .home-redesign .hero-taybac::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        background:
-            linear-gradient(110deg, rgba(255,255,255,.035), transparent 42%),
-            repeating-linear-gradient(
-                135deg,
-                rgba(255,255,255,.018) 0,
-                rgba(255,255,255,.018) 1px,
-                transparent 1px,
-                transparent 16px
-            );
-    }
-
-    .home-redesign .hero-label {
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-        backdrop-filter: blur(10px);
-    }
-
-    .home-redesign .hero-title {
-        text-shadow: 0 3px 20px rgba(0,0,0,.15);
-    }
-
-    .home-redesign .food-card {
-        transition: transform .28s ease, box-shadow .28s ease;
-    }
-
-    .home-redesign .food-card:hover {
-        transform: rotate(-1deg) translateY(-7px);
-        box-shadow: 0 36px 70px rgba(0,0,0,.28);
-    }
-
-    /* STATS */
-    .home-redesign .stats-home-row {
         overflow: hidden;
-    }
 
-    .home-redesign .stat-box {
-        transition: background .2s ease, transform .2s ease;
-    }
+        border:
+            1px solid var(--shop-border);
 
-    .home-redesign .stat-box:hover {
-        transform: translateY(-3px);
-        background: #fffdf8;
-    }
+        border-radius: 16px;
 
-    .home-redesign .stat-icon {
-        box-shadow: inset 0 0 0 1px rgba(95,52,29,.05);
-    }
+        background: #fff;
 
-    /* SECTION HEADINGS */
-    .home-redesign .section-heading-home {
-        gap: 18px;
-    }
-
-    .home-redesign .section-heading-home h2 {
-        letter-spacing: -.4px;
-    }
-
-    .home-redesign .section-kicker {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    /* CATEGORY */
-    .home-redesign .category-scroll {
-        scrollbar-width: none;
-    }
-
-    .home-redesign .category-scroll::-webkit-scrollbar {
-        display: none;
-    }
-
-    .home-redesign .category-box {
-        border-color: #efe0cc;
-        background:
-            linear-gradient(180deg, #ffffff 0%, #fffdf8 100%);
-    }
-
-    .home-redesign .category-box:hover {
-        transform: translateY(-7px);
-        border-color: #dcbf94;
-        box-shadow: 0 20px 42px rgba(95,52,29,.12);
-    }
-
-    .home-redesign .category-icon {
         box-shadow:
-            inset 0 0 0 1px rgba(95,52,29,.06),
-            0 7px 16px rgba(95,52,29,.06);
-        transition: transform .22s ease;
+            var(--shop-shadow);
     }
 
-    .home-redesign .category-box:hover .category-icon {
-        transform: scale(1.08) rotate(-3deg);
-    }
 
-    .home-redesign .category-scroll-btn {
-        backdrop-filter: blur(8px);
-        background: rgba(255,255,255,.94);
-    }
+    .category-tile {
+        min-height: 125px;
 
-    /* PRODUCT CARDS */
-    .home-redesign .product-card-tb {
-        border-color: #eee0cf;
-        position: relative;
-        isolation: isolate;
-        transition:
-            transform .24s ease,
-            box-shadow .24s ease,
-            border-color .24s ease;
-    }
-
-    .home-redesign .product-card-tb::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        pointer-events: none;
-        z-index: 0;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
-    }
-
-    .home-redesign .product-card-tb:hover {
-        transform: translateY(-8px);
-        border-color: #dfc397;
-        box-shadow: 0 22px 48px rgba(95,52,29,.14);
-    }
-
-    .home-redesign .product-image-wrap {
-        border-bottom: 1px solid #f2e5d5;
-    }
-
-    .home-redesign .product-image {
-        transition: transform .35s ease;
-    }
-
-    .home-redesign .product-card-tb:hover .product-image {
-        transform: scale(1.055);
-    }
-
-    .home-redesign .product-title-tb {
-        color: #34251d;
-        line-height: 1.35;
-    }
-
-    .home-redesign .price-text {
-        letter-spacing: -.2px;
-    }
-
-    .home-redesign .stock-badge,
-    .home-redesign .best-seller-badge {
-        backdrop-filter: blur(6px);
-    }
-
-    .home-redesign .best-seller-card {
-        box-shadow: 0 10px 28px rgba(168,59,45,.09);
-    }
-
-    /* BUTTONS */
-    .home-redesign .btn {
-        font-weight: 700;
-        min-height: 42px;
-        display: inline-flex;
+        display: flex;
         align-items: center;
         justify-content: center;
+        flex-direction: column;
+
+        gap: 8px;
+
+        padding: 14px 7px;
+
+        color: #4d443d;
+
+        text-align: center;
+
         transition:
-            transform .18s ease,
-            box-shadow .18s ease,
-            background-color .18s ease,
-            border-color .18s ease;
+            background .17s ease,
+            color .17s ease;
     }
 
-    .home-redesign .btn:hover {
-        transform: translateY(-1px);
+
+    .category-tile:not(:last-child) {
+        border-right:
+            1px solid #eee9e4;
     }
 
-    .home-redesign .btn-taybac {
-        box-shadow: 0 7px 16px rgba(168,59,45,.16);
-    }
 
-    .home-redesign .btn-taybac:hover {
-        box-shadow: 0 10px 22px rgba(168,59,45,.22);
-    }
+    .category-tile:hover {
+        color: var(--shop-red);
 
-    .home-redesign .btn-outline-taybac {
-        background: #fff;
-    }
-
-    /* PROMO */
-    .home-redesign .promo-card {
-        overflow: hidden;
-        border: 1px solid rgba(255,255,255,.09);
-    }
-
-    .home-redesign .promo-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
         background:
-            radial-gradient(circle at 15% 25%, rgba(255,255,255,.08), transparent 22%),
-            linear-gradient(120deg, rgba(255,255,255,.02), transparent 46%);
+            #fff9ef;
     }
 
-    .home-redesign .promo-badge {
-        box-shadow: 0 7px 18px rgba(0,0,0,.10);
+
+    .category-tile-icon {
+        width: 53px;
+        height: 53px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            1px solid #ead1a8;
+
+        border-radius: 50%;
+
+        background:
+            #fff1d2;
+
+        font-size: 25px;
+
+        transition:
+            transform .18s ease;
     }
 
-    /* FEATURE STRIP */
-    .home-redesign .feature-strip {
-        border-color: #ead8bf;
+
+    .category-tile:hover
+    .category-tile-icon {
+        transform:
+            translateY(-3px);
     }
 
-    .home-redesign .feature-strip .col-md-3 {
-        transition: transform .2s ease;
+
+    .category-tile-name {
+        max-width: 120px;
+
+        font-size: 11px;
+
+        line-height: 1.25;
+
+        font-weight: 900;
     }
 
-    .home-redesign .feature-strip .col-md-3:hover {
-        transform: translateY(-3px);
+
+    .category-tile-count {
+        color: #91867e;
+
+        font-size: 9px;
     }
 
-    /* PAGINATION */
-    .home-redesign .pagination {
-        gap: 6px;
+
+    /* =========================================================
+       PRODUCT CARD
+    ========================================================= */
+
+    .commerce-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(5, minmax(0, 1fr));
+
+        gap: 14px;
     }
 
-    .home-redesign .page-link {
-        border-radius: 10px !important;
-        border-color: #ead8bf;
-        color: var(--tb-brown);
-        min-width: 40px;
+
+    .commerce-card {
+        position: relative;
+
+        overflow: hidden;
+
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        border:
+            1px solid var(--shop-border);
+
+        border-radius: 15px;
+
+        background:
+            var(--shop-card);
+
+        box-shadow:
+            var(--shop-shadow);
+
+        transition:
+            transform .2s ease,
+            box-shadow .2s ease,
+            border-color .2s ease;
+    }
+
+
+    .commerce-card:hover {
+        border-color:
+            #d9c5ad;
+
+        transform:
+            translateY(-5px);
+
+        box-shadow:
+            var(--shop-shadow-hover);
+    }
+
+
+    .commerce-media {
+        position: relative;
+
+        height: 210px;
+
+        overflow: hidden;
+
+        background:
+            #faf8f5;
+    }
+
+
+    .commerce-media img {
+        width: 100%;
+        height: 100%;
+
+        padding: 10px;
+
+        object-fit: contain;
+
+        transition:
+            transform .27s ease;
+    }
+
+
+    .commerce-card:hover
+    .commerce-media img {
+        transform:
+            scale(1.045);
+    }
+
+
+    .commerce-no-image {
+        height: 100%;
+
+        display: grid;
+        place-items: center;
+
+        color: #9a8c80;
+
+        font-size: 40px;
+    }
+
+
+    .commerce-sale {
+        position: absolute;
+
+        z-index: 4;
+
+        top: 9px;
+        left: 9px;
+
+        min-width: 42px;
+
+        padding:
+            5px 7px;
+
+        border-radius: 6px;
+
+        color: #fff;
+
+        background:
+            var(--shop-red);
+
+        font-size: 9px;
+
+        font-weight: 950;
+
         text-align: center;
     }
 
-    .home-redesign .page-item.active .page-link {
-        background: var(--tb-brown);
-        border-color: var(--tb-brown);
+
+    .commerce-featured {
+        position: absolute;
+
+        z-index: 4;
+
+        top: 9px;
+        right: 9px;
+
+        padding:
+            5px 7px;
+
+        border-radius: 999px;
+
+        color: #5b3a1d;
+
+        background:
+            #f4cd78;
+
+        font-size: 8px;
+
+        font-weight: 950;
     }
 
-    /* RESPONSIVE POLISH */
+
+    .commerce-body {
+        flex: 1;
+
+        display: flex;
+        flex-direction: column;
+
+        padding:
+            13px;
+    }
+
+
+    .commerce-category {
+        margin-bottom: 5px;
+
+        color: #898078;
+
+        font-size: 9px;
+    }
+
+
+    .commerce-name {
+        min-height: 39px;
+
+        color: #332c27;
+
+        font-size: 13px;
+
+        line-height: 1.45;
+
+        font-weight: 850;
+
+        display: -webkit-box;
+
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+
+        overflow: hidden;
+    }
+
+
+    .commerce-name:hover {
+        color: var(--shop-red);
+    }
+
+
+    .commerce-rating {
+        display: flex;
+        align-items: center;
+
+        gap: 5px;
+
+        min-height: 24px;
+
+        margin-top: 5px;
+
+        color: #e59e16;
+
+        font-size: 10px;
+    }
+
+
+    .commerce-sold {
+        color: #92867d;
+
+        font-size: 9px;
+    }
+
+
+    .commerce-price-box {
+        margin-top: auto;
+
+        padding-top: 7px;
+    }
+
+
+    .commerce-old-price {
+        min-height: 14px;
+
+        color: #a29a93;
+
+        font-size: 9px;
+
+        text-decoration:
+            line-through;
+    }
+
+
+    .commerce-price {
+        color: var(--shop-red);
+
+        font-size: 17px;
+
+        font-weight: 950;
+
+        letter-spacing: -.02em;
+    }
+
+
+    .commerce-unit {
+        color: #8e8178;
+
+        font-size: 8px;
+
+        font-weight: 700;
+    }
+
+
+    .commerce-stock {
+        display: flex;
+        align-items: center;
+
+        gap: 4px;
+
+        margin-top: 5px;
+
+        color: #4d7b43;
+
+        font-size: 9px;
+
+        font-weight: 850;
+    }
+
+
+    .commerce-stock::before {
+        content: "";
+
+        width: 5px;
+        height: 5px;
+
+        border-radius: 50%;
+
+        background: #5d8e50;
+    }
+
+
+    .commerce-stock.out {
+        color: #ad4b40;
+    }
+
+
+    .commerce-stock.out::before {
+        background: #c44d42;
+    }
+
+
+    .commerce-actions {
+        display: grid;
+
+        grid-template-columns:
+            42px 1fr;
+
+        gap: 6px;
+
+        margin-top: 10px;
+    }
+
+
+    .commerce-detail-btn {
+        min-height: 38px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            1px solid #ded4ca;
+
+        border-radius: 9px;
+
+        color: #604733;
+
+        background: #fff;
+
+        font-size: 16px;
+
+        font-weight: 900;
+    }
+
+
+    .commerce-detail-btn:hover {
+        color: #fff;
+
+        border-color:
+            var(--shop-brown);
+
+        background:
+            var(--shop-brown);
+    }
+
+
+    .commerce-cart-btn {
+        width: 100%;
+        min-height: 38px;
+
+        border: 0;
+
+        border-radius: 9px;
+
+        color: #fff;
+
+        background:
+            var(--shop-red);
+
+        font-size: 10px;
+
+        font-weight: 900;
+
+        transition:
+            background .17s ease;
+    }
+
+
+    .commerce-cart-btn:hover {
+        background:
+            var(--shop-red-dark);
+    }
+
+
+    .commerce-cart-btn:disabled {
+        cursor: not-allowed;
+
+        opacity: .5;
+    }
+
+
+    .commerce-admin-btn {
+        width: 100%;
+        min-height: 38px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 9px;
+
+        color: #fff;
+
+        background:
+            var(--shop-green);
+
+        font-size: 10px;
+
+        font-weight: 900;
+    }
+
+
+    .commerce-admin-btn:hover {
+        color: #fff;
+
+        background:
+            var(--shop-green-dark);
+    }
+
+
+    /* =========================================================
+       WIDE PROMO
+    ========================================================= */
+
+    .wide-promo {
+        position: relative;
+
+        overflow: hidden;
+
+        display: grid;
+
+        grid-template-columns:
+            1fr auto;
+
+        align-items: center;
+
+        gap: 20px;
+
+        padding:
+            30px 35px;
+
+        border-radius: 17px;
+
+        color: #fff;
+
+        background:
+            radial-gradient(
+                circle at 84% 15%,
+                rgba(231,173,66,.30),
+                transparent 28%
+            ),
+
+            linear-gradient(
+                120deg,
+                #59311e,
+                #853226
+            );
+
+        box-shadow:
+            var(--shop-shadow);
+    }
+
+
+    .wide-promo::after {
+        content: "✦";
+
+        position: absolute;
+
+        right: 17%;
+
+        top: -60px;
+
+        color:
+            rgba(255,255,255,.06);
+
+        font-size: 180px;
+    }
+
+
+    .wide-promo-copy {
+        position: relative;
+
+        z-index: 2;
+    }
+
+
+    .wide-promo-label {
+        color: #f4cf78;
+
+        font-size: 10px;
+
+        font-weight: 900;
+
+        letter-spacing: .09em;
+
+        text-transform: uppercase;
+    }
+
+
+    .wide-promo h2 {
+        margin:
+            5px 0 0;
+
+        font-size:
+            clamp(24px,2.7vw,35px);
+
+        font-weight: 950;
+
+        letter-spacing: -.035em;
+    }
+
+
+    .wide-promo p {
+        max-width: 690px;
+
+        margin:
+            7px 0 0;
+
+        color:
+            rgba(255,255,255,.70);
+
+        font-size: 11px;
+
+        line-height: 1.6;
+    }
+
+
+    .wide-promo-btn {
+        position: relative;
+
+        z-index: 3;
+
+        min-height: 43px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding:
+            0 16px;
+
+        border-radius: 10px;
+
+        color: #50301b;
+
+        background:
+            #f3cb73;
+
+        font-size: 11px;
+
+        font-weight: 950;
+    }
+
+
+    .wide-promo-btn:hover {
+        color: #422517;
+
+        background:
+            #ffe19a;
+    }
+
+
+    /* =========================================================
+       EMPTY
+    ========================================================= */
+
+    .commerce-empty {
+        grid-column:
+            1 / -1;
+
+        padding: 42px 20px;
+
+        border:
+            1px dashed #dccab4;
+
+        border-radius: 14px;
+
+        color: #897d74;
+
+        background: #fff;
+
+        text-align: center;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
     @media (max-width: 1199.98px) {
-        .home-redesign .hero-taybac {
-            padding: 44px 42px;
+
+        .market-layout {
+            grid-template-columns:
+                190px
+                minmax(0,1fr);
         }
 
-        .home-redesign .product-image-wrap {
-            height: 225px;
+
+        .market-side {
+            display: none;
         }
+
+
+        .category-grid {
+            grid-template-columns:
+                repeat(4,1fr);
+        }
+
+
+        .category-tile:nth-child(4n) {
+            border-right: 0;
+        }
+
+
+        .commerce-grid,
+        .flash-products {
+            grid-template-columns:
+                repeat(4,minmax(0,1fr));
+        }
+
+
+        .flash-products
+        .commerce-card:nth-child(5) {
+            display: none;
+        }
+
     }
+
+
+    @media (max-width: 991.98px) {
+
+        .market-layout {
+            grid-template-columns:
+                1fr;
+        }
+
+
+        .market-categories {
+            display: none;
+        }
+
+
+        .market-hero {
+            min-height: 360px;
+        }
+
+
+        .shop-service-strip {
+            grid-template-columns:
+                repeat(2,1fr);
+        }
+
+
+        .shop-service:nth-child(2) {
+            border-right: 0;
+        }
+
+
+        .shop-service:nth-child(-n+2) {
+            border-bottom:
+                1px solid var(--shop-border);
+        }
+
+
+        .commerce-grid,
+        .flash-products {
+            grid-template-columns:
+                repeat(3,minmax(0,1fr));
+        }
+
+
+        .flash-products
+        .commerce-card:nth-child(4) {
+            display: none;
+        }
+
+    }
+
 
     @media (max-width: 767.98px) {
-        .home-redesign > section {
-            margin-bottom: 38px !important;
+
+        .shop-section {
+            margin-top: 33px;
         }
 
-        .home-redesign .stats-home-row {
-            padding: 6px;
+
+        .shop-section-header {
+            align-items: flex-start;
+
+            flex-direction: column;
         }
 
-        .home-redesign .stat-box {
-            padding: 18px;
+
+        .market-hero {
+            grid-template-columns: 1fr;
+            min-height: 0;
+            aspect-ratio: auto;
         }
 
-        .home-redesign .section-heading-home {
-            align-items: flex-start !important;
+        .market-hero-copy {
+            padding: 26px;
         }
 
-        .home-redesign .category-box {
-            min-height: 170px !important;
-            padding: 20px;
+        .market-hero-title {
+            font-size: 32px;
         }
 
-        .home-redesign .product-card-tb:hover {
-            transform: none;
+        .market-hero-eyebrow {
+            margin-bottom: 14px;
         }
 
-        .home-redesign .feature-strip {
-            padding: 22px !important;
+        .market-hero-description {
+            margin: 16px 0 20px;
         }
+
+        .market-hero-visual {
+            min-height: 0;
+            aspect-ratio: 4 / 3;
+        }
+
+        .taybac-discovery {
+            grid-template-columns: 1fr;
+        }
+
+
+        .category-grid {
+            grid-template-columns:
+                repeat(4,1fr);
+        }
+
+
+        .category-tile {
+            min-height: 110px;
+        }
+
+
+        .commerce-grid,
+        .flash-products {
+            grid-template-columns:
+                repeat(2,minmax(0,1fr));
+        }
+
+
+        .flash-products
+        .commerce-card:nth-child(3) {
+            display: none;
+        }
+
+
+        .wide-promo {
+            grid-template-columns:
+                1fr;
+
+            padding:
+                27px 22px;
+        }
+
+
+        .wide-promo-btn {
+            width: fit-content;
+        }
+
     }
+
 
     @media (max-width: 575.98px) {
-        .home-redesign .hero-label {
-            font-size: 13px;
+
+        .shop-service-strip {
+            grid-template-columns: 1fr;
         }
 
-        .home-redesign .hero-title {
-            line-height: 1.14;
+
+        .shop-service {
+            border-right: 0 !important;
+
+            border-bottom:
+                1px solid var(--shop-border);
         }
 
-        .home-redesign .stats-home-row {
-            border-radius: 18px;
+
+        .shop-service:last-child {
+            border-bottom: 0;
         }
 
-        .home-redesign .category-scroll-item {
-            flex-basis: 176px;
+
+        .category-grid {
+            grid-template-columns:
+                repeat(2,1fr);
         }
 
-        .home-redesign .product-image-wrap {
-            height: 210px;
+
+        .category-tile {
+            border-right:
+                1px solid #eee9e4 !important;
+
+            border-bottom:
+                1px solid #eee9e4;
         }
 
-        .home-redesign .product-card-tb .card-body {
-            padding: 17px !important;
+
+        .category-tile:nth-child(2n) {
+            border-right: 0 !important;
         }
+
+
+        .commerce-grid {
+            gap: 9px;
+        }
+
+
+        .commerce-media {
+            height: 165px;
+        }
+
+
+        .commerce-body {
+            padding: 10px;
+        }
+
+
+        .commerce-name {
+            font-size: 12px;
+        }
+
+
+        .commerce-price {
+            font-size: 15px;
+        }
+
+
+        .commerce-actions {
+            grid-template-columns: 1fr;
+        }
+
+
+        .commerce-detail-btn {
+            display: none;
+        }
+
+
+        .flash-header {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+    }
+    /* =========================================================
+   NEW PRODUCTS - VỪA LÊN KỆ
+   Chỉ làm section sản phẩm mới gọn và cân đối hơn
+========================================================= */
+
+.tb-new-products-section {
+    position: relative;
+
+    padding:
+        30px 28px 32px;
+
+    border:
+        1px solid
+        #eadbc6;
+
+    border-radius:
+        24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fffdf9 0%,
+            #fff8ed 58%,
+            #f5f8f2 100%
+        );
+
+    box-shadow:
+        0 12px 34px
+        rgba(74, 47, 29, .07);
+}
+
+
+.tb-new-products-section
+.tb-home-section-head {
+    margin-bottom:
+        24px;
+}
+
+
+.tb-new-products-section
+.tb-products-grid {
+    grid-template-columns:
+        repeat(
+            5,
+            minmax(0, 1fr)
+        );
+
+    gap:
+        16px;
+}
+
+
+.tb-new-products-section
+.tb-product-card {
+    border-radius:
+        17px;
+
+    box-shadow:
+        0 8px 22px
+        rgba(75, 46, 28, .07);
+}
+
+
+.tb-new-products-section
+.tb-product-media {
+    height:
+        205px;
+}
+
+
+.tb-new-products-section
+.tb-product-body {
+    padding:
+        15px;
+}
+
+
+.tb-new-products-section
+.tb-product-name {
+    min-height:
+        44px;
+
+    font-size:
+        15px;
+}
+
+
+.tb-new-products-section
+.tb-product-desc {
+    display: none;
+}
+
+
+.tb-new-products-section
+.tb-product-category {
+    margin-bottom:
+        7px;
+
+    font-size:
+        11px;
+}
+
+
+.tb-new-products-section
+.tb-price {
+    font-size:
+        18px;
+}
+
+
+.tb-new-products-section
+.tb-product-actions {
+    margin-top:
+        12px;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1199.98px) {
+
+    .tb-new-products-section
+    .tb-products-grid {
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(0, 1fr)
+            );
     }
 
+}
+
+
+/* =========================================================
+   SMALL TABLET
+========================================================= */
+
+@media (max-width: 767.98px) {
+
+    .tb-new-products-section {
+        padding:
+            22px 18px 24px;
+
+        border-radius:
+            19px;
+    }
+
+
+    .tb-new-products-section
+    .tb-products-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap:
+            12px;
+    }
+
+
+    .tb-new-products-section
+    .tb-product-media {
+        height:
+            190px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 575.98px) {
+
+    .tb-new-products-section
+    .tb-products-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .tb-new-products-section
+    .tb-product-media {
+        height:
+            245px;
+    }
+
+}
 </style>
 
 
-{{-- =====================================================
-    HERO
-===================================================== --}}
-<div class="home-redesign">
+<div class="shop-home">
 
-<section class="mb-5">
 
-    <div class="hero-taybac">
+    {{-- =====================================================
+        TOP MARKETPLACE
+    ====================================================== --}}
+    <section>
 
-        <div
-            class="row align-items-center position-relative"
-            style="z-index:2;"
-        >
+        <div class="market-layout">
 
-            <div class="col-lg-7">
 
-                <div class="hero-label mb-3">
-                    🌿 Hương vị núi rừng Tây Bắc
+            {{-- CATEGORY SIDEBAR --}}
+            <aside class="market-categories">
+
+                <div class="market-category-title">
+                    ☰ Danh mục sản phẩm
                 </div>
 
 
-                <h1 class="display-4 hero-title mb-3">
+                <ul class="market-category-list">
 
-                    Mang tinh hoa
-                    <span style="color:#f2c15c;">
-                        Tây Bắc
+                    @foreach($categories->take(8) as $category)
+
+                        <li>
+
+                            <a
+                                href="{{
+                                    route(
+                                        'products.index',
+                                        [
+                                            'category_id'
+                                            =>
+                                            $category->id
+                                        ]
+                                    )
+                                }}"
+                                class="market-category-link"
+                            >
+
+                                <span class="market-category-link-icon">
+
+                                    {{
+                                        $category->icon
+                                    }}
+
+                                </span>
+
+
+                                <span>
+                                    {{ $category->name }}
+                                </span>
+
+
+                                <span class="market-category-link-arrow">
+                                    ›
+                                </span>
+
+                            </a>
+
+                        </li>
+
+                    @endforeach
+
+                </ul>
+
+
+                <a
+                    href="{{ route('products.index') }}"
+                    class="market-category-all"
+                >
+                    Xem tất cả sản phẩm →
+                </a>
+
+            </aside>
+
+
+            {{-- HERO --}}
+            <section class="market-hero" aria-labelledby="market-hero-title">
+                <div class="market-hero-copy">
+                    <p class="market-hero-eyebrow">Tinh Hoa Tây Bắc</p>
+                    <h1 class="market-hero-title" id="market-hero-title">
+                        Tinh hoa núi rừng
+                        <span>Gửi trọn hương vị Tây Bắc</span>
+                    </h1>
+                    <p class="market-hero-description">
+                        Khám phá thịt gác bếp, gia vị và những món quà đặc trưng vùng cao.
+                    </p>
+                    <a href="{{ route('products.index') }}" class="market-hero-cta">
+                        Khám phá đặc sản <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+                <figure class="market-hero-visual">
+                    <img
+                        src="{{ asset('images/tay-bac-specialties-hero.png') }}"
+                        alt="Thịt gác bếp, gia vị, trà và mật ong trên mẹt tre giữa phong cảnh núi rừng Tây Bắc"
+                        width="1254"
+                        height="1254"
+                        fetchpriority="high"
+                    >
+                </figure>
+            </section>
+
+
+
+            {{-- SIDE PROMOS --}}
+            <aside class="market-side">
+
+
+                <div class="side-banner sale">
+
+                    <div class="side-banner-label">
+                        Ưu đãi
+                    </div>
+
+                    <div class="side-banner-title">
+                        Giá tốt cho đặc sản yêu thích
+                    </div>
+
+                    <div class="side-banner-text">
+                        Khám phá sản phẩm
+                        đang có chương trình khuyến mãi.
+                    </div>
+
+                    <a
+                        href="{{ route('products.promotions') }}"
+                        class="side-banner-link"
+                    >
+                        Xem ưu đãi →
+                    </a>
+
+                </div>
+
+
+                <div class="side-banner best-sellers">
+
+                    <div class="side-banner-label">
+                        Bán chạy
+                    </div>
+
+                    <div class="side-banner-title">
+                        Sản phẩm bán chạy
+                    </div>
+
+                    <div class="best-seller-side-list">
+
+                        @forelse($bestSellerList->take(3) as $bestProduct)
+
+                            <a
+                                href="{{ route('products.show', $bestProduct) }}"
+                                class="best-seller-side-item"
+                                title="{{ $bestProduct->name }}"
+                            >
+                                <span class="best-seller-side-rank">
+                                    {{ $loop->iteration }}
+                                </span>
+
+                                <span class="best-seller-side-info">
+                                    <span class="best-seller-side-name">
+                                        {{ $bestProduct->name }}
+                                    </span>
+
+                                    <span class="best-seller-side-meta">
+                                        {{ number_format($bestProduct->getCurrentPrice(), 0, ',', '.') }}đ
+                                        · Đã bán {{ number_format((int) ($bestProduct->sold_quantity ?? 0), 0, ',', '.') }}
+                                    </span>
+                                </span>
+                            </a>
+
+                        @empty
+
+                            <p class="best-seller-side-empty">
+                                Chưa có đủ dữ liệu bán hàng.
+                            </p>
+
+                        @endforelse
+
+                    </div>
+
+                    <a
+                        href="{{ route('products.index') }}"
+                        class="side-banner-link"
+                    >
+                        Xem tất cả sản phẩm →
+                    </a>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+
+        {{-- SERVICE STRIP --}}
+        <div class="shop-service-strip">
+
+
+            <div class="shop-service">
+
+                <div class="shop-service-icon">
+                    🌿
+                </div>
+
+                <div>
+
+                    <strong>
+                        Đặc sản chọn lọc
+                    </strong>
+
+                    <span>
+                        Hương vị Tây Bắc
                     </span>
-                    đến từng bữa ăn
 
-                </h1>
-
-
-                <p class="lead hero-subtitle mb-4">
-
-                    Khám phá thịt gác bếp, lạp xưởng,
-                    mắc khén, hạt dổi, mật ong,
-                    trà Shan Tuyết và nhiều đặc sản
-                    đậm đà hương vị núi rừng.
-
-                </p>
-
-
-
+                </div>
 
             </div>
 
 
-            <div class="col-lg-5">
+            <div class="shop-service">
 
-                <div class="hero-food">
+                <div class="shop-service-icon">
+                    🚚
+                </div>
 
-                    <div class="food-card">
+                <div>
 
-                        <div class="food-icon">
-                            🥩
+                    <strong>
+                        Giao hàng toàn quốc
+                    </strong>
+
+                    <span>
+                        Nhiều lựa chọn vận chuyển
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="shop-service">
+
+                <div class="shop-service-icon">
+                    💳
+                </div>
+
+                <div>
+
+                    <strong>
+                        Thanh toán thuận tiện
+                    </strong>
+
+                    <span>
+                        COD hoặc chuyển khoản
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="shop-service">
+
+                <div class="shop-service-icon">
+                    📦
+                </div>
+
+                <div>
+
+                    <strong>
+                        Theo dõi đơn hàng
+                    </strong>
+
+                    <span>
+                        Cập nhật trạng thái dễ dàng
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    {{-- =====================================================
+        FLASH SALE / FEATURED
+    ====================================================== --}}
+    @if($featuredList->count() > 0)
+
+        <section class="shop-section">
+
+            <div class="flash-box">
+
+
+                <div class="flash-header">
+
+                    <div>
+
+                        <div class="flash-title">
+
+                            ⚡
+
+                            <span>
+                                NỔI BẬT HÔM NAY
+                            </span>
+
                         </div>
 
+                        <div class="flash-note">
+                            Những sản phẩm đáng chú ý
+                            tại Tinh Hoa Tây Bắc.
+                        </div>
 
-                        <h4 class="fw-bold mt-3 mb-1">
-                            Đặc sản Tây Bắc
-                        </h4>
+                    </div>
 
 
-                        <small style="color:rgba(255,255,255,.72);">
-                            Tinh hoa ẩm thực núi rừng
-                        </small>
+                    <a
+                        href="{{ route('products.index') }}"
+                        style="
+                            color:#fff;
+                            font-size:11px;
+                            font-weight:900;
+                        "
+                    >
+                        Xem tất cả →
+                    </a>
 
+                </div>
+
+
+                <div class="flash-products">
+
+                    @foreach($featuredList as $product)
+
+                        <article class="commerce-card">
+
+
+                            <div class="commerce-media">
+
+
+                                @if($product->isOnSale())
+
+                                    <span class="commerce-sale">
+
+                                        -{{
+                                            $product
+                                                ->getDiscountPercent()
+                                        }}%
+
+                                    </span>
+
+                                @endif
+
+
+                                <span class="commerce-featured">
+                                    ⭐ Nổi bật
+                                </span>
+
+
+                                <a
+                                    href="{{
+                                        route(
+                                            'products.show',
+                                            $product
+                                        )
+                                    }}"
+                                >
+
+                                    @if($product->image)
+
+                                        <img
+                                            src="{{
+                                                asset(
+                                                    'storage/'
+                                                    . $product->image
+                                                )
+                                            }}"
+                                            alt="{{ $product->name }}"
+                                            loading="lazy"
+                                        >
+
+                                    @else
+
+                                        <div class="commerce-no-image">
+                                            🧺
+                                        </div>
+
+                                    @endif
+
+                                </a>
+
+                            </div>
+
+
+                            <div class="commerce-body">
+
+                                <div class="commerce-category">
+
+                                    {{
+                                        $product
+                                            ->category
+                                            ?->name
+                                        ??
+                                        'Đặc sản Tây Bắc'
+                                    }}
+
+                                </div>
+
+
+                                <a
+                                    href="{{
+                                        route(
+                                            'products.show',
+                                            $product
+                                        )
+                                    }}"
+                                    class="commerce-name"
+                                >
+                                    {{ $product->name }}
+                                </a>
+
+
+                                <div class="commerce-rating">
+
+                                    ★★★★★
+
+                                    <span class="commerce-sold">
+
+                                        Đã bán
+
+                                        {{
+                                            number_format(
+                                                (float)
+                                                (
+                                                    $product
+                                                        ->sold_quantity
+                                                    ??
+                                                    0
+                                                ),
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}
+
+                                    </span>
+
+                                </div>
+
+
+                                <div class="commerce-price-box">
+
+                                    <div class="commerce-old-price">
+
+                                        @if($product->isOnSale())
+
+                                            {{
+                                                number_format(
+                                                    (float)
+                                                    $product->price,
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                            }}
+                                            đ
+
+                                        @endif
+
+                                    </div>
+
+
+                                    <div class="commerce-price">
+
+                                        {{
+                                            number_format(
+                                                $product
+                                                    ->getCurrentPrice(),
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}
+                                        đ
+
+                                        @if($product->unit)
+
+                                            <span class="commerce-unit">
+                                                /{{ $product->unit }}
+                                            </span>
+
+                                        @endif
+
+                                    </div>
+
+
+                                    <div
+                                        class="
+                                            commerce-stock
+                                            {{
+                                                $product->quantity > 0
+                                                ? ''
+                                                : 'out'
+                                            }}
+                                        "
+                                    >
+
+                                        {{
+                                            $product->quantity > 0
+                                            ? 'Còn hàng'
+                                            : 'Hết hàng'
+                                        }}
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="commerce-actions">
+
+
+                                    <a
+                                        href="{{
+                                            route(
+                                                'products.show',
+                                                $product
+                                            )
+                                        }}"
+                                        class="commerce-detail-btn"
+                                        title="Xem chi tiết"
+                                    >
+                                        👁
+                                    </a>
+
+
+                                    @if(Auth::check() && Auth::user()->role === 'admin')
+
+                                        <a
+                                            href="{{
+                                                route(
+                                                    'admin.products.edit',
+                                                    $product
+                                                )
+                                            }}"
+                                            class="commerce-admin-btn"
+                                        >
+                                            Quản lý
+                                        </a>
+
+
+                                    @elseif(Auth::check())
+
+                                        <form
+                                            action="{{
+                                                route(
+                                                    'cart.add',
+                                                    $product
+                                                )
+                                            }}"
+                                            method="POST"
+                                        >
+
+                                            @csrf
+
+                                            <button
+                                                type="submit"
+                                                class="commerce-cart-btn"
+                                                {{ $product->quantity <= 0 ? 'disabled' : '' }}
+                                            >
+                                                🛒 Thêm vào giỏ
+                                            </button>
+
+                                        </form>
+
+
+                                    @else
+
+                                        <a
+                                            href="{{ route('login') }}"
+                                            class="commerce-admin-btn"
+                                            style="
+                                                background:#b43e2e;
+                                            "
+                                        >
+                                            Đăng nhập để mua
+                                        </a>
+
+                                    @endif
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    @endforeach
+
+                </div>
+
+            </div>
+
+        </section>
+
+    @endif
+
+
+    {{-- =====================================================
+        BEST SELLERS
+    ====================================================== --}}
+    @if($bestSellerList->count() > 0)
+
+        <section class="shop-section">
+
+
+            <div class="shop-section-header">
+
+                <div>
+
+                    <div class="shop-section-label">
+                        🔥 Khách hàng lựa chọn
+                    </div>
+
+                    <h2 class="shop-section-title">
+                        Sản phẩm bán chạy
+                    </h2>
+
+                    <div class="shop-section-subtitle">
+                        Những đặc sản được lựa chọn nhiều.
                     </div>
 
                 </div>
 
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-{{-- =====================================================
-    THỐNG KÊ
-===================================================== --}}
-<section class="mb-5">
-
-    <div class="row g-3 stats-home-row">
-
-        <div class="col-6 col-lg-3">
-
-            <div class="stat-box">
-
-                <div class="stat-icon">
-                    🥩
-                </div>
-
-                <h4 class="fw-bold mb-1">
-                    {{ number_format($totalProducts) }}+
-                </h4>
-
-                <div class="text-muted">
-                    Đặc sản đang bán
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-6 col-lg-3">
-
-            <div class="stat-box">
-
-                <div class="stat-icon">
-                    🧺
-                </div>
-
-                <h4 class="fw-bold mb-1">
-                    {{ $totalCategories }}
-                </h4>
-
-                <div class="text-muted">
-                    Nhóm đặc sản
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-6 col-lg-3">
-
-            <div class="stat-box">
-
-                <div class="stat-icon">
-                    🚚
-                </div>
-
-                <h4 class="fw-bold mb-1">
-                    Toàn quốc
-                </h4>
-
-                <div class="text-muted">
-                    Giao hàng tận nơi
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-6 col-lg-3">
-
-            <div class="stat-box">
-
-                <div class="stat-icon">
-                    🌿
-                </div>
-
-                <h4 class="fw-bold mb-1">
-                    Đậm vị
-                </h4>
-
-                <div class="text-muted">
-                    Hương vị Tây Bắc
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-{{-- =====================================================
-    DANH MỤC
-===================================================== --}}
-
-@if($categories->count() > 0)
-
-<section class="mb-5">
-
-    <div
-        class="section-heading-home 
-            d-flex
-            justify-content-between
-            align-items-end
-            flex-wrap
-            gap-3
-            mb-4
-        "
-    >
-
-        <div>
-
-            <div class="section-kicker mb-1">
-                Danh mục đặc sản
-            </div>
-
-            <h2 class="fw-bold mb-0">
-                Khám phá hương vị Tây Bắc
-            </h2>
-
-            <div class="text-muted mt-1">
-                Lướt ngang để xem toàn bộ danh mục
-            </div>
-
-        </div>
-
-
-        @auth
-
-            @if(Auth::user()->role !== 'admin')
 
                 <a
-                    href="{{ route('categories.index') }}"
-                    class="btn btn-outline-taybac"
+                    href="{{ route('products.index') }}"
+                    class="shop-more-link"
                 >
                     Xem tất cả →
                 </a>
 
-            @endif
-
-        @endauth
-
-    </div>
-
-
-    <div class="category-scroll-wrapper">
-
-        {{-- NÚT TRÁI --}}
-        <button
-            type="button"
-            class="category-scroll-btn left"
-            onclick="scrollCategories(-1)"
-            aria-label="Danh mục trước"
-        >
-            ‹
-        </button>
-
-
-        {{-- DANH SÁCH DANH MỤC --}}
-        <div
-            class="category-scroll"
-            id="categoryScroll"
-        >
-
-            @foreach($categories as $category)
-
-                @php
-
-                    $categoryName =
-                        mb_strtolower($category->name);
-
-                    $categoryIcon = '🌿';
-
-
-                    if (
-                        str_contains($categoryName, 'trâu')
-                        ||
-                        str_contains($categoryName, 'thịt')
-                        ||
-                        str_contains($categoryName, 'gác bếp')
-                    ) {
-                        $categoryIcon = '🥩';
-                    }
-
-                    elseif (
-                        str_contains($categoryName, 'lạp xưởng')
-                    ) {
-                        $categoryIcon = '🌭';
-                    }
-
-                    elseif (
-                        str_contains($categoryName, 'gia vị')
-                        ||
-                        str_contains($categoryName, 'mắc khén')
-                        ||
-                        str_contains($categoryName, 'hạt dổi')
-                        ||
-                        str_contains($categoryName, 'chẩm chéo')
-                    ) {
-                        $categoryIcon = '🌶️';
-                    }
-
-                    elseif (
-                        str_contains($categoryName, 'trà')
-                        ||
-                        str_contains($categoryName, 'thảo mộc')
-                    ) {
-                        $categoryIcon = '🍵';
-                    }
-
-                    elseif (
-                        str_contains($categoryName, 'mật ong')
-                    ) {
-                        $categoryIcon = '🍯';
-                    }
-
-                    elseif (
-                        str_contains($categoryName, 'gạo')
-                        ||
-                        str_contains($categoryName, 'nếp')
-                    ) {
-                        $categoryIcon = '🍚';
-                    }
-
-                    elseif (
-                        str_contains($categoryName, 'quà')
-                    ) {
-                        $categoryIcon = '🎁';
-                    }
-
-                    elseif (
-                        str_contains($categoryName, 'khô')
-                    ) {
-                        $categoryIcon = '🧺';
-                    }
-
-                @endphp
-
-
-                <div class="category-scroll-item">
-
-                    @if(
-                        Auth::check()
-                        &&
-                        Auth::user()->role === 'admin'
-                    )
-
-                        <a
-                            href="{{
-                                route(
-                                    'admin.categories.show',
-                                    $category
-                                )
-                            }}"
-                            class="category-box"
-                        >
-
-                    @else
-
-                        <a
-                            href="{{
-                                route(
-                                    'categories.show',
-                                    $category
-                                )
-                            }}"
-                            class="category-box"
-                        >
-
-                    @endif
-
-
-                            <div class="category-icon">
-                                {{ $categoryIcon }}
-                            </div>
-
-
-                            <h6 class="fw-bold mb-1">
-                                {{ $category->name }}
-                            </h6>
-
-
-                            <small class="text-muted">
-                                {{ $category->products_count }}
-                                sản phẩm
-                            </small>
-
-                        </a>
-
-                </div>
-
-            @endforeach
-
-        </div>
-
-
-        {{-- NÚT PHẢI --}}
-        <button
-            type="button"
-            class="category-scroll-btn right"
-            onclick="scrollCategories(1)"
-            aria-label="Danh mục tiếp theo"
-        >
-            ›
-        </button>
-
-    </div>
-
-</section>
-
-@endif
-
-
-{{-- =====================================================
-    🔥 SẢN PHẨM BÁN CHẠY
-    Chỉ tính từ các đơn đã giao thành công
-===================================================== --}}
-
-@if(isset($bestSellingProducts) && $bestSellingProducts->count() > 0)
-
-<section class="mb-5">
-
-    <div
-        class="
-            section-heading-home
-            d-flex
-            justify-content-between
-            align-items-end
-            flex-wrap
-            gap-3
-            mb-4
-        "
-    >
-        <div>
-            <div class="section-kicker mb-1">
-                🔥 Được khách hàng yêu thích
             </div>
 
-            <h2 class="fw-bold mb-1">
-                Bán chạy nhất
-            </h2>
 
-            <div class="text-muted">
-                Xếp hạng theo số lượng thực tế từ các đơn đã giao thành công
-            </div>
-        </div>
+            <div class="commerce-grid">
 
-        <a
-            href="{{ route('products.index') }}"
-            class="btn btn-outline-taybac"
-        >
-            Xem tất cả →
-        </a>
-    </div>
+                @foreach($bestSellerList as $product)
 
-    <div
-        class="
-            row
-            row-cols-1
-            row-cols-sm-2
-            row-cols-lg-4
-            g-4
-        "
-    >
-        @foreach($bestSellingProducts as $index => $product)
-
-            <div class="col">
-                <div class="product-card-tb best-seller-card">
-
-                    <div class="product-image-wrap">
-                        <span class="best-seller-badge">
-                            {{ $index === 0 ? '🏆 TOP 1' : '🔥 TOP ' . ($index + 1) }}
-                        </span>
-
-                        @if($product->image)
-                            <img
-                                src="{{ asset('storage/' . $product->image) }}"
-                                alt="{{ $product->name }}"
-                                class="product-image"
-                                onerror="
-                                    this.style.display='none';
-                                    this.nextElementSibling.style.display='flex';
-                                "
-                            >
-                            <div
-                                class="align-items-center justify-content-center text-muted"
-                                style="display:none;height:100%;font-size:54px;"
-                            >
-                                🧺
-                            </div>
-                        @else
-                            <div
-                                class="d-flex align-items-center justify-content-center text-muted"
-                                style="height:100%;font-size:54px;"
-                            >
-                                🧺
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="card-body p-4">
-                        <div class="small text-muted mb-2">
-                            {{ $product->category->name ?? 'Đặc sản Tây Bắc' }}
-                        </div>
-
-                        <h5 class="fw-bold product-title-tb mb-2">
-                            {{ $product->name }}
-                        </h5>
-
-                        <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                            <div class="price-text">
-                                {{ number_format($product->getCurrentPrice(), 0, ',', '.') }} đ
-                            </div>
-
-                            <span class="sold-count-tb">
-                                🔥 Đã bán
-                                {{ rtrim(rtrim(number_format((float) $product->sold_quantity, 2, '.', ''), '0'), '.') }} {{ $product->unit }}
-                            </span>
-                        </div>
-
-                        <a
-                            href="{{ route('products.show', $product) }}"
-                            class="btn btn-outline-taybac w-100"
-                        >
-                            👁 Xem chi tiết
-                        </a>
-                    </div>
-
-                </div>
-            </div>
-
-        @endforeach
-    </div>
-
-</section>
-
-@endif
-
-{{-- =====================================================
-    ⭐ SẢN PHẨM NỔI BẬT
-===================================================== --}}
-
-@if($featuredProducts->count() > 0)
-
-<section class="mb-5">
-
-    {{-- TIÊU ĐỀ --}}
-    <div
-        class="section-heading-home 
-            d-flex
-            justify-content-between
-            align-items-end
-            flex-wrap
-            gap-3
-            mb-4
-        "
-    >
-
-        <div>
-
-            <div class="section-kicker mb-1">
-                ⭐ Được cửa hàng đề xuất
-            </div>
-
-            <h2 class="fw-bold mb-1">
-                Sản phẩm nổi bật
-            </h2>
-
-            <div class="text-muted">
-                Những đặc sản nổi bật được Tinh Hoa Tây Bắc lựa chọn
-            </div>
-
-        </div>
+                    <article class="commerce-card">
 
 
-        <div class="d-flex gap-2 flex-wrap">
-
-            <a
-                href="{{ route('products.index') }}"
-                class="btn btn-outline-taybac"
-            >
-                Xem tất cả →
-            </a>
-
-            @if(Auth::check() && Auth::user()->role === 'admin')
-                <a
-                    href="{{ route('admin.products.create') }}"
-                    class="btn btn-taybac"
-                >
-                    ➕ Thêm sản phẩm
-                </a>
-            @endif
-
-        </div>
-
-    </div>
+                        <div class="commerce-media">
 
 
-    {{-- DANH SÁCH SẢN PHẨM NỔI BẬT --}}
-    <div
-        class="
-            row
-            row-cols-1
-            row-cols-sm-2
-            row-cols-lg-4
-            g-4
-        "
-    >
+                            @if($product->isOnSale())
 
-        @foreach($featuredProducts as $product)
+                                <span class="commerce-sale">
 
-            <div class="col">
+                                    -{{
+                                        $product
+                                            ->getDiscountPercent()
+                                    }}%
 
-                <div class="product-card-tb">
+                                </span>
 
-                    {{-- =================================================
-                        ẢNH SẢN PHẨM
-                    ================================================= --}}
-                    <div class="product-image-wrap">
-
-                        {{-- BADGE NỔI BẬT --}}
-                        <span
-                            class="badge stock-badge"
-                            style="
-                                background:#f2c15c;
-                                color:#3b2114;
-                                border:1px solid #dda83e;
-                            "
-                        >
-                            ⭐ Nổi bật
-                        </span>
+                            @endif
 
 
-                        {{-- ẢNH --}}
-                        @if(
-                            $product->image
-                            &&
-                            Storage::disk('public')->exists(
-                                $product->image
-                            )
-                        )
-
-                            <img
-                                src="{{
-                                    Storage::disk('public')
-                                        ->url($product->image)
+                            <a
+                                href="{{
+                                    route(
+                                        'products.show',
+                                        $product
+                                    )
                                 }}"
-                                alt="{{ $product->name }}"
-                                class="product-image"
                             >
 
-                        @else
+                                @if($product->image)
 
-                            <div
-                                class="
-                                    h-100
-                                    d-flex
-                                    align-items-center
-                                    justify-content-center
-                                "
-                                style="font-size:68px;"
-                            >
-                                🧺
-                            </div>
+                                    <img
+                                        src="{{
+                                            asset(
+                                                'storage/'
+                                                . $product->image
+                                            )
+                                        }}"
+                                        alt="{{ $product->name }}"
+                                        loading="lazy"
+                                    >
 
-                        @endif
+                                @else
 
-                    </div>
+                                    <div class="commerce-no-image">
+                                        🧺
+                                    </div>
 
+                                @endif
 
-                    {{-- =================================================
-                        NỘI DUNG
-                    ================================================= --}}
-                    <div
-                        class="
-                            card-body
-                            p-4
-                            d-flex
-                            flex-column
-                        "
-                    >
-
-                        {{-- DANH MỤC --}}
-                        <div class="mb-2">
-
-                            <span
-                                class="
-                                    badge
-                                    rounded-pill
-                                    bg-light
-                                    text-dark
-                                    border
-                                "
-                            >
-                                {{
-                                    $product->category->name
-                                    ?? 'Chưa phân loại'
-                                }}
-                            </span>
+                            </a>
 
                         </div>
 
 
-                        {{-- TÊN SẢN PHẨM --}}
-                        <h5
-                            class="
-                                fw-bold
-                                mb-2
-                                product-title-tb
-                            "
-                        >
-                            {{ $product->name }}
-                        </h5>
+                        <div class="commerce-body">
 
+                            <div class="commerce-category">
 
-                        {{-- MÔ TẢ --}}
-                        <p
-                            class="
-                                text-muted
-                                small
-                                product-description-tb
-                            "
-                        >
-                            {{
-                                \Illuminate\Support\Str::limit(
-                                    $product->description
-                                    ?? 'Đặc sản Tây Bắc đậm đà hương vị núi rừng.',
-                                    80
-                                )
-                            }}
-                        </p>
-
-
-                        {{-- GIÁ + TỒN KHO --}}
-                        <div class="mb-3 product-price-stock-tb">
-
-                            <div class="price-text">
-
-                                @if($product->isOnSale())
-                                    <span class="text-muted text-decoration-line-through small me-2">
-                                        {{ number_format($product->price, 0, ',', '.') }} đ
-                                    </span>
-                                    <span>
-                                        {{ number_format($product->getCurrentPrice(), 0, ',', '.') }} đ
-                                    </span>
-                                    <span class="badge bg-danger ms-1">
-                                        -{{ $product->getDiscountPercent() }}%
-                                    </span>
-                                @else
-                                    {{ number_format($product->price, 0, ',', '.') }} đ
-                                @endif
-
-                                @if($product->unit)
-                                    <small
-                                        class="text-muted fw-normal"
-                                        style="font-size:13px;"
-                                    >
-                                        / {{ $product->unit }}
-                                    </small>
-                                @endif
+                                {{
+                                    $product
+                                        ->category
+                                        ?->name
+                                    ??
+                                    'Đặc sản Tây Bắc'
+                                }}
 
                             </div>
 
 
-                            @if($product->quantity > 0)
+                            <a
+                                href="{{
+                                    route(
+                                        'products.show',
+                                        $product
+                                    )
+                                }}"
+                                class="commerce-name"
+                            >
+                                {{ $product->name }}
+                            </a>
 
-                                <small class="text-success fw-semibold">
 
-                                    Còn:
+                            <div class="commerce-rating">
+
+                                ★★★★★
+
+                                <span class="commerce-sold">
+
+                                    Đã bán
+
                                     {{
-                                        rtrim(
-                                            rtrim(
-                                                number_format(
-                                                    (float) $product->quantity,
-                                                    2,
-                                                    '.',
-                                                    ''
-                                                ),
-                                                '0'
+                                        number_format(
+                                            (float)
+                                            (
+                                                $product
+                                                    ->sold_quantity
+                                                ??
+                                                0
                                             ),
+                                            0,
+                                            ',',
                                             '.'
                                         )
                                     }}
 
-                                    {{ $product->unit ?? 'sản phẩm' }}
-
-                                </small>
-
-                            @else
-
-                                <small class="text-danger fw-semibold">
-                                    Hết hàng
-                                </small>
-
-                            @endif
-
-                        </div>
-
-
-                        {{-- =================================================
-                            ADMIN
-                        ================================================= --}}
-                        @if(
-                            Auth::check()
-                            &&
-                            Auth::user()->role === 'admin'
-                        )
-
-                            <div class="d-grid gap-2 product-actions-tb">
-
-                                <a
-                                    href="{{
-                                        route(
-                                            'products.show',
-                                            $product
-                                        )
-                                    }}"
-                                    class="btn btn-outline-taybac"
-                                >
-                                    👁 Xem sản phẩm
-                                </a>
-
-
-                                <a
-                                    href="{{ route('admin.products.edit', $product) }}"
-                                    class="btn btn-outline-warning fw-bold"
-                                >
-                                    ✏️ Sửa sản phẩm
-                                </a>
-
-
-                                {{-- BỎ GHIM NGAY TẠI TRANG CHỦ --}}
-                                <form
-                                    action="{{
-                                        route(
-                                            'admin.products.toggleFeatured',
-                                            $product
-                                        )
-                                    }}"
-                                    method="POST"
-                                >
-
-                                    @csrf
-                                    @method('PATCH')
-
-
-                                    <button
-                                        type="submit"
-                                        class="btn btn-warning w-100 fw-bold"
-                                    >
-                                        ★ Bỏ ghim
-                                    </button>
-
-                                </form>
+                                </span>
 
                             </div>
 
 
-                        {{-- =================================================
-                            CUSTOMER
-                        ================================================= --}}
-                        @elseif(Auth::check())
+                            <div class="commerce-price-box">
 
-                            <div class="d-grid gap-2 product-actions-tb">
+                                <div class="commerce-old-price">
+
+                                    @if($product->isOnSale())
+
+                                        {{
+                                            number_format(
+                                                (float)
+                                                $product->price,
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}
+                                        đ
+
+                                    @endif
+
+                                </div>
+
+
+                                <div class="commerce-price">
+
+                                    {{
+                                        number_format(
+                                            $product
+                                                ->getCurrentPrice(),
+                                            0,
+                                            ',',
+                                            '.'
+                                        )
+                                    }}
+                                    đ
+
+                                    @if($product->unit)
+
+                                        <span class="commerce-unit">
+                                            /{{ $product->unit }}
+                                        </span>
+
+                                    @endif
+
+                                </div>
+
+
+                                <div
+                                    class="
+                                        commerce-stock
+                                        {{
+                                            $product->quantity > 0
+                                            ? ''
+                                            : 'out'
+                                        }}
+                                    "
+                                >
+
+                                    {{
+                                        $product->quantity > 0
+                                        ? 'Còn hàng'
+                                        : 'Hết hàng'
+                                    }}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="commerce-actions">
+
 
                                 <a
                                     href="{{
@@ -1999,13 +2889,29 @@
                                             $product
                                         )
                                     }}"
-                                    class="btn btn-outline-taybac"
+                                    class="commerce-detail-btn"
+                                    title="Xem chi tiết"
                                 >
-                                    Xem chi tiết
+                                    👁
                                 </a>
 
 
-                                @if($product->quantity > 0)
+                                @if(Auth::check() && Auth::user()->role === 'admin')
+
+                                    <a
+                                        href="{{
+                                            route(
+                                                'admin.products.edit',
+                                                $product
+                                            )
+                                        }}"
+                                        class="commerce-admin-btn"
+                                    >
+                                        Quản lý
+                                    </a>
+
+
+                                @elseif(Auth::check())
 
                                     <form
                                         action="{{
@@ -2021,355 +2927,314 @@
 
                                         <button
                                             type="submit"
-                                            class="btn btn-taybac w-100"
+                                            class="commerce-cart-btn"
+                                            {{ $product->quantity <= 0 ? 'disabled' : '' }}
                                         >
                                             🛒 Thêm vào giỏ
                                         </button>
 
                                     </form>
 
+
                                 @else
 
-                                    <button
-                                        class="btn btn-secondary w-100"
-                                        disabled
+                                    <a
+                                        href="{{ route('login') }}"
+                                        class="commerce-admin-btn"
+                                        style="
+                                            background:#b43e2e;
+                                        "
                                     >
-                                        Hết hàng
-                                    </button>
+                                        Đăng nhập để mua
+                                    </a>
 
                                 @endif
 
                             </div>
 
+                        </div>
 
-                        {{-- =================================================
-                            KHÁCH CHƯA ĐĂNG NHẬP
-                        ================================================= --}}
-                        @else
+                    </article>
 
-                            <div class="d-grid gap-2 product-actions-tb">
-
-                                <a
-                                    href="{{
-                                        route(
-                                            'products.show',
-                                            $product
-                                        )
-                                    }}"
-                                    class="btn btn-outline-taybac"
-                                >
-                                    Xem chi tiết
-                                </a>
-
-                                <a
-                                    href="{{ route('login') }}"
-                                    class="btn btn-taybac"
-                                >
-                                    🔐 Đăng nhập để mua
-                                </a>
-
-                            </div>
-
-                        @endif
-
-                    </div>
-
-                </div>
+                @endforeach
 
             </div>
 
-        @endforeach
+        </section>
 
-    </div>
-
-</section>
-
-@endif
-
-{{-- =====================================================
-    BANNER ƯU ĐÃI
-===================================================== --}}
-<section class="mb-5">
-
-    <div class="promo-card p-4 p-lg-5">
-
-        <div class="row align-items-center">
-
-            <div class="col-lg-8">
-
-                <span class="badge promo-badge mb-3">
-                    🔥 ƯU ĐÃI ĐẶC SẢN
-                </span>
+    @endif
 
 
-                <h2 class="fw-bold mb-3">
-                    Mang hương vị Tây Bắc về nhà với giá tốt
+    {{-- =====================================================
+        WIDE PROMO
+    ====================================================== --}}
+    <section class="shop-section">
+
+        <div class="wide-promo">
+
+
+            <div class="wide-promo-copy">
+
+                <div class="wide-promo-label">
+                    Đặc sản Tây Bắc
+                </div>
+
+                <h2>
+                    Một món ngon, một món quà mang hương vị núi rừng.
                 </h2>
 
+                <p>
 
-                <p
-                    class="mb-0"
-                    style="color:rgba(255,255,255,.76);"
-                >
-                    Sử dụng voucher tại bước thanh toán
-                    để nhận thêm ưu đãi cho đơn hàng.
+                    Chọn những sản phẩm đặc trưng
+                    cho gia đình hoặc làm quà
+                    với giá bán,
+                    tồn kho và khuyến mãi
+                    được hiển thị rõ ràng.
+
                 </p>
 
             </div>
 
 
-            <div
-                class="
-                    col-lg-4
-                    text-lg-end
-                    mt-4
-                    mt-lg-0
-                "
+            <a
+                href="{{ route('products.promotions') }}"
+                class="wide-promo-btn"
             >
-
-                @if(
-                    Auth::check()
-                    &&
-                    Auth::user()->role !== 'admin'
-                )
-
-                    <a
-                        href="{{ route('products.index') }}"
-                        class="btn btn-warning btn-lg fw-bold"
-                    >
-                        Khám phá ngay →
-                    </a>
-
-                @elseif(!Auth::check())
-
-                    <a
-                        href="{{ route('register') }}"
-                        class="btn btn-warning btn-lg fw-bold"
-                    >
-                        Bắt đầu mua sắm →
-                    </a>
-
-                @endif
-
-            </div>
+                Khám phá ưu đãi →
+            </a>
 
         </div>
 
-    </div>
-
-</section>
+    </section>
 
 
-{{-- =====================================================
-    SẢN PHẨM MỚI
-===================================================== --}}
-<section class="mb-5">
+    {{-- =====================================================
+        NEW PRODUCTS
+    ====================================================== --}}
+  <section class="tb-home-section tb-new-products-section">
 
-    <div
-        class="section-heading-home 
-            d-flex
-            justify-content-between
-            align-items-end
-            mb-4
-        "
-    >
 
-        <div>
+        <div class="shop-section-header">
 
-            <div class="section-kicker mb-1">
-                Đặc sản mới
+            <div>
+
+                <div class="shop-section-label">
+                    🆕 Sản phẩm mới
+                </div>
+
+                <h2 class="shop-section-title">
+                    Vừa lên kệ
+                </h2>
+
+                <div class="shop-section-subtitle">
+                    Những sản phẩm mới nhất
+                    tại Tinh Hoa Tây Bắc.
+                </div>
+
             </div>
 
 
-            <h2 class="fw-bold mb-0">
-                Hương vị mới dành cho bạn
-            </h2>
+            <a
+                href="{{ route('products.index') }}"
+                class="shop-more-link"
+            >
+                Tất cả sản phẩm →
+            </a>
 
         </div>
 
 
-        @auth
+        <div class="commerce-grid">
 
-            @if(Auth::user()->role === 'admin')
+            @php
+    $newProducts = $products instanceof \Illuminate\Pagination\AbstractPaginator
+        ? collect($products->items())->take(5)
+        : $products->take(5);
+@endphp
 
-                <a
-                    href="{{ route('admin.products.index') }}"
-                    class="btn btn-outline-taybac"
-                >
-                    Quản lý sản phẩm →
-                </a>
+@forelse($newProducts as $product)
 
-            @else
-
-                <a
-                    href="{{ route('products.index') }}"
-                    class="btn btn-outline-taybac"
-                >
-                    Xem tất cả →
-                </a>
-
-            @endif
-
-        @endauth
-
-    </div>
+                <article class="commerce-card">
 
 
-    <div
-        class="
-            row
-            row-cols-1
-            row-cols-sm-2
-            row-cols-lg-4
-            g-4
-        "
-    >
-
-        @forelse($products as $product)
-
-            <div class="col">
-
-                <div class="product-card-tb">
+                    <div class="commerce-media">
 
 
-                    {{-- ẢNH --}}
-                    <div class="product-image-wrap">
+                        @if($product->isOnSale())
 
-                        @if($product->quantity > 0)
+                            <span class="commerce-sale">
 
-                            <span class="badge bg-success stock-badge">
-                                Còn hàng
-                            </span>
+                                -{{
+                                    $product
+                                        ->getDiscountPercent()
+                                }}%
 
-                        @else
-
-                            <span class="badge bg-danger stock-badge">
-                                Hết hàng
                             </span>
 
                         @endif
 
 
-                        @if(
-                            $product->image
-                            &&
-                            Storage::disk('public')->exists(
-                                $product->image
-                            )
-                        )
+                        <a
+                            href="{{
+                                route(
+                                    'products.show',
+                                    $product
+                                )
+                            }}"
+                        >
 
-                            <img
-                                src="{{
-                                    Storage::disk('public')
-                                        ->url($product->image)
-                                }}"
-                                alt="{{ $product->name }}"
-                                class="product-image"
-                            >
+                            @if($product->image)
 
-                        @else
+                                <img
+                                    src="{{
+                                        asset(
+                                            'storage/'
+                                            . $product->image
+                                        )
+                                    }}"
+                                    alt="{{ $product->name }}"
+                                    loading="lazy"
+                                >
 
-                            <div
-                                class="
-                                    h-100
-                                    d-flex
-                                    align-items-center
-                                    justify-content-center
-                                "
-                                style="font-size:68px;"
-                            >
-                                🧺
-                            </div>
+                            @else
 
-                        @endif
+                                <div class="commerce-no-image">
+                                    🧺
+                                </div>
+
+                            @endif
+
+                        </a>
 
                     </div>
 
 
-                    <div
-                        class="
-                            card-body
-                            p-4
-                            d-flex
-                            flex-column
-                        "
-                    >
+                    <div class="commerce-body">
 
-                        <div class="mb-2">
+                        <div class="commerce-category">
 
-                            <span
-                                class="
-                                    badge
-                                    rounded-pill
-                                    bg-light
-                                    text-dark
-                                    border
-                                "
-                            >
+                            {{
+                                $product
+                                    ->category
+                                    ?->name
+                                ??
+                                'Đặc sản Tây Bắc'
+                            }}
+
+                        </div>
+
+
+                        <a
+                            href="{{
+                                route(
+                                    'products.show',
+                                    $product
+                                )
+                            }}"
+                            class="commerce-name"
+                        >
+                            {{ $product->name }}
+                        </a>
+
+
+                        <div class="commerce-rating">
+
+                            ★★★★★
+
+                            <span class="commerce-sold">
+
+                                Đã bán
+
                                 {{
-                                    $product->category->name
-                                    ?? 'Chưa phân loại'
+                                    number_format(
+                                        (float)
+                                        (
+                                            $product
+                                                ->sold_quantity
+                                            ??
+                                            0
+                                        ),
+                                        0,
+                                        ',',
+                                        '.'
+                                    )
                                 }}
+
                             </span>
 
                         </div>
 
 
-                        <h5 class="fw-bold mb-2 product-title-tb">
-                            {{ $product->name }}
-                        </h5>
+                        <div class="commerce-price-box">
 
-
-                        <p class="text-muted small product-description-tb">
-
-                            {{
-                                \Illuminate\Support\Str::limit(
-                                    $product->description
-                                    ??
-                                    'Đặc sản Tây Bắc đậm đà hương vị núi rừng.',
-                                    80
-                                )
-                            }}
-
-                        </p>
-
-
-                        <div class="mb-3 product-price-stock-tb">
-
-                            <div class="price-text">
+                            <div class="commerce-old-price">
 
                                 @if($product->isOnSale())
-                                    <span class="text-muted text-decoration-line-through small me-2">
-                                        {{ number_format($product->price, 0, ',', '.') }} đ
-                                    </span>
-                                    <span>
-                                        {{ number_format($product->getCurrentPrice(), 0, ',', '.') }} đ
-                                    </span>
-                                    <span class="badge bg-danger ms-1">
-                                        -{{ $product->getDiscountPercent() }}%
-                                    </span>
-                                @else
-                                    {{ number_format($product->price, 0, ',', '.') }} đ
+
+                                    {{
+                                        number_format(
+                                            (float)
+                                            $product->price,
+                                            0,
+                                            ',',
+                                            '.'
+                                        )
+                                    }}
+                                    đ
+
                                 @endif
 
                             </div>
 
 
-                            <small class="text-muted">
-                                Còn:
-                                {{ $product->quantity }}
-                                sản phẩm
-                            </small>
+                            <div class="commerce-price">
+
+                                {{
+                                    number_format(
+                                        $product
+                                            ->getCurrentPrice(),
+                                        0,
+                                        ',',
+                                        '.'
+                                    )
+                                }}
+                                đ
+
+                                @if($product->unit)
+
+                                    <span class="commerce-unit">
+                                        /{{ $product->unit }}
+                                    </span>
+
+                                @endif
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    commerce-stock
+                                    {{
+                                        $product->quantity > 0
+                                        ? ''
+                                        : 'out'
+                                    }}
+                                "
+                            >
+
+                                {{
+                                    $product->quantity > 0
+                                    ? 'Còn hàng'
+                                    : 'Hết hàng'
+                                }}
+
+                            </div>
 
                         </div>
 
 
-                        {{-- PHÂN QUYỀN --}}
-                        @if(
-                            Auth::check()
-                            &&
-                            Auth::user()->role === 'admin'
-                        )
+                        <div class="commerce-actions">
+
 
                             <a
                                 href="{{
@@ -2378,237 +3243,127 @@
                                         $product
                                     )
                                 }}"
-                                class="
-                                    btn
-                                    btn-outline-taybac
-                                    mt-auto
-                                "
+                                class="commerce-detail-btn"
+                                title="Xem chi tiết"
                             >
-                                👁 Xem chi tiết
-                            </a>
-
-                            <a
-                                href="{{ route('admin.products.edit', $product) }}"
-                                class="btn btn-outline-warning mt-2 fw-bold"
-                            >
-                                ✏️ Sửa sản phẩm
+                                👁
                             </a>
 
 
-                        @elseif(Auth::check())
-
-                            <div class="d-grid gap-2 product-actions-tb">
+                            @if(Auth::check() && Auth::user()->role === 'admin')
 
                                 <a
                                     href="{{
                                         route(
-                                            'products.show',
+                                            'admin.products.edit',
                                             $product
                                         )
                                     }}"
-                                    class="btn btn-outline-taybac"
+                                    class="commerce-admin-btn"
                                 >
-                                    Xem chi tiết
+                                    Quản lý
                                 </a>
 
 
-                                @if($product->quantity > 0)
+                            @elseif(Auth::check())
 
-                                    <form
-                                        action="{{
-                                            route(
-                                                'cart.add',
-                                                $product->id
-                                            )
-                                        }}"
-                                        method="POST"
+                                <form
+                                    action="{{
+                                        route(
+                                            'cart.add',
+                                            $product
+                                        )
+                                    }}"
+                                    method="POST"
+                                >
+
+                                    @csrf
+
+                                    <button
+                                        type="submit"
+                                        class="commerce-cart-btn"
+                                        {{ $product->quantity <= 0 ? 'disabled' : '' }}
                                     >
+                                        🛒 Thêm vào giỏ
+                                    </button>
 
-                                        @csrf
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-taybac w-100"
-                                        >
-                                            🛒 Thêm vào giỏ
-                                        </button>
-
-                                    </form>
-
-                                @endif
-
-                            </div>
+                                </form>
 
 
-                        @else
+                            @else
 
-                            <a
-                                href="{{ route('login') }}"
-                                class="btn btn-taybac mt-auto"
-                            >
-                                Đăng nhập để mua
-                            </a>
+                                <a
+                                    href="{{ route('login') }}"
+                                    class="commerce-admin-btn"
+                                    style="
+                                        background:#b43e2e;
+                                    "
+                                >
+                                    Đăng nhập để mua
+                                </a>
 
-                        @endif
+                            @endif
 
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+            @empty
+
+                <div class="commerce-empty">
+
+                    🧺
+
+                    <div class="fw-bold mt-2">
+                        Chưa có sản phẩm.
                     </div>
 
                 </div>
 
-            </div>
-
-        @empty
-
-            <div class="col-12">
-
-                <div class="text-center py-5">
-
-                    <div style="font-size:68px;">
-                        🧺
-                    </div>
-
-                    <h5 class="text-muted mt-3">
-                        Hiện chưa có đặc sản nào.
-                    </h5>
-
-                </div>
-
-            </div>
-
-        @endforelse
-
-    </div>
-
-
-    <div class="d-flex justify-content-center mt-4">
-        {{ $products->links() }}
-    </div>
-
-</section>
-
-
-{{-- =====================================================
-    LỢI ÍCH
-===================================================== --}}
-<section class="mb-4">
-
-    <div class="feature-strip p-4">
-
-        <div class="row g-4 text-center">
-
-            <div class="col-md-3">
-
-                <div class="fs-2 mb-2">
-                    🌿
-                </div>
-
-                <h6 class="fw-bold">
-                    Hương vị đặc trưng
-                </h6>
-
-                <small class="text-muted">
-                    Đậm chất ẩm thực vùng cao Tây Bắc
-                </small>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="fs-2 mb-2">
-                    🚚
-                </div>
-
-                <h6 class="fw-bold">
-                    Giao hàng linh hoạt
-                </h6>
-
-                <small class="text-muted">
-                    Tiết kiệm, nhanh và hỏa tốc
-                </small>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="fs-2 mb-2">
-                    💳
-                </div>
-
-                <h6 class="fw-bold">
-                    Thanh toán tiện lợi
-                </h6>
-
-                <small class="text-muted">
-                    COD hoặc chuyển khoản QR
-                </small>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="fs-2 mb-2">
-                    📦
-                </div>
-
-                <h6 class="fw-bold">
-                    Theo dõi đơn hàng
-                </h6>
-
-                <small class="text-muted">
-                    Cập nhật trạng thái trực tiếp
-                </small>
-
-            </div>
+            @endforelse
 
         </div>
 
-    </div>
 
-</section>
+        @if($products->hasPages())
+
+            <div class="d-flex justify-content-center mt-4">
+                {{ $products->links() }}
+            </div>
+
+        @endif
+
+    </section>
+
+
+    @if(file_exists(public_path('videos/tay-bac-nature.mp4')))
+        <section class="shop-section taybac-discovery" aria-labelledby="taybac-discovery-title">
+            <div class="taybac-discovery-copy">
+                <p class="taybac-discovery-label">Miền đất của những hương vị</p>
+                <h2 id="taybac-discovery-title">Khám phá Tây Bắc</h2>
+                <p class="taybac-discovery-description">
+                    Ngắm những thửa ruộng bậc thang Mù Cang Chải và cảm nhận
+                    vẻ đẹp bình dị của núi rừng Tây Bắc.
+                </p>
+                <a class="taybac-discovery-credit"
+                   href="https://pixabay.com/videos/rice-fields-terraces-mountain-rice-87041/"
+                   target="_blank" rel="noopener noreferrer">
+                    Video: trilemedia / Pixabay
+                </a>
+            </div>
+            <video controls playsinline muted preload="metadata" aria-label="Phong cảnh ruộng bậc thang Mù Cang Chải">
+                <source src="{{ asset('videos/tay-bac-nature.mp4') }}" type="video/mp4">
+                Trình duyệt của bạn chưa hỗ trợ phát video.
+            </video>
+        </section>
+    @endif
+
+
 
 
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const container = document.getElementById('categoryScroll');
-
-    if (!container) {
-        return;
-    }
-
-    window.scrollCategories = function (direction) {
-        const firstItem = container.querySelector('.category-scroll-item');
-
-        let distance = 720;
-
-        if (firstItem) {
-            const itemWidth = firstItem.getBoundingClientRect().width;
-            const gap = 18;
-            distance = (itemWidth + gap) * 3;
-        }
-
-        container.scrollBy({
-            left: direction * distance,
-            behavior: 'smooth'
-        });
-    };
-
-    // Cho phép Shift + con lăn chuột để lướt ngang.
-    container.addEventListener('wheel', function (event) {
-        if (event.shiftKey) {
-            event.preventDefault();
-
-            container.scrollBy({
-                left: event.deltaY,
-                behavior: 'smooth'
-            });
-        }
-    }, { passive: false });
-});
-</script>
 
 @endsection

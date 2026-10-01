@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ForgotPasswordController;
@@ -17,9 +18,11 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReviewController;
 
 
-// =====================================================
-// TRANG CHỦ
-// =====================================================
+/*
+|--------------------------------------------------------------------------
+| TRANG CHỦ
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', [
     WelcomeController::class,
@@ -27,10 +30,49 @@ Route::get('/', [
 ])->name('welcome');
 
 
-// =====================================================
-// ĐĂNG KÝ + ĐĂNG NHẬP
-// Chỉ dành cho người chưa đăng nhập
-// =====================================================
+/*
+|--------------------------------------------------------------------------
+| CHÍNH SÁCH & ĐIỀU KHOẢN
+|--------------------------------------------------------------------------
+| Guest / Customer / Admin đều có thể xem
+*/
+
+Route::get('/chinh-sach-giao-hang', [
+    PolicyController::class,
+    'shipping'
+])->name('policies.shipping');
+
+
+Route::get('/chinh-sach-doi-tra', [
+    PolicyController::class,
+    'returns'
+])->name('policies.returns');
+
+
+Route::get('/chinh-sach-bao-mat', [
+    PolicyController::class,
+    'privacy'
+])->name('policies.privacy');
+
+
+Route::get('/dieu-khoan-dich-vu', [
+    PolicyController::class,
+    'terms'
+])->name('policies.terms');
+
+
+Route::get('/chinh-sach-thanh-toan', [
+    PolicyController::class,
+    'payment'
+])->name('policies.payment');
+
+
+/*
+|--------------------------------------------------------------------------
+| ĐĂNG KÝ + ĐĂNG NHẬP
+|--------------------------------------------------------------------------
+| Chỉ dành cho người chưa đăng nhập
+*/
 
 Route::middleware('guest')->group(function () {
 
@@ -38,11 +80,11 @@ Route::middleware('guest')->group(function () {
     // QUÊN MẬT KHẨU BẰNG OTP
     // =================================================
 
-    // Bước 1: Nhập email
     Route::get('/forgot-password', [
         ForgotPasswordController::class,
         'showForgotForm'
     ])->name('password.request');
+
 
     Route::post('/forgot-password', [
         ForgotPasswordController::class,
@@ -50,11 +92,11 @@ Route::middleware('guest')->group(function () {
     ])->name('password.email');
 
 
-    // Bước 2: Xác nhận OTP
     Route::get('/forgot-password/verify-otp', [
         ForgotPasswordController::class,
         'showOtpForm'
     ])->name('password.otp.form');
+
 
     Route::post('/forgot-password/verify-otp', [
         ForgotPasswordController::class,
@@ -62,11 +104,11 @@ Route::middleware('guest')->group(function () {
     ])->name('password.otp.verify');
 
 
-    // Bước 3: Đặt mật khẩu mới
     Route::get('/reset-password', [
         ForgotPasswordController::class,
         'showResetForm'
     ])->name('password.reset.form');
+
 
     Route::post('/reset-password', [
         ForgotPasswordController::class,
@@ -74,11 +116,15 @@ Route::middleware('guest')->group(function () {
     ])->name('password.reset');
 
 
-    // Đăng ký
+    // =================================================
+    // ĐĂNG KÝ
+    // =================================================
+
     Route::get('/register', [
         AuthController::class,
         'showRegistrationForm'
     ])->name('register');
+
 
     Route::post('/register', [
         AuthController::class,
@@ -86,11 +132,15 @@ Route::middleware('guest')->group(function () {
     ]);
 
 
-    // Đăng nhập
+    // =================================================
+    // ĐĂNG NHẬP
+    // =================================================
+
     Route::get('/login', [
         AuthController::class,
         'showLoginForm'
     ])->name('login');
+
 
     Route::post('/login', [
         AuthController::class,
@@ -99,9 +149,11 @@ Route::middleware('guest')->group(function () {
 });
 
 
-// =====================================================
-// ĐĂNG XUẤT
-// =====================================================
+/*
+|--------------------------------------------------------------------------
+| ĐĂNG XUẤT
+|--------------------------------------------------------------------------
+*/
 
 Route::post('/logout', [
     AuthController::class,
@@ -111,13 +163,12 @@ Route::post('/logout', [
     ->name('logout');
 
 
-// =====================================================
-// USER ĐÃ ĐĂNG NHẬP
-// =====================================================
-// =====================================================
-// 🛍️ SẢN PHẨM CÔNG KHAI
-// Guest / Customer / Admin đều có thể xem
-// =====================================================
+/*
+|--------------------------------------------------------------------------
+| SẢN PHẨM CÔNG KHAI
+|--------------------------------------------------------------------------
+| Guest / Customer / Admin đều có thể xem
+*/
 
 Route::get('/products-search-suggestions', [
     ProductController::class,
@@ -141,6 +192,14 @@ Route::get('/khuyen-mai', [
     ProductController::class,
     'promotions'
 ])->name('products.promotions');
+
+
+/*
+|--------------------------------------------------------------------------
+| USER ĐÃ ĐĂNG NHẬP
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('auth')->group(function () {
 
     // =================================================
@@ -168,15 +227,18 @@ Route::middleware('auth')->group(function () {
         'updateProfile'
     ])->name('profile.update');
 
+
     Route::post('/profile/avatar', [
         AuthController::class,
         'updateAvatar'
     ])->name('profile.avatar.update');
 
+
     Route::delete('/profile/avatar', [
         AuthController::class,
         'deleteAvatar'
     ])->name('profile.avatar.delete');
+
 
     Route::patch('/profile/password', [
         AuthController::class,
@@ -185,7 +247,7 @@ Route::middleware('auth')->group(function () {
 
 
     // =================================================
-    // XÁC THỰC EMAIL BẰNG MÃ OTP
+    // XÁC THỰC EMAIL BẰNG OTP
     // =================================================
 
     Route::get('/email/verify', [
@@ -225,15 +287,16 @@ Route::middleware('auth')->group(function () {
 });
 
 
-// =====================================================
-// ADMIN
-// =====================================================
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-
 
         // =================================================
         // DASHBOARD ADMIN
@@ -245,15 +308,15 @@ Route::middleware(['auth', 'admin'])
         ])->name('dashboard');
 
 
-
         // =================================================
-        // 👥 QUẢN LÝ KHÁCH HÀNG
+        // QUẢN LÝ KHÁCH HÀNG
         // =================================================
 
         Route::get('/customers', [
             AdminController::class,
             'customers'
         ])->name('customers.index');
+
 
         Route::get('/customers/{customer}', [
             AdminController::class,
@@ -272,7 +335,7 @@ Route::middleware(['auth', 'admin'])
 
 
         // =================================================
-        // 🔔 THÔNG BÁO ADMIN
+        // THÔNG BÁO ADMIN
         // =================================================
 
         Route::get('/notifications/{notification}', [
@@ -288,7 +351,7 @@ Route::middleware(['auth', 'admin'])
 
 
         // =================================================
-        // ⭐ QUẢN LÝ ĐÁNH GIÁ
+        // QUẢN LÝ ĐÁNH GIÁ
         // =================================================
 
         Route::delete('/reviews/{review}', [
@@ -298,10 +361,9 @@ Route::middleware(['auth', 'admin'])
 
 
         // =================================================
-        // 📦 QUẢN LÝ SẢN PHẨM
+        // QUẢN LÝ SẢN PHẨM
         // =================================================
 
-        // ⭐ Ghim / bỏ ghim sản phẩm nổi bật
         Route::patch('/products/{product}/featured', [
             ProductController::class,
             'toggleFeatured'
@@ -309,24 +371,25 @@ Route::middleware(['auth', 'admin'])
 
 
         // =================================================
-        // 🔥 KHUYẾN MÃI SẢN PHẨM
+        // KHUYẾN MÃI SẢN PHẨM
         // =================================================
 
-        // Admin đưa sản phẩm lên sale / chỉnh sửa sale
         Route::patch('/products/{product}/promotion', [
             ProductController::class,
             'setPromotion'
         ])->name('products.setPromotion');
 
 
-        // Admin gỡ sản phẩm khỏi sale
         Route::delete('/products/{product}/promotion', [
             ProductController::class,
             'removePromotion'
         ])->name('products.removePromotion');
 
 
-        // CRUD sản phẩm
+        // =================================================
+        // CRUD SẢN PHẨM
+        // =================================================
+
         Route::resource(
             'products',
             ProductController::class
@@ -334,7 +397,7 @@ Route::middleware(['auth', 'admin'])
 
 
         // =================================================
-        // 📂 QUẢN LÝ DANH MỤC
+        // QUẢN LÝ DANH MỤC
         // =================================================
 
         Route::resource(
@@ -344,7 +407,7 @@ Route::middleware(['auth', 'admin'])
 
 
         // =================================================
-        // 🎟️ QUẢN LÝ VOUCHER
+        // QUẢN LÝ VOUCHER
         // =================================================
 
         Route::resource(
@@ -354,29 +417,27 @@ Route::middleware(['auth', 'admin'])
 
 
         // =================================================
-        // 📋 QUẢN LÝ ĐƠN HÀNG
+        // QUẢN LÝ ĐƠN HÀNG
         // =================================================
 
-        // Danh sách đơn hàng
         Route::get('/orders', [
             OrderController::class,
             'adminIndex'
         ])->name('orders.index');
 
 
-        // Chi tiết đơn hàng
         Route::get('/orders/{order}', [
             OrderController::class,
             'show'
         ])->name('orders.show');
-        // Cập nhật trạng thái đơn hàng
+
+
         Route::patch('/orders/{order}/status', [
             OrderController::class,
             'updateStatus'
         ])->name('orders.updateStatus');
 
 
-        // Xác nhận thanh toán
         Route::patch('/orders/{order}/payment', [
             OrderController::class,
             'confirmPayment'
@@ -384,16 +445,17 @@ Route::middleware(['auth', 'admin'])
     });
 
 
-// =====================================================
-// USER ĐÃ ĐĂNG NHẬP + XÁC THỰC EMAIL
-// =====================================================
+/*
+|--------------------------------------------------------------------------
+| USER ĐÃ ĐĂNG NHẬP + XÁC THỰC EMAIL
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth', 'verified'])
     ->group(function () {
 
-
         // =================================================
-        // 🔔 THÔNG BÁO CUSTOMER
+        // THÔNG BÁO CUSTOMER
         // =================================================
 
         Route::get('/notifications/{notification}', [
@@ -409,7 +471,7 @@ Route::middleware(['auth', 'verified'])
 
 
         // =================================================
-        // ⭐ ĐÁNH GIÁ SẢN PHẨM
+        // ĐÁNH GIÁ SẢN PHẨM
         // =================================================
 
         Route::post('/products/{product}/reviews', [
@@ -419,40 +481,33 @@ Route::middleware(['auth', 'verified'])
 
 
         // =================================================
-        // 🛍️ SẢN PHẨM
-        // Route xem/tìm kiếm sản phẩm đã đặt ở khu vực public phía trên.
-        // Guest / Customer / Admin đều có thể xem.
+        // ĐỊA CHỈ KHÁCH HÀNG
         // =================================================
 
-        // =================================================
-        // 📍 ĐỊA CHỈ KHÁCH HÀNG
-        // =================================================
-
-        // Danh sách địa chỉ
         Route::get('/addresses', [
             AddressController::class,
             'index'
         ])->name('addresses.index');
 
-        // Thêm địa chỉ mới
+
         Route::post('/addresses', [
             AddressController::class,
             'store'
         ])->name('addresses.store');
 
-        // Cập nhật địa chỉ
+
         Route::put('/addresses/{address}', [
             AddressController::class,
             'update'
         ])->name('addresses.update');
 
-        // Đặt làm địa chỉ mặc định
+
         Route::patch('/addresses/{address}/default', [
             AddressController::class,
             'setDefault'
         ])->name('addresses.default');
 
-        // Xóa địa chỉ
+
         Route::delete('/addresses/{address}', [
             AddressController::class,
             'destroy'
@@ -460,31 +515,27 @@ Route::middleware(['auth', 'verified'])
 
 
         // =================================================
-        // 🛒 GIỎ HÀNG
+        // GIỎ HÀNG
         // =================================================
 
-        // Thêm sản phẩm vào giỏ
         Route::post('/cart/add/{product}', [
             CartController::class,
             'add'
         ])->name('cart.add');
 
 
-        // Xem giỏ hàng
         Route::get('/cart', [
             CartController::class,
             'index'
         ])->name('cart.index');
 
 
-        // Cập nhật số lượng giỏ hàng
         Route::patch('/cart/{id}', [
             CartController::class,
             'update'
         ])->name('cart.update');
 
 
-        // Xóa sản phẩm khỏi giỏ
         Route::delete('/cart/{product}', [
             CartController::class,
             'destroy'
@@ -492,17 +543,15 @@ Route::middleware(['auth', 'verified'])
 
 
         // =================================================
-        // 💳 THANH TOÁN
+        // THANH TOÁN
         // =================================================
 
-        // Trang checkout
         Route::get('/checkout', [
             CartController::class,
             'checkout'
         ])->name('checkout');
 
 
-        // Xử lý đặt hàng
         Route::post('/checkout', [
             CartController::class,
             'processCheckout'
@@ -510,7 +559,7 @@ Route::middleware(['auth', 'verified'])
 
 
         // =================================================
-        // 📦 ĐƠN HÀNG USER
+        // ĐƠN HÀNG USER
         // =================================================
 
         Route::get('/orders', [
@@ -518,15 +567,17 @@ Route::middleware(['auth', 'verified'])
             'index'
         ])->name('orders.index');
 
-        // Kiểm tra trạng thái thanh toán tự động
-        // PHẢI đặt trước /orders/{order}
+
+        /*
+         * Phải đặt route payment-status
+         * trước /orders/{order}
+         */
         Route::get('/orders/{order}/payment-status', [
             OrderController::class,
             'paymentStatus'
         ])->name('orders.paymentStatus');
 
 
-        // Xem chi tiết một đơn hàng của User
         Route::get('/orders/{order}', [
             OrderController::class,
             'showCustomer'
@@ -534,15 +585,18 @@ Route::middleware(['auth', 'verified'])
     });
 
 
-// =====================================================
-// 💳 SEPAY WEBHOOK - XÁC NHẬN CHUYỂN KHOẢN TỰ ĐỘNG
-// =====================================================
+/*
+|--------------------------------------------------------------------------
+| SEPAY WEBHOOK
+|--------------------------------------------------------------------------
+| Xác nhận chuyển khoản tự động
+*/
 
 Route::post('/webhooks/sepay', [
     PaymentWebhookController::class,
     'sepay'
 ])
-->withoutMiddleware([
-    \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
-])
-->name('webhooks.sepay');
+    ->withoutMiddleware([
+        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
+    ])
+    ->name('webhooks.sepay');

@@ -4,495 +4,1335 @@
 
 @section('content')
 
-
 <style>
-    :root {
-        --auth-brown: #5f341d;
-        --auth-brown-dark: #2c1810;
-        --auth-red: #a83b2d;
-        --auth-gold: #f2c15c;
-        --auth-green: #48633b;
-        --auth-cream: #fffaf0;
-        --auth-border: #ead8bf;
-        --auth-muted: #7b6a5e;
-    }
+    /* =========================================================
+       EMAIL OTP VERIFY - TINH HOA TÂY BẮC
+    ========================================================= */
 
-    .auth-premium-page {
+    .tb-verify-page {
+        --verify-brown: #633820;
+        --verify-brown-dark: #2d1a11;
+        --verify-green: #35562f;
+        --verify-red: #b43e2e;
+        --verify-gold: #e5ad42;
+        --verify-cream: #fff8e9;
+        --verify-border: #e7d4b7;
+        --verify-text: #33261f;
+        --verify-muted: #76685e;
+
         position: relative;
         isolation: isolate;
-        min-height: calc(100vh - 170px);
-        display: grid;
-        place-items: center;
-        padding: 54px 12px 84px;
+
+        width: 100%;
+
+        padding: 42px 0 72px;
     }
 
-    .auth-premium-page::before {
-        content: "";
-        position: absolute;
-        z-index: -3;
-        inset: -40px 0 0;
-        background:
-            radial-gradient(circle at 8% 12%, rgba(242,193,92,.20), transparent 24%),
-            radial-gradient(circle at 92% 10%, rgba(72,99,59,.15), transparent 28%),
-            radial-gradient(circle at 52% 28%, rgba(168,59,45,.055), transparent 30%),
-            linear-gradient(180deg,#fffaf0 0%,#fff 74%);
-    }
 
-    .auth-premium-page::after {
+    .tb-verify-page::before {
         content: "";
+
         position: absolute;
         z-index: -2;
-        right: 3%;
-        top: 90px;
-        width: 230px;
-        height: 230px;
-        border-radius: 50%;
-        opacity: .10;
+
+        inset: -30px -40px 0;
+
         pointer-events: none;
+
         background:
-            repeating-radial-gradient(circle at center, rgba(95,52,29,.35) 0 1px, transparent 1px 13px);
+            radial-gradient(
+                circle at 7% 13%,
+                rgba(229,173,66,.19),
+                transparent 25%
+            ),
+            radial-gradient(
+                circle at 92% 9%,
+                rgba(53,86,47,.13),
+                transparent 28%
+            ),
+            radial-gradient(
+                circle at 50% 46%,
+                rgba(180,62,46,.05),
+                transparent 30%
+            ),
+            linear-gradient(
+                180deg,
+                #fff9ed 0%,
+                #fdfbf7 52%,
+                #faf9f7 100%
+            );
     }
 
-    .auth-shell {
-        width: min(100%, 1040px);
-        display: grid;
-        grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
-        overflow: hidden;
-        border: 1px solid rgba(218,190,152,.78);
-        border-radius: 30px;
-        background: #fff;
-        box-shadow:
-            0 30px 80px rgba(72,43,27,.14),
-            0 4px 14px rgba(72,43,27,.05);
-    }
 
-    .auth-brand-panel {
+    .tb-verify-shell {
         position: relative;
+
+        width: min(1100px, 100%);
+
+        margin: 0 auto;
+
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, .92fr)
+            minmax(0, 1.08fr);
+
         overflow: hidden;
-        min-height: 590px;
-        padding: 46px 42px;
+
+        border:
+            1px solid
+            rgba(222,195,158,.88);
+
+        border-radius: 30px;
+
+        background: #fff;
+
+        box-shadow:
+            0 32px 80px
+            rgba(73,44,27,.14);
+    }
+
+
+    .tb-verify-shell::before {
+        content: "";
+
+        position: absolute;
+
+        z-index: 10;
+
+        top: 0;
+        left: 8%;
+        right: 8%;
+
+        height: 3px;
+
+        border-radius: 999px;
+
+        background:
+            linear-gradient(
+                90deg,
+                transparent,
+                var(--verify-gold),
+                var(--verify-red),
+                var(--verify-green),
+                transparent
+            );
+
+        pointer-events: none;
+    }
+
+
+    /* =========================================================
+       LEFT
+    ========================================================= */
+
+    .tb-verify-brand {
+        position: relative;
+
+        overflow: hidden;
+
+        min-height: 620px;
+
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+
+        padding: 52px 46px;
+
         color: #fff;
+
         background:
-            radial-gradient(circle at 82% 14%, rgba(242,193,92,.25), transparent 28%),
-            radial-gradient(circle at 16% 110%, rgba(168,59,45,.30), transparent 34%),
-            linear-gradient(145deg,#2c1810 0%,#5f341d 52%,#48633b 100%);
+            radial-gradient(
+                circle at 82% 14%,
+                rgba(229,173,66,.27),
+                transparent 28%
+            ),
+            radial-gradient(
+                circle at 12% 112%,
+                rgba(180,62,46,.32),
+                transparent 35%
+            ),
+            linear-gradient(
+                145deg,
+                #26140d 0%,
+                #56301d 49%,
+                #35562f 100%
+            );
     }
 
-    .auth-brand-panel::before {
+
+    .tb-verify-brand::before {
         content: "";
+
         position: absolute;
-        right: -40px;
-        bottom: -60px;
-        width: 350px;
-        height: 220px;
-        opacity: .11;
-        clip-path: polygon(0 100%,17% 58%,34% 73%,53% 25%,69% 58%,85% 34%,100% 66%,100% 100%);
-        background: linear-gradient(135deg,#fff,#f2c15c);
+
+        right: -70px;
+        bottom: -55px;
+
+        width: 420px;
+        height: 250px;
+
+        opacity: .13;
+
+        clip-path:
+            polygon(
+                0 100%,
+                18% 58%,
+                34% 73%,
+                53% 23%,
+                70% 58%,
+                85% 34%,
+                100% 65%,
+                100% 100%
+            );
+
+        background:
+            linear-gradient(
+                135deg,
+                #fff,
+                #f0bf5c
+            );
     }
 
-    .auth-brand-panel::after {
-        content: "🌿";
+
+    .tb-verify-brand::after {
+        content: "✦";
+
         position: absolute;
-        right: 34px;
-        top: 20px;
-        font-size: 105px;
+
+        top: 30px;
+        right: 38px;
+
+        color: #ffe291;
+
+        font-size: 90px;
+
         opacity: .055;
-        transform: rotate(-14deg);
+
+        transform: rotate(18deg);
     }
 
-    .auth-brand-content,
-    .auth-brand-benefits {
+
+    .tb-verify-brand-top,
+    .tb-verify-benefits {
         position: relative;
+
         z-index: 2;
     }
 
-    .auth-kicker {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 11px;
-        margin-bottom: 16px;
-        border: 1px solid rgba(242,193,92,.32);
-        border-radius: 999px;
-        color: #f7dc96;
-        background: rgba(255,255,255,.055);
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: .09em;
-    }
 
-    .auth-brand-panel h1 {
-        max-width: 440px;
-        color: #fff;
-        font-size: clamp(34px,4vw,52px);
-        line-height: 1.08;
-        letter-spacing: -.9px;
-        text-shadow: 0 2px 16px rgba(0,0,0,.18);
-    }
+    .tb-verify-logo {
+        width: 58px;
+        height: 58px;
 
-    .auth-brand-panel p {
-        max-width: 470px;
-        color: rgba(255,255,255,.76);
-        line-height: 1.72;
-    }
-
-    .auth-brand-benefits {
-        display: grid;
-        gap: 11px;
-    }
-
-    .auth-benefit {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: rgba(255,255,255,.82);
-        font-size: 14px;
-        font-weight: 650;
-    }
-
-    .auth-benefit span {
-        width: 31px;
-        height: 31px;
-        flex: 0 0 31px;
         display: grid;
         place-items: center;
-        border-radius: 10px;
-        background: rgba(255,255,255,.09);
-        border: 1px solid rgba(255,255,255,.10);
-    }
 
-    .auth-form-panel {
-        padding: 46px 50px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        margin-bottom: 24px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.16);
+
+        border-radius: 18px;
+
         background:
-            radial-gradient(circle at 100% 0%, rgba(242,193,92,.09), transparent 25%),
-            #fff;
+            rgba(255,255,255,.08);
+
+        box-shadow:
+            inset 0 1px 0
+            rgba(255,255,255,.12),
+            0 12px 26px
+            rgba(0,0,0,.14);
+
+        font-size: 25px;
     }
 
-    .auth-form-head {
-        margin-bottom: 27px;
-    }
 
-    .auth-form-head h2 {
-        color: #31231c;
-        font-size: 32px;
+    .tb-verify-kicker {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 7px;
+
+        margin-bottom: 18px;
+
+        padding: 8px 12px;
+
+        border:
+            1px solid
+            rgba(229,173,66,.34);
+
+        border-radius: 999px;
+
+        color: #f5d789;
+
+        background:
+            rgba(255,255,255,.06);
+
+        font-size: 12px;
+
         font-weight: 900;
-        letter-spacing: -.6px;
+
+        letter-spacing: .08em;
+
+        text-transform: uppercase;
     }
 
-    .auth-form-head p {
-        color: var(--auth-muted);
-        line-height: 1.65;
-    }
 
-    .auth-label {
-        margin-bottom: 7px;
-        color: #503729;
-        font-size: 13px;
-        font-weight: 850;
-    }
+    .tb-verify-brand h1 {
+        max-width: 460px;
 
-    .auth-input-wrap {
-        position: relative;
-    }
+        margin: 0;
 
-    .auth-input-icon {
-        position: absolute;
-        z-index: 2;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        opacity: .62;
-        pointer-events: none;
-    }
-
-    .auth-input {
-        min-height: 50px;
-        padding-left: 45px;
-        border: 1px solid #dfcbae;
-        border-radius: 14px;
-        background: #fffdf9;
-        color: #35271f;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .auth-input:focus {
-        border-color: #d5aa69;
-        background: #fff;
-        box-shadow: 0 0 0 .22rem rgba(217,119,6,.09);
-    }
-
-    .auth-input.is-invalid {
-        border-color: #c75a4c;
-    }
-
-    .auth-submit {
-        position: relative;
-        overflow: hidden;
-        min-height: 52px;
-        width: 100%;
-        border: 0;
-        border-radius: 14px;
         color: #fff;
-        background: linear-gradient(135deg,#a83b2d,#5f341d 58%,#48633b);
-        font-weight: 900;
-        letter-spacing: .1px;
-        box-shadow: 0 11px 24px rgba(95,52,29,.18);
-        transition: transform .17s ease, box-shadow .17s ease;
+
+        font-size:
+            clamp(
+                38px,
+                4vw,
+                56px
+            );
+
+        line-height: 1.05;
+
+        font-weight: 950;
+
+        letter-spacing: -1.2px;
     }
 
-    .auth-submit::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -120%;
-        width: 62%;
-        height: 100%;
-        transform: skewX(-20deg);
-        background: linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
-        transition: left .45s ease;
+
+    .tb-verify-brand-copy {
+        max-width: 470px;
+
+        margin: 19px 0 0;
+
+        color:
+            rgba(255,255,255,.76);
+
+        font-size: 15px;
+
+        line-height: 1.75;
     }
 
-    .auth-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 30px rgba(95,52,29,.23);
+
+    .tb-verify-benefits {
+        display: grid;
+
+        gap: 11px;
+
+        margin-top: 34px;
     }
 
-    .auth-submit:hover::after {
-        left: 145%;
-    }
 
-    .auth-link {
-        color: var(--auth-red);
-        font-weight: 800;
-        text-decoration: none;
-    }
-
-    .auth-link:hover {
-        color: var(--auth-brown);
-        text-decoration: underline;
-    }
-
-    .auth-separator {
+    .tb-verify-benefit {
         display: flex;
         align-items: center;
-        gap: 13px;
-        margin: 23px 0;
-        color: #9b8a7f;
-        font-size: 12px;
+
+        gap: 11px;
+
+        padding: 11px 13px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.09);
+
+        border-radius: 14px;
+
+        color:
+            rgba(255,255,255,.84);
+
+        background:
+            rgba(255,255,255,.045);
+
+        font-size: 14px;
+
         font-weight: 700;
     }
 
-    .auth-separator::before,
-    .auth-separator::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: #ead8bf;
-    }
 
-    .auth-alt-box {
-        padding: 14px 16px;
-        border: 1px solid #ead8bf;
-        border-radius: 13px;
-        background: #fffaf1;
-        color: #6f5a4d;
-        text-align: center;
-        font-size: 14px;
-    }
+    .tb-verify-benefit-icon {
+        width: 36px;
+        height: 36px;
 
-    .auth-note {
-        display: flex;
-        gap: 9px;
-        padding: 13px 15px;
-        border: 1px solid #ead2a4;
-        border-radius: 13px;
-        background: linear-gradient(135deg,#fff9e8,#fff2d2);
-        color: #6d5332;
-        font-size: 13px;
-        line-height: 1.55;
-    }
+        flex: 0 0 36px;
 
-    @media (max-width: 900px) {
-        .auth-shell {
-            grid-template-columns: 1fr;
-            max-width: 640px;
-        }
-
-        .auth-brand-panel {
-            min-height: 300px;
-            padding: 34px 30px;
-        }
-
-        .auth-brand-benefits {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .auth-form-panel {
-            padding: 38px 34px;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .auth-premium-page {
-            padding: 28px 0 60px;
-        }
-
-        .auth-premium-page::after {
-            display: none;
-        }
-
-        .auth-shell {
-            border-radius: 22px;
-        }
-
-        .auth-brand-panel {
-            min-height: 275px;
-            padding: 28px 22px;
-        }
-
-        .auth-brand-panel h1 {
-            font-size: 34px;
-        }
-
-        .auth-brand-benefits {
-            grid-template-columns: 1fr;
-        }
-
-        .auth-form-panel {
-            padding: 30px 22px;
-        }
-
-        .auth-form-head h2 {
-            font-size: 28px;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .auth-premium-page *,
-        .auth-premium-page *::before,
-        .auth-premium-page *::after {
-            transition: none !important;
-            animation: none !important;
-        }
-    }
-</style>
-
-
-<style>
-    .otp-card {
-        text-align: center;
-    }
-
-    .otp-mail-icon {
-        width: 86px;
-        height: 86px;
         display: grid;
         place-items: center;
-        margin: 0 auto 20px;
-        border: 1px solid #ead0a3;
-        border-radius: 26px;
+
+        border-radius: 11px;
+
         background:
-            radial-gradient(circle at 35% 25%,rgba(255,255,255,.9),transparent 30%),
-            linear-gradient(135deg,#fff1cd,#f7dfae);
-        font-size: 40px;
-        box-shadow: 0 12px 26px rgba(95,52,29,.09);
+            rgba(255,255,255,.09);
+
+        font-size: 17px;
     }
 
-    .otp-email-pill {
+
+    /* =========================================================
+       RIGHT PANEL
+    ========================================================= */
+
+    .tb-verify-form-panel {
+        position: relative;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        padding: 56px 62px;
+
+        background:
+            radial-gradient(
+                circle at 100% 0%,
+                rgba(229,173,66,.10),
+                transparent 26%
+            ),
+            radial-gradient(
+                circle at 0% 100%,
+                rgba(53,86,47,.045),
+                transparent 25%
+            ),
+            #fff;
+    }
+
+
+    .tb-verify-form-panel::after {
+        content: "";
+
+        position: absolute;
+
+        top: 25px;
+        right: 27px;
+
+        width: 90px;
+        height: 90px;
+
+        border:
+            1px solid
+            rgba(99,56,32,.06);
+
+        border-left: 0;
+        border-bottom: 0;
+
+        border-radius:
+            0 24px 0 0;
+
+        pointer-events: none;
+    }
+
+
+    .tb-verify-mail-icon {
+        width: 96px;
+        height: 96px;
+
+        display: grid;
+        place-items: center;
+
+        margin:
+            0 auto 22px;
+
+        border:
+            1px solid
+            #e4c78f;
+
+        border-radius: 28px;
+
+        background:
+            radial-gradient(
+                circle at 30% 24%,
+                rgba(255,255,255,.95),
+                transparent 31%
+            ),
+            linear-gradient(
+                135deg,
+                #fff1c8,
+                #efd28e
+            );
+
+        box-shadow:
+            0 16px 34px
+            rgba(99,56,32,.11),
+            inset 0 1px 0
+            rgba(255,255,255,.95);
+
+        font-size: 44px;
+    }
+
+
+    .tb-verify-head {
+        text-align: center;
+
+        margin-bottom: 22px;
+    }
+
+
+    .tb-verify-head h2 {
+        margin: 0;
+
+        color: #30231c;
+
+        font-size: 34px;
+
+        line-height: 1.15;
+
+        font-weight: 950;
+
+        letter-spacing: -.7px;
+    }
+
+
+    .tb-verify-head p {
+        margin:
+            10px 0 13px;
+
+        color: var(--verify-muted);
+
+        font-size: 14px;
+
+        line-height: 1.65;
+    }
+
+
+    .tb-verify-email {
         display: inline-flex;
         align-items: center;
-        gap: 7px;
+
         max-width: 100%;
-        padding: 7px 12px;
-        border: 1px solid #e6d0ad;
+
+        gap: 7px;
+
+        padding: 8px 14px;
+
+        border:
+            1px solid
+            #e2c791;
+
         border-radius: 999px;
-        background: #fff8ea;
-        color: #5f341d;
+
+        color: #633820;
+
+        background:
+            linear-gradient(
+                180deg,
+                #fffaf0,
+                #fff2d9
+            );
+
         font-size: 13px;
-        font-weight: 800;
+
+        font-weight: 850;
+
         overflow-wrap: anywhere;
     }
 
-    .otp-input {
-        height: 66px;
-        padding: 0 18px !important;
-        text-align: center;
-        letter-spacing: .48em;
-        text-indent: .48em;
-        font-size: 28px;
-        font-weight: 900;
-        font-variant-numeric: tabular-nums;
-        border-radius: 16px;
+
+    .tb-verify-badges {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+
+        gap: 8px;
+
+        margin-bottom: 23px;
     }
 
-    .otp-resend-btn {
-        min-height: 45px;
-        border: 1px solid #d9c19f;
-        border-radius: 12px;
-        background: #fff;
-        color: #5f341d;
+
+    .tb-verify-badges span {
+        display: inline-flex;
+        align-items: center;
+
+        min-height: 34px;
+
+        padding: 6px 11px;
+
+        border:
+            1px solid
+            #e6dacb;
+
+        border-radius: 999px;
+
+        color: #655349;
+
+        background: #fffdf9;
+
+        font-size: 12px;
+
+        font-weight: 750;
+    }
+
+
+    /* =========================================================
+       OTP INPUT
+    ========================================================= */
+
+    .tb-verify-label {
+        display: block;
+
+        margin-bottom: 8px;
+
+        color: #4c3529;
+
+        font-size: 14px;
+
         font-weight: 850;
     }
 
-    .otp-resend-btn:hover {
-        background: #fff7e8;
+
+    .tb-verify-otp {
+        width: 100%;
+
+        height: 72px;
+
+        padding:
+            0 18px;
+
+        border:
+            1px solid
+            #dfcbae;
+
+        border-radius: 18px;
+
+        outline: none;
+
+        color: #422b20;
+
+        background:
+            linear-gradient(
+                180deg,
+                #fffefb,
+                #fff8ed
+            );
+
+        text-align: center;
+
+        font-size: 29px;
+
+        font-weight: 950;
+
+        letter-spacing: .48em;
+
+        text-indent: .48em;
+
+        font-variant-numeric:
+            tabular-nums;
+
+        box-shadow:
+            inset 0 1px 0
+            rgba(255,255,255,.95),
+            0 8px 20px
+            rgba(99,56,32,.05);
+
+        transition:
+            border-color .18s ease,
+            box-shadow .18s ease,
+            background .18s ease;
+    }
+
+
+    .tb-verify-otp:hover {
+        border-color: #d8b98e;
+    }
+
+
+    .tb-verify-otp:focus {
+        border-color: #cf9f5d;
+
+        background: #fff;
+
+        box-shadow:
+            0 0 0 .22rem
+            rgba(229,173,66,.13),
+            0 9px 22px
+            rgba(99,56,32,.06);
+    }
+
+
+    .tb-verify-otp.is-invalid {
+        border-color: #c85a4b;
+    }
+
+
+    .tb-verify-error {
+        margin-top: 7px;
+
+        color: #b43e2e;
+
+        font-size: 13px;
+
+        font-weight: 700;
+
+        text-align: left;
+    }
+
+
+    .tb-verify-input-help {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 10px;
+
+        margin-top: 8px;
+
+        color: #918178;
+
+        font-size: 12px;
+    }
+
+
+    .tb-verify-input-help strong {
+        color: #6e5a4d;
+    }
+
+
+    /* =========================================================
+       VERIFY BUTTON
+    ========================================================= */
+
+    .tb-verify-submit {
+        position: relative;
+
+        overflow: hidden;
+
+        width: 100%;
+
+        min-height: 56px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 8px;
+
+        margin-top: 21px;
+
+        border: 0;
+
+        border-radius: 16px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                #b43e2e 0%,
+                #633820 50%,
+                #35562f 100%
+            );
+
+        box-shadow:
+            0 13px 28px
+            rgba(99,56,32,.21);
+
+        font-size: 15px;
+
+        font-weight: 900;
+
+        cursor: pointer;
+
+        transition:
+            transform .18s ease,
+            box-shadow .18s ease;
+    }
+
+
+    .tb-verify-submit::before {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: -120%;
+
+        width: 60%;
+        height: 100%;
+
+        transform:
+            skewX(-20deg);
+
+        background:
+            linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,.22),
+                transparent
+            );
+
+        transition:
+            left .45s ease;
+    }
+
+
+    .tb-verify-submit:hover {
+        transform:
+            translateY(-2px);
+
+        box-shadow:
+            0 17px 34px
+            rgba(99,56,32,.25);
+    }
+
+
+    .tb-verify-submit:hover::before {
+        left: 145%;
+    }
+
+
+    /* =========================================================
+       RESEND
+    ========================================================= */
+
+    .tb-verify-separator {
+        display: flex;
+        align-items: center;
+
+        gap: 13px;
+
+        margin:
+            27px 0 19px;
+
+        color: #9a8a80;
+
+        font-size: 12px;
+
+        font-weight: 800;
+
+        letter-spacing: .04em;
+    }
+
+
+    .tb-verify-separator::before,
+    .tb-verify-separator::after {
+        content: "";
+
+        flex: 1;
+
+        height: 1px;
+
+        background: #ead8bf;
+    }
+
+
+    .tb-verify-resend {
+        width: 100%;
+
+        min-height: 50px;
+
+        border:
+            1px solid
+            #d9c19f;
+
+        border-radius: 14px;
+
+        color: #633820;
+
+        background:
+            linear-gradient(
+                180deg,
+                #fff,
+                #fff9ef
+            );
+
+        font-size: 14px;
+
+        font-weight: 850;
+
+        cursor: pointer;
+
+        transition:
+            transform .16s ease,
+            box-shadow .16s ease,
+            border-color .16s ease;
+    }
+
+
+    .tb-verify-resend:hover {
+        transform:
+            translateY(-1px);
+
         border-color: #cda873;
-        color: #5f341d;
+
+        box-shadow:
+            0 8px 18px
+            rgba(99,56,32,.07);
+    }
+
+
+    .tb-verify-note {
+        display: flex;
+        align-items: flex-start;
+
+        gap: 10px;
+
+        margin-top: 17px;
+
+        padding: 13px 14px;
+
+        border:
+            1px solid
+            #ead09d;
+
+        border-radius: 13px;
+
+        color: #6a5333;
+
+        background:
+            linear-gradient(
+                135deg,
+                #fff9e6,
+                #fff1ca
+            );
+
+        font-size: 13px;
+
+        line-height: 1.55;
+    }
+
+
+    /* =========================================================
+       PROGRESS
+    ========================================================= */
+
+    .tb-verify-progress {
+        display: grid;
+
+        grid-template-columns:
+            repeat(3,1fr);
+
+        gap: 8px;
+
+        margin-bottom: 25px;
+    }
+
+
+    .tb-verify-step {
+        text-align: center;
+    }
+
+
+    .tb-verify-step-line {
+        height: 4px;
+
+        margin-bottom: 6px;
+
+        border-radius: 999px;
+
+        background: #e8ddd0;
+    }
+
+
+    .tb-verify-step.done
+    .tb-verify-step-line {
+        background: #79965e;
+    }
+
+
+    .tb-verify-step.active
+    .tb-verify-step-line {
+        background:
+            linear-gradient(
+                90deg,
+                #e5ad42,
+                #b43e2e
+            );
+    }
+
+
+    .tb-verify-step span {
+        color: #998a80;
+
+        font-size: 11px;
+
+        font-weight: 750;
+    }
+
+
+    .tb-verify-step.done span,
+    .tb-verify-step.active span {
+        color: #654939;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 991.98px) {
+
+        .tb-verify-page {
+            padding:
+                30px 0 60px;
+        }
+
+
+        .tb-verify-shell {
+            max-width: 680px;
+
+            grid-template-columns: 1fr;
+        }
+
+
+        .tb-verify-brand {
+            min-height: auto;
+
+            padding: 38px 34px;
+        }
+
+
+        .tb-verify-brand h1 {
+            max-width: 540px;
+
+            font-size: 40px;
+        }
+
+
+        .tb-verify-benefits {
+            grid-template-columns:
+                repeat(
+                    3,
+                    minmax(0,1fr)
+                );
+
+            margin-top: 28px;
+        }
+
+
+        .tb-verify-benefit {
+            align-items: flex-start;
+
+            flex-direction: column;
+
+            font-size: 13px;
+        }
+
+
+        .tb-verify-form-panel {
+            padding: 44px 38px;
+        }
+
+    }
+
+
+    @media (max-width: 575.98px) {
+
+        .tb-verify-page {
+            padding:
+                18px 0 42px;
+        }
+
+
+        .tb-verify-shell {
+            border-radius: 22px;
+        }
+
+
+        .tb-verify-brand {
+            padding: 29px 23px;
+        }
+
+
+        .tb-verify-logo {
+            width: 50px;
+            height: 50px;
+
+            margin-bottom: 18px;
+
+            border-radius: 15px;
+        }
+
+
+        .tb-verify-brand h1 {
+            font-size: 34px;
+        }
+
+
+        .tb-verify-brand-copy {
+            font-size: 14px;
+        }
+
+
+        .tb-verify-benefits {
+            grid-template-columns: 1fr;
+
+            gap: 8px;
+
+            margin-top: 24px;
+        }
+
+
+        .tb-verify-benefit {
+            flex-direction: row;
+
+            align-items: center;
+        }
+
+
+        .tb-verify-form-panel {
+            padding: 32px 22px;
+        }
+
+
+        .tb-verify-form-panel::after {
+            display: none;
+        }
+
+
+        .tb-verify-mail-icon {
+            width: 82px;
+            height: 82px;
+
+            border-radius: 24px;
+
+            font-size: 38px;
+        }
+
+
+        .tb-verify-head h2 {
+            font-size: 29px;
+        }
+
+
+        .tb-verify-badges {
+            display: grid;
+
+            grid-template-columns: 1fr;
+        }
+
+
+        .tb-verify-badges span {
+            justify-content: center;
+        }
+
+
+        .tb-verify-otp {
+            height: 66px;
+
+            padding: 0 8px;
+
+            font-size: 25px;
+
+            letter-spacing: .35em;
+
+            text-indent: .35em;
+        }
+
+    }
+
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .tb-verify-page *,
+        .tb-verify-page *::before,
+        .tb-verify-page *::after {
+            transition: none !important;
+        }
+
     }
 </style>
 
-<div class="auth-premium-page">
-    <div class="auth-shell">
-        <aside class="auth-brand-panel">
-            <div class="auth-brand-content">
-                <div class="auth-kicker">🔐 BẢO MẬT TÀI KHOẢN</div>
-                <h1>Xác thực email để bảo vệ tài khoản của bạn.</h1>
-                <p class="mt-3 mb-0">
-                    Mã OTP gồm 6 chữ số đã được gửi tới email đăng ký.
-                    Mã có thời hạn theo cấu hình xác thực hiện tại của hệ thống.
+
+<div class="tb-verify-page">
+
+    <div class="tb-verify-shell">
+
+
+        {{-- =====================================================
+            LEFT
+        ====================================================== --}}
+        <aside class="tb-verify-brand">
+
+            <div class="tb-verify-brand-top">
+
+                <div class="tb-verify-logo">
+                    🔐
+                </div>
+
+
+                <div class="tb-verify-kicker">
+                    Bảo mật tài khoản
+                </div>
+
+
+                <h1>
+                    Xác thực email
+                    để bảo vệ tài khoản.
+                </h1>
+
+
+                <p class="tb-verify-brand-copy">
+
+                    Mã OTP gồm 6 chữ số
+                    đã được gửi đến email đăng ký.
+                    Hoàn tất bước này để sử dụng
+                    đầy đủ các chức năng mua sắm
+                    trên Tinh Hoa Tây Bắc.
+
                 </p>
+
             </div>
 
-            <div class="auth-brand-benefits">
-                <div class="auth-benefit"><span>✉️</span> Mã xác thực gửi qua email</div>
-                <div class="auth-benefit"><span>🛡️</span> Bảo vệ thông tin tài khoản</div>
-                <div class="auth-benefit"><span>✅</span> Xác thực trước khi sử dụng đầy đủ</div>
+
+            <div class="tb-verify-benefits">
+
+                <div class="tb-verify-benefit">
+
+                    <span class="tb-verify-benefit-icon">
+                        ✉️
+                    </span>
+
+                    <span>
+                        Mã xác thực được gửi qua email
+                    </span>
+
+                </div>
+
+
+                <div class="tb-verify-benefit">
+
+                    <span class="tb-verify-benefit-icon">
+                        🛡️
+                    </span>
+
+                    <span>
+                        Giúp bảo vệ thông tin tài khoản
+                    </span>
+
+                </div>
+
+
+                <div class="tb-verify-benefit">
+
+                    <span class="tb-verify-benefit-icon">
+                        ✅
+                    </span>
+
+                    <span>
+                        Xác thực trước khi mua sắm đầy đủ
+                    </span>
+
+                </div>
+
             </div>
+
         </aside>
 
-        <section class="auth-form-panel otp-card">
-            <div class="otp-mail-icon">✉️</div>
 
-            <div class="auth-form-head mb-3">
-                <h2 class="mb-2">Nhập mã xác thực</h2>
-                <p class="mb-3">Chúng tôi đã gửi mã OTP đến:</p>
+        {{-- =====================================================
+            OTP FORM
+        ====================================================== --}}
+        <section class="tb-verify-form-panel">
 
-                <div class="otp-email-pill">
+
+            <div class="tb-verify-mail-icon">
+                ✉️
+            </div>
+
+
+            <div class="tb-verify-head">
+
+                <h2>
+                    Nhập mã xác thực
+                </h2>
+
+
+                <p>
+                    Chúng tôi đã gửi mã OTP đến:
+                </p>
+
+
+                <div class="tb-verify-email">
                     ✉️ {{ $user->email }}
                 </div>
+
             </div>
 
 
-            <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
-                <span class="badge rounded-pill text-bg-light border px-3 py-2">🔐 OTP 6 số</span>
-                <span class="badge rounded-pill text-bg-light border px-3 py-2">✉️ Xác thực email</span>
+            {{-- PROGRESS --}}
+            <div class="tb-verify-progress">
+
+                <div class="tb-verify-step done">
+
+                    <div class="tb-verify-step-line">
+                    </div>
+
+                    <span>
+                        Đăng ký
+                    </span>
+
+                </div>
+
+
+                <div class="tb-verify-step active">
+
+                    <div class="tb-verify-step-line">
+                    </div>
+
+                    <span>
+                        Xác thực OTP
+                    </span>
+
+                </div>
+
+
+                <div class="tb-verify-step">
+
+                    <div class="tb-verify-step-line">
+                    </div>
+
+                    <span>
+                        Hoàn tất
+                    </span>
+
+                </div>
+
             </div>
-            <form method="POST" action="{{ route('verification.verify.code') }}">
+
+
+            <div class="tb-verify-badges">
+
+                <span>
+                    🔐 OTP 6 số
+                </span>
+
+                <span>
+                    ✉️ Xác thực email
+                </span>
+
+            </div>
+
+
+            {{-- VERIFY FORM --}}
+            <form
+                method="POST"
+                action="{{ route('verification.verify.code') }}"
+                id="verifyEmailForm"
+            >
+
                 @csrf
 
-                <div class="mb-3 text-start">
-                    <label for="verification_code" class="auth-label">Mã OTP 6 số</label>
+
+                <div>
+
+                    <label
+                        for="verification_code"
+                        class="tb-verify-label"
+                    >
+                        Mã OTP 6 số
+                    </label>
+
+
                     <input
                         id="verification_code"
                         type="text"
                         name="verification_code"
                         value="{{ old('verification_code') }}"
-                        class="form-control auth-input otp-input @error('verification_code') is-invalid @enderror"
+                        class="
+                            tb-verify-otp
+                            @error('verification_code')
+                                is-invalid
+                            @enderror
+                        "
                         inputmode="numeric"
                         autocomplete="one-time-code"
                         maxlength="6"
@@ -501,427 +1341,259 @@
                         required
                         autofocus
                     >
+
+
                     @error('verification_code')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
+
+                        <div class="tb-verify-error">
+                            {{ $message }}
+                        </div>
+
                     @enderror
+
+
+                    <div class="tb-verify-input-help">
+
+                        <span>
+                            Chỉ nhập số
+                        </span>
+
+                        <strong id="otpCount">
+                            0 / 6
+                        </strong>
+
+                    </div>
+
                 </div>
 
-                <button type="submit" class="auth-submit mt-2">
-                    ✅ Xác thực email
+
+                <button
+                    type="submit"
+                    class="tb-verify-submit"
+                    id="verifySubmit"
+                >
+                    <span>
+                        ✅
+                    </span>
+
+                    <span>
+                        Xác thực email
+                    </span>
                 </button>
+
             </form>
 
-            <div class="auth-separator">CHƯA NHẬN ĐƯỢC MÃ?</div>
 
-            <form method="POST" action="{{ route('verification.resend') }}">
+            <div class="tb-verify-separator">
+                CHƯA NHẬN ĐƯỢC MÃ?
+            </div>
+
+
+            {{-- RESEND --}}
+            <form
+                method="POST"
+                action="{{ route('verification.resend') }}"
+                id="resendOtpForm"
+            >
+
                 @csrf
-                <button type="submit" class="otp-resend-btn w-100">
+
+
+                <button
+                    type="submit"
+                    class="tb-verify-resend"
+                    id="resendOtpButton"
+                >
                     🔄 Gửi lại mã xác thực
                 </button>
+
             </form>
 
-            <div class="auth-note mt-3 text-start">
-                <span>💡</span>
+
+            <div class="tb-verify-note">
+
                 <span>
-                    Kiểm tra cả thư mục Spam/Junk nếu chưa thấy email. Khi yêu cầu mã mới,
-                    hãy sử dụng mã mới nhất được gửi tới hộp thư.
+                    💡
                 </span>
+
+                <span>
+                    Nếu chưa thấy email,
+                    hãy kiểm tra thư mục Spam/Junk.
+                    Khi yêu cầu gửi mã mới,
+                    hãy sử dụng mã OTP mới nhất
+                    được gửi tới hộp thư.
+                </span>
+
             </div>
+
         </section>
+
     </div>
+
 </div>
 
 
-<style>
-    /* =========================================================
-       AUTH LUXURY UPGRADE
-       Chỉ nâng UI - không đổi route / form / field / logic.
-    ========================================================= */
+<script>
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
 
-    .auth-premium-page {
-        overflow: hidden;
-        padding-top: 64px !important;
-        padding-bottom: 96px !important;
-    }
+        const otpInput =
+            document.getElementById(
+                'verification_code'
+            );
 
-    /* Nền tổng thể có chiều sâu hơn */
-    .auth-premium-page::before {
-        background:
-            radial-gradient(circle at 8% 12%, rgba(242,193,92,.24), transparent 25%),
-            radial-gradient(circle at 92% 10%, rgba(72,99,59,.18), transparent 29%),
-            radial-gradient(circle at 50% 32%, rgba(168,59,45,.06), transparent 31%),
-            linear-gradient(180deg,#fff8e9 0%,#fffdf8 45%,#ffffff 100%) !important;
-    }
 
-    .auth-premium-page::after {
-        width: 300px !important;
-        height: 300px !important;
-        top: 65px !important;
-        right: -70px !important;
-        opacity: .085 !important;
-    }
+        const otpCount =
+            document.getElementById(
+                'otpCount'
+            );
 
-    .auth-shell {
-        position: relative;
-        width: min(100%, 1120px) !important;
-        border-radius: 34px !important;
-        border: 1px solid rgba(221,193,154,.82) !important;
-        box-shadow:
-            0 38px 95px rgba(75,42,24,.16),
-            0 8px 24px rgba(75,42,24,.06) !important;
-        isolation: isolate;
-    }
 
-    /* viền ánh vàng mảnh ở mép trên */
-    .auth-shell::before {
-        content: "";
-        position: absolute;
-        z-index: 4;
-        top: 0;
-        left: 9%;
-        right: 9%;
-        height: 3px;
-        border-radius: 999px;
-        background:
-            linear-gradient(90deg,transparent,#f2c15c 24%,#d97706 48%,#48633b 76%,transparent);
-        opacity: .82;
-        pointer-events: none;
-    }
+        const verifyForm =
+            document.getElementById(
+                'verifyEmailForm'
+            );
 
-    /* PANEL TRÁI */
-    .auth-brand-panel {
-        min-height: 640px !important;
-        padding: 54px 48px !important;
-        background:
-            radial-gradient(circle at 82% 14%, rgba(242,193,92,.28), transparent 29%),
-            radial-gradient(circle at 12% 112%, rgba(168,59,45,.33), transparent 35%),
-            linear-gradient(148deg,#25130c 0%,#552e1c 46%,#48633b 100%) !important;
-    }
 
-    .auth-brand-panel::before {
-        width: 410px !important;
-        height: 255px !important;
-        right: -50px !important;
-        bottom: -65px !important;
-        opacity: .14 !important;
-        filter: drop-shadow(0 12px 24px rgba(0,0,0,.12));
-    }
+        const verifySubmit =
+            document.getElementById(
+                'verifySubmit'
+            );
 
-    .auth-brand-panel::after {
-        content: "✦";
-        right: 44px !important;
-        top: 28px !important;
-        font-size: 86px !important;
-        opacity: .055 !important;
-        color: #f7d579;
-        transform: rotate(18deg) !important;
-    }
 
-    .auth-brand-content::before {
-        content: "TH";
-        display: grid;
-        place-items: center;
-        width: 56px;
-        height: 56px;
-        margin-bottom: 24px;
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,.15);
-        background:
-            linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
-        color: #f5d47e;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 22px;
-        font-weight: 900;
-        letter-spacing: .05em;
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.12),
-            0 10px 24px rgba(0,0,0,.14);
-        backdrop-filter: blur(10px);
-    }
+        const resendForm =
+            document.getElementById(
+                'resendOtpForm'
+            );
 
-    .auth-kicker {
-        margin-bottom: 18px !important;
-        padding: 7px 12px !important;
-        background: rgba(255,255,255,.07) !important;
-        border-color: rgba(242,193,92,.34) !important;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-    }
 
-    .auth-brand-panel h1 {
-        max-width: 470px !important;
-        font-size: clamp(38px,4.4vw,58px) !important;
-        line-height: 1.02 !important;
-        letter-spacing: -1.25px !important;
-    }
+        const resendButton =
+            document.getElementById(
+                'resendOtpButton'
+            );
 
-    .auth-brand-panel p {
-        max-width: 490px !important;
-        font-size: 15px;
-        line-height: 1.78 !important;
-    }
 
-    .auth-brand-benefits {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
-        margin-top: 34px;
-    }
+        /* =============================================
+           CHỈ CHO NHẬP 6 CHỮ SỐ
+        ============================================= */
 
-    .auth-benefit {
-        padding: 11px 13px;
-        border: 1px solid rgba(255,255,255,.08);
-        border-radius: 14px;
-        background: rgba(255,255,255,.045);
-        backdrop-filter: blur(8px);
-        transition:
-            transform .18s ease,
-            background .18s ease,
-            border-color .18s ease;
-    }
+        function updateOtp() {
 
-    .auth-benefit:hover {
-        transform: translateX(4px);
-        background: rgba(255,255,255,.08);
-        border-color: rgba(242,193,92,.18);
-    }
+            if (!otpInput) {
+                return;
+            }
 
-    .auth-benefit span {
-        width: 35px !important;
-        height: 35px !important;
-        flex-basis: 35px !important;
-        border-radius: 11px !important;
-        background:
-            linear-gradient(135deg,rgba(242,193,92,.16),rgba(255,255,255,.06)) !important;
-    }
 
-    /* FORM PANEL */
-    .auth-form-panel {
-        position: relative;
-        padding: 58px 62px !important;
-        background:
-            radial-gradient(circle at 100% 0%,rgba(242,193,92,.11),transparent 26%),
-            radial-gradient(circle at 0% 100%,rgba(72,99,59,.045),transparent 26%),
-            #fff !important;
-    }
+            otpInput.value =
+                otpInput.value
+                    .replace(/\D/g, '')
+                    .slice(0, 6);
 
-    .auth-form-panel::before {
-        content: "";
-        position: absolute;
-        top: 24px;
-        right: 26px;
-        width: 92px;
-        height: 92px;
-        border: 1px solid rgba(95,52,29,.055);
-        border-left: 0;
-        border-bottom: 0;
-        border-radius: 0 24px 0 0;
-        pointer-events: none;
-    }
 
-    .auth-form-head {
-        margin-bottom: 31px !important;
-    }
+            if (otpCount) {
 
-    .auth-form-head::before {
-        content: "✦";
-        display: inline-grid;
-        place-items: center;
-        width: 38px;
-        height: 38px;
-        margin-bottom: 14px;
-        border: 1px solid #e8d2af;
-        border-radius: 12px;
-        background:
-            linear-gradient(135deg,#fff8e8,#f7e4bd);
-        color: #8a4c2c;
-        font-size: 17px;
-        box-shadow: 0 6px 14px rgba(95,52,29,.06);
-    }
+                otpCount.textContent =
+                    otpInput.value.length
+                    + ' / 6';
 
-    .auth-form-head h2 {
-        font-size: 35px !important;
-        color: #2e2019 !important;
-    }
+            }
 
-    .auth-form-head p {
-        font-size: 14.5px;
-    }
-
-    .auth-label {
-        font-size: 12.5px !important;
-        letter-spacing: .015em;
-    }
-
-    .auth-input {
-        min-height: 54px !important;
-        padding-left: 48px !important;
-        border-radius: 15px !important;
-        border-color: #e1cdb0 !important;
-        background:
-            linear-gradient(180deg,#fffefb,#fffaf3) !important;
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.95),
-            0 4px 12px rgba(95,52,29,.025) !important;
-        transition:
-            border-color .18s ease,
-            box-shadow .18s ease,
-            background .18s ease,
-            transform .18s ease;
-    }
-
-    .auth-input:hover {
-        border-color: #d9bb91 !important;
-    }
-
-    .auth-input:focus {
-        border-color: #d3a25f !important;
-        background: #fff !important;
-        box-shadow:
-            0 0 0 .22rem rgba(217,119,6,.10),
-            0 8px 18px rgba(95,52,29,.05) !important;
-        transform: translateY(-1px);
-    }
-
-    .auth-input-icon {
-        left: 17px !important;
-        opacity: .72 !important;
-        filter: grayscale(.08);
-    }
-
-    .auth-submit {
-        min-height: 56px !important;
-        border-radius: 16px !important;
-        background:
-            linear-gradient(135deg,#a83b2d 0%,#6a3923 48%,#48633b 100%) !important;
-        box-shadow:
-            0 13px 28px rgba(95,52,29,.21) !important;
-    }
-
-    .auth-submit:hover {
-        transform: translateY(-3px) !important;
-        box-shadow:
-            0 18px 34px rgba(95,52,29,.25) !important;
-    }
-
-    .auth-alt-box {
-        border-radius: 14px !important;
-        background:
-            linear-gradient(135deg,#fffaf1,#fff5e5) !important;
-        border-color: #e7d0ad !important;
-    }
-
-    .auth-note {
-        border-radius: 14px !important;
-        background:
-            linear-gradient(135deg,#fff8df,#fff1ca) !important;
-        border-color: #ebcf94 !important;
-    }
-
-    .auth-separator {
-        margin: 26px 0 !important;
-    }
-
-    /* OTP riêng */
-    .otp-mail-icon {
-        width: 96px !important;
-        height: 96px !important;
-        border-radius: 30px !important;
-        font-size: 45px !important;
-        background:
-            radial-gradient(circle at 30% 24%,rgba(255,255,255,.94),transparent 32%),
-            linear-gradient(135deg,#fff1c9,#f3d999) !important;
-        box-shadow:
-            0 16px 34px rgba(95,52,29,.11),
-            inset 0 1px 0 rgba(255,255,255,.95) !important;
-    }
-
-    .otp-email-pill {
-        padding: 8px 14px !important;
-        border-color: #e3c898 !important;
-        background:
-            linear-gradient(180deg,#fffaf0,#fff3dd) !important;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .otp-input {
-        height: 72px !important;
-        border-radius: 18px !important;
-        background:
-            linear-gradient(180deg,#fffefb,#fff8ed) !important;
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.95),
-            0 8px 20px rgba(95,52,29,.05) !important;
-    }
-
-    .otp-resend-btn {
-        min-height: 49px !important;
-        border-radius: 14px !important;
-        background:
-            linear-gradient(180deg,#fff,#fffaf2) !important;
-        transition:
-            transform .16s ease,
-            box-shadow .16s ease,
-            background .16s ease;
-    }
-
-    .otp-resend-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 18px rgba(95,52,29,.07);
-    }
-
-    /* responsive */
-    @media (max-width: 900px) {
-        .auth-shell {
-            max-width: 680px !important;
         }
 
-        .auth-brand-panel {
-            min-height: 360px !important;
-            padding: 38px 34px !important;
+
+        if (otpInput) {
+
+            updateOtp();
+
+
+            otpInput.addEventListener(
+                'input',
+                updateOtp
+            );
+
+
+            otpInput.addEventListener(
+                'paste',
+                function () {
+
+                    window.setTimeout(
+                        updateOtp,
+                        0
+                    );
+
+                }
+            );
+
         }
 
-        .auth-form-panel {
-            padding: 42px 36px !important;
+
+        /* =============================================
+           CHỐNG BẤM XÁC THỰC NHIỀU LẦN
+        ============================================= */
+
+        if (
+            verifyForm
+            &&
+            verifySubmit
+        ) {
+
+            verifyForm.addEventListener(
+                'submit',
+                function () {
+
+                    if (
+                        otpInput
+                        &&
+                        otpInput.value.length !== 6
+                    ) {
+                        return;
+                    }
+
+
+                    verifySubmit.disabled =
+                        true;
+
+
+                    verifySubmit.innerHTML =
+                        '<span>⏳</span>'
+                        +
+                        '<span>Đang xác thực...</span>';
+
+                }
+            );
+
         }
 
-        .auth-brand-content::before {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 18px;
+
+        /* =============================================
+           CHỐNG BẤM GỬI LẠI NHIỀU LẦN
+        ============================================= */
+
+        if (
+            resendForm
+            &&
+            resendButton
+        ) {
+
+            resendForm.addEventListener(
+                'submit',
+                function () {
+
+                    resendButton.disabled =
+                        true;
+
+
+                    resendButton.textContent =
+                        '⏳ Đang gửi mã...';
+
+                }
+            );
+
         }
+
     }
-
-    @media (max-width: 575.98px) {
-        .auth-premium-page {
-            padding-top: 32px !important;
-            padding-bottom: 64px !important;
-        }
-
-        .auth-shell {
-            border-radius: 24px !important;
-        }
-
-        .auth-brand-panel {
-            min-height: 325px !important;
-            padding: 30px 24px !important;
-        }
-
-        .auth-brand-panel h1 {
-            font-size: 36px !important;
-        }
-
-        .auth-form-panel {
-            padding: 32px 22px !important;
-        }
-
-        .auth-form-head h2 {
-            font-size: 30px !important;
-        }
-
-        .auth-input {
-            min-height: 52px !important;
-        }
-    }
-</style>
-
+);
+</script>
 
 @endsection

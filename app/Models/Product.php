@@ -45,13 +45,36 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    // Đánh giá sản phẩm
+    /*
+    |--------------------------------------------------------------------------
+    | THƯ VIỆN ẢNH CHI TIẾT
+    |--------------------------------------------------------------------------
+    */
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ĐÁNH GIÁ
+    |--------------------------------------------------------------------------
+    */
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
     }
 
-    // Chi tiết đơn hàng chứa sản phẩm này
+    /*
+    |--------------------------------------------------------------------------
+    | CHI TIẾT ĐƠN HÀNG
+    |--------------------------------------------------------------------------
+    */
+
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
@@ -59,7 +82,10 @@ class Product extends Model
 
     public function averageRating(): float
     {
-        return round((float) $this->reviews()->avg('rating'), 1);
+        return round(
+            (float) $this->reviews()->avg('rating'),
+            1
+        );
     }
 
     public function reviewCount(): int
@@ -69,10 +95,9 @@ class Product extends Model
 
     /*
      * Số lượng đã bán.
-     * CHỈ tính OrderItem thuộc đơn có status = delivered.
      *
-     * Nếu controller đã dùng withSum(... as sold_quantity),
-     * accessor sẽ dùng luôn dữ liệu đó để tránh query lại.
+     * Chỉ tính OrderItem thuộc đơn
+     * có status = delivered.
      */
     public function getSoldQuantityAttribute($value): float
     {
@@ -82,30 +107,47 @@ class Product extends Model
 
         return (float) $this->orderItems()
             ->whereHas('order', function ($query) {
-                $query->where('status', 'delivered');
+                $query->where(
+                    'status',
+                    'delivered'
+                );
             })
             ->sum('quantity');
     }
 
     /*
-     * Scope dùng chung để nạp số lượng đã bán hiệu quả.
-     *
-     * Ví dụ:
-     * Product::withSoldQuantity()->get();
+     * Scope nạp số lượng đã bán.
      */
     public function scopeWithSoldQuantity($query)
     {
         return $query->withSum(
             [
-                'orderItems as sold_quantity' => function ($itemQuery) {
-                    $itemQuery->whereHas('order', function ($orderQuery) {
-                        $orderQuery->where('status', 'delivered');
-                    });
-                },
+                'orderItems as sold_quantity' =>
+                    function ($itemQuery) {
+
+                        $itemQuery->whereHas(
+                            'order',
+                            function ($orderQuery) {
+
+                                $orderQuery->where(
+                                    'status',
+                                    'delivered'
+                                );
+
+                            }
+                        );
+
+                    },
             ],
             'quantity'
         );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | KHUYẾN MÃI
+    |--------------------------------------------------------------------------
+    */
 
     public function isOnSale(): bool
     {
@@ -113,17 +155,29 @@ class Product extends Model
             return false;
         }
 
-        if ((float) $this->sale_price >= (float) $this->price) {
+        if (
+            (float) $this->sale_price
+            >=
+            (float) $this->price
+        ) {
             return false;
         }
 
         $now = now();
 
-        if ($this->sale_start && $now->lt($this->sale_start)) {
+        if (
+            $this->sale_start
+            &&
+            $now->lt($this->sale_start)
+        ) {
             return false;
         }
 
-        if ($this->sale_end && $now->gt($this->sale_end)) {
+        if (
+            $this->sale_end
+            &&
+            $now->gt($this->sale_end)
+        ) {
             return false;
         }
 
@@ -139,12 +193,26 @@ class Product extends Model
 
     public function getDiscountPercent(): int
     {
-        if (!$this->isOnSale() || (float) $this->price <= 0) {
+        if (
+            !$this->isOnSale()
+            ||
+            (float) $this->price <= 0
+        ) {
             return 0;
         }
 
         return (int) round(
-            (1 - ((float) $this->sale_price / (float) $this->price)) * 100
+            (
+                1
+                -
+                (
+                    (float) $this->sale_price
+                    /
+                    (float) $this->price
+                )
+            )
+            *
+            100
         );
     }
 
@@ -154,14 +222,37 @@ class Product extends Model
 
         return $query
             ->whereNotNull('sale_price')
-            ->whereColumn('sale_price', '<', 'price')
-            ->where(function ($q) use ($now) {
-                $q->whereNull('sale_start')
-                    ->orWhere('sale_start', '<=', $now);
-            })
-            ->where(function ($q) use ($now) {
-                $q->whereNull('sale_end')
-                    ->orWhere('sale_end', '>=', $now);
-            });
+
+            ->whereColumn(
+                'sale_price',
+                '<',
+                'price'
+            )
+
+            ->where(
+                function ($q) use ($now) {
+
+                    $q->whereNull('sale_start')
+                        ->orWhere(
+                            'sale_start',
+                            '<=',
+                            $now
+                        );
+
+                }
+            )
+
+            ->where(
+                function ($q) use ($now) {
+
+                    $q->whereNull('sale_end')
+                        ->orWhere(
+                            'sale_end',
+                            '>=',
+                            $now
+                        );
+
+                }
+            );
     }
 }

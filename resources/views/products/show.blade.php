@@ -4,1632 +4,3957 @@
 
 @section('content')
 
+@php
+
+    /*
+    |--------------------------------------------------------------------------
+    | GALLERY SẢN PHẨM
+    |--------------------------------------------------------------------------
+    */
+
+   $gallery = collect();
+
+
+/*
+|--------------------------------------------------------------------------
+| ẢNH ĐẠI DIỆN
+|--------------------------------------------------------------------------
+*/
+
+if (
+    $product->image
+    &&
+    Storage::disk('public')->exists(
+        $product->image
+    )
+) {
+
+    $gallery->push([
+        'url' =>
+            Storage::disk('public')->url(
+                $product->image
+            ),
+
+        'alt' =>
+            $product->name
+            . ' - ảnh đại diện',
+    ]);
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| ẢNH CHI TIẾT
+|--------------------------------------------------------------------------
+*/
+
+foreach ($product->images as $galleryImage) {
+
+    if (
+        $galleryImage->path
+        &&
+        Storage::disk('public')->exists(
+            $galleryImage->path
+        )
+    ) {
+
+        $gallery->push([
+            'url' =>
+                Storage::disk('public')->url(
+                    $galleryImage->path
+                ),
+
+            'alt' =>
+                $product->name
+                . ' - ảnh chi tiết',
+        ]);
+
+    }
+
+}
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | REVIEW
+    |--------------------------------------------------------------------------
+    */
+
+    $reviews =
+        $product
+            ->reviews()
+
+            ->with('user')
+
+            ->latest()
+
+            ->get();
+
+
+    $reviewCount =
+        $reviews->count();
+
+
+    $averageRating =
+        $reviewCount > 0
+
+        ? round(
+            (float)
+            $reviews->avg('rating'),
+            1
+        )
+
+        : 0;
+
+
+    $myReview =
+        Auth::check()
+
+        ? $reviews->firstWhere(
+            'user_id',
+            Auth::id()
+        )
+
+        : null;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SẢN PHẨM TƯƠNG TỰ
+    |--------------------------------------------------------------------------
+    */
+
+    $relatedProducts =
+        \App\Models\Product::query()
+
+            ->where(
+                'category_id',
+                $product->category_id
+            )
+
+            ->where(
+                'id',
+                '!=',
+                $product->id
+            )
+
+            ->orderBy('name')
+
+            ->limit(4)
+
+            ->get();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | QUY CÁCH BÁN
+    |--------------------------------------------------------------------------
+    */
+
+    $minQty =
+        (float)
+        (
+            $product->min_quantity
+            ??
+            1
+        );
+
+
+    $stepQty =
+        (float)
+        (
+            $product->quantity_step
+            ??
+            1
+        );
+
+
+    $stockQty =
+        (float)
+        $product->quantity;
+
+
+    $stockText =
+        rtrim(
+            rtrim(
+                number_format(
+                    $stockQty,
+                    2,
+                    '.',
+                    ''
+                ),
+                '0'
+            ),
+            '.'
+        );
+
+
+    $soldText =
+        rtrim(
+            rtrim(
+                number_format(
+                    (float)
+                    $product->sold_quantity,
+                    2,
+                    '.',
+                    ''
+                ),
+                '0'
+            ),
+            '.'
+        );
+
+@endphp
+
+
 <style>
-    .product-detail-card {
-        border: 1px solid #ead8bf;
-        border-radius: 22px;
-        overflow: hidden;
-        box-shadow: 0 12px 32px rgba(95,52,29,.08);
+    .ecom-product-page {
+        --brown: #5f341d;
+        --green: #48633b;
+        --red: #aa3c2e;
+        --gold: #e3ad4a;
+        --border: #ead8bf;
+        --ink: #32241c;
+        --muted: #76685e;
+
+        padding:
+            24px 0 66px;
     }
 
-    .product-image-wrapper {
-        background: linear-gradient(180deg,#fffaf0,#f8efe2);
-        border-radius: 18px;
-        overflow: hidden;
-        min-height: 400px;
+    .ecom-breadcrumb {
         display: flex;
         align-items: center;
-        justify-content: center;
-    }
+        flex-wrap: wrap;
 
-    .product-image {
-        width: 100%;
-        max-height: 480px;
-        object-fit: contain;
-        padding: 18px;
-    }
+        gap: 8px;
 
-    .no-image {
-        min-height: 400px;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #6b7280;
-        font-size: 18px;
-    }
+        margin-bottom: 18px;
 
-    .price-box {
-        background: #fffaf0;
-        border: 1px solid #ead8bf;
-        border-radius: 16px;
-    }
+        color: #8b7a6f;
 
-    .price-main {
-        color: #a83b2d;
-        font-size: 32px;
-        font-weight: 800;
-    }
-
-    .admin-box {
-        background: #fff8e1;
-        border: 1px solid #ffe69c;
-        border-radius: 14px;
-        padding: 16px;
-    }
-
-    .buy-box {
-        border: 1px solid #ead8bf;
-        border-radius: 18px;
-        padding: 20px;
-        background: #fff;
-    }
-
-    .quantity-control {
-        display: flex;
-        align-items: stretch;
-        max-width: 310px;
-    }
-
-    .quantity-control button {
-        width: 52px;
-        border: 1px solid #d8c5ac;
-        background: #f8efe2;
-        font-size: 22px;
-        font-weight: 800;
-        color: #5f341d;
-    }
-
-    .quantity-control input {
-        width: 150px;
-        border-left: 0;
-        border-right: 0;
-        border-radius: 0;
-        text-align: center;
-        font-weight: 800;
-    }
-
-    .quantity-control button:first-child {
-        border-radius: 10px 0 0 10px;
-    }
-
-    .quantity-control button:last-child {
-        border-radius: 0 10px 10px 0;
-    }
-
-    .live-total {
-        color: #a83b2d;
-        font-size: 28px;
-        font-weight: 900;
-    }
-
-    .btn-tb {
-        border: 0;
-        color: #fff;
-        background: linear-gradient(135deg,#a83b2d,#5f341d);
-    }
-
-    .btn-tb:hover {
-        color: #fff;
-        background: linear-gradient(135deg,#8b3025,#3b2114);
-    }
-
-    /* =========================
-       ĐÁNH GIÁ SẢN PHẨM
-    ========================== */
-    .review-section {
-        margin-top: 28px;
-        border: 1px solid #ead8bf;
-        border-radius: 22px;
-        background: #fff;
-        box-shadow: 0 12px 32px rgba(95,52,29,.06);
-        overflow: hidden;
-    }
-
-    .review-summary {
-        background: linear-gradient(135deg,#fffaf0,#f8efe2);
-        border: 1px solid #ead8bf;
-        border-radius: 16px;
-        padding: 22px;
-    }
-
-    .rating-number {
-        color: #a83b2d;
-        font-size: 42px;
-        line-height: 1;
-        font-weight: 900;
-    }
-
-    .star-display {
-        color: #f59e0b;
-        letter-spacing: 2px;
-        font-size: 22px;
-    }
-
-    .review-form-box {
-        border: 1px solid #ead8bf;
-        border-radius: 16px;
-        padding: 22px;
-        background: #fffdf9;
-    }
-
-    .star-rating {
-        display: flex;
-        flex-direction: row-reverse;
-        justify-content: flex-end;
-        gap: 5px;
-    }
-
-    .star-rating input {
-        display: none;
-    }
-
-    .star-rating label {
-        margin: 0;
-        color: #d6d3d1;
-        font-size: 34px;
-        cursor: pointer;
-        transition: .15s;
-    }
-
-    .star-rating label:hover,
-    .star-rating label:hover ~ label,
-    .star-rating input:checked ~ label {
-        color: #f59e0b;
-    }
-
-    .review-item {
-        padding: 20px 0;
-        border-bottom: 1px solid #eee2d3;
-    }
-
-    .review-item:last-child {
-        border-bottom: 0;
-    }
-
-    /* =========================
-       NỘI DUNG CHI TIẾT + SẢN PHẨM TƯƠNG TỰ
-    ========================== */
-    .product-content-section,
-    .related-section {
-        margin-top: 28px;
-        border: 1px solid #ead8bf;
-        border-radius: 22px;
-        background: #fff;
-        box-shadow: 0 12px 32px rgba(95,52,29,.06);
-        overflow: hidden;
-    }
-
-    .product-content-title {
-        color: #5f341d;
-        font-weight: 900;
-        border-bottom: 2px solid #f2c15c;
-        padding-bottom: 14px;
-        margin-bottom: 22px;
-    }
-
-    .product-long-description {
-        color: #4b5563;
-        line-height: 1.95;
-        font-size: 17px;
-        white-space: pre-line;
-    }
-
-    .purchase-benefits {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0,1fr));
-        gap: 10px;
-        margin-top: 16px;
-    }
-
-    .purchase-benefit {
-        background: #fffaf0;
-        border: 1px solid #ead8bf;
-        border-radius: 12px;
-        padding: 12px 14px;
-        font-size: 14px;
-        font-weight: 700;
-        color: #5f341d;
-    }
-
-    .related-card {
-        height: 100%;
-        border: 1px solid #ead8bf;
-        border-radius: 16px;
-        overflow: hidden;
-        background: #fff;
-        transition: transform .2s ease, box-shadow .2s ease;
-    }
-
-    .related-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(95,52,29,.12);
-    }
-
-    .related-image-wrap {
-        height: 190px;
-        background: #fffaf0;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .related-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .related-name {
-        color: #2f241e;
-        text-decoration: none;
-        font-weight: 800;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: 48px;
-    }
-
-    .related-name:hover { color: #a83b2d; }
-
-    @media (max-width: 767.98px) {
-        .purchase-benefits { grid-template-columns: 1fr; }
-        .product-image-wrapper { min-height: 300px; }
-    }
-
-    .review-avatar {
-        width: 44px;
-        height: 44px;
-        flex: 0 0 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        color: #fff;
-        background: linear-gradient(135deg,#5f341d,#48633b);
-        font-weight: 900;
-    }
-
-
-    /* =========================
-       PRODUCT HERO - BỐ CỤC MUA HÀNG MỚI
-    ========================== */
-    .product-detail-card {
-        border-radius: 26px;
-        border: 1px solid #ead8bf;
-        background: #fff;
-        box-shadow: 0 18px 50px rgba(95,52,29,.09);
-    }
-
-    .product-image-wrapper {
-        position: sticky;
-        top: 155px;
-        min-height: 520px;
-        border: 1px solid #f0dfc9;
-        background:
-            radial-gradient(circle at top right, rgba(242,193,92,.18), transparent 35%),
-            linear-gradient(180deg,#fffdf8,#fff8ec);
-    }
-
-    .product-image {
-        max-height: 520px;
-        padding: 26px;
-    }
-
-    .product-category-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px 13px;
-        border: 1px solid #ead8bf;
-        border-radius: 999px;
-        background: #fff8ec;
-        color: #6b3a20;
-        font-size: 14px;
-        font-weight: 800;
-    }
-
-    .product-title-new {
-        color: #2f241e;
-        font-size: clamp(30px,3vw,43px);
-        line-height: 1.15;
-        font-weight: 900;
-        letter-spacing: -.5px;
-    }
-
-    .rating-row-new {
-        padding-bottom: 15px;
-        border-bottom: 1px solid #f0e4d5;
-    }
-
-    .product-short-description {
-        color: #655b55;
-        line-height: 1.8;
-        font-size: 15px;
-    }
-
-    .commerce-panel {
-        overflow: hidden;
-        border: 1px solid #ead8bf;
-        border-radius: 20px;
-        background: #fffdf9;
-    }
-
-    .commerce-price {
-        padding: 20px 22px;
-        background:
-            radial-gradient(circle at right top, rgba(242,193,92,.18), transparent 36%),
-            linear-gradient(135deg,#fffaf0,#f8efe2);
-    }
-
-    .sale-old-price {
-        color: #8b817b;
-        font-size: 15px;
-        text-decoration: line-through;
-    }
-
-    .sale-badge-new {
-        display: inline-block;
-        margin-left: 8px;
-        padding: 4px 8px;
-        border-radius: 8px;
-        background: #a83b2d;
-        color: #fff;
         font-size: 12px;
-        font-weight: 900;
     }
 
-    .stock-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px 11px;
-        border-radius: 999px;
-        background: #eef7ea;
-        color: #35612e;
-        font-size: 13px;
+    .ecom-breadcrumb a {
+        color: #654128;
+
+        text-decoration: none;
+
         font-weight: 800;
     }
 
-    .stock-pill.out {
-        background: #fff0ee;
-        color: #a83b2d;
+    .ecom-breadcrumb a:hover {
+        color: var(--red);
     }
 
-    .benefit-strip {
-        display: grid;
-        grid-template-columns: repeat(3,minmax(0,1fr));
-        border-top: 1px solid #ead8bf;
-        border-bottom: 1px solid #ead8bf;
-        background: #fff;
-    }
-
-    .benefit-strip-item {
-        padding: 13px 10px;
-        text-align: center;
-        color: #5f341d;
-        font-size: 13px;
-        font-weight: 800;
-        border-right: 1px solid #eee2d3;
-    }
-
-    .benefit-strip-item:last-child {
-        border-right: 0;
-    }
-
-    .purchase-area {
-        padding: 20px 22px 22px;
-    }
-
-    .purchase-label {
-        color: #3b2b22;
-        font-size: 15px;
-        font-weight: 900;
-    }
-
-    .quantity-control-new {
-        display: inline-flex;
+    .product-market-card {
         overflow: hidden;
-        border: 1px solid #d8c5ac;
-        border-radius: 12px;
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 26px;
+
         background: #fff;
+
+        box-shadow:
+            0 18px 48px
+            rgba(77,47,28,.09);
     }
 
-    .quantity-control-new button {
-        width: 48px;
-        height: 48px;
-        border: 0;
-        background: #f8efe2;
-        color: #5f341d;
-        font-size: 21px;
-        font-weight: 900;
-    }
-
-    .quantity-control-new input {
-        width: 115px;
-        height: 48px;
-        border: 0;
-        border-left: 1px solid #e4d4c0;
-        border-right: 1px solid #e4d4c0;
-        outline: 0;
-        text-align: center;
-        font-weight: 900;
-    }
-
-    .order-total-new {
-        padding: 14px 16px;
-        border-radius: 14px;
-        background: #fff7e8;
-        border: 1px dashed #e2bd75;
-    }
-
-    .btn-cart-new {
-        min-height: 52px;
-        border: 0;
-        border-radius: 13px;
-        background: linear-gradient(135deg,#a83b2d,#6d291f);
-        color: #fff;
-        font-weight: 900;
-    }
-
-    .btn-cart-new:hover {
-        color: #fff;
-        transform: translateY(-1px);
-        box-shadow: 0 9px 20px rgba(168,59,45,.2);
-    }
-
-    .trust-grid-new {
-        display: grid;
-        grid-template-columns: repeat(2,minmax(0,1fr));
-        gap: 10px;
-        margin-top: 14px;
-    }
-
-    .trust-item-new {
-        padding: 11px 12px;
-        border: 1px solid #eee2d3;
-        border-radius: 12px;
-        background: #fff;
-        color: #5f341d;
-        font-size: 13px;
-        font-weight: 700;
-    }
-
-    .product-facts {
-        display: grid;
-        grid-template-columns: repeat(3,minmax(0,1fr));
-        gap: 12px;
-        margin-top: 18px;
-    }
-
-    .product-fact {
-        padding: 13px 14px;
-        border: 1px solid #eee2d3;
-        border-radius: 13px;
-        background: #fffdf9;
-    }
-
-    .product-fact small {
-        display: block;
-        margin-bottom: 3px;
-        color: #8a817b;
-    }
-
-    .product-fact strong {
-        color: #493126;
-    }
-
-    @media (max-width: 991.98px) {
-        .product-image-wrapper {
-            position: relative;
-            top: auto;
-            min-height: 390px;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .benefit-strip {
-            grid-template-columns: 1fr;
-        }
-        .benefit-strip-item {
-            border-right: 0;
-            border-bottom: 1px solid #eee2d3;
-        }
-        .benefit-strip-item:last-child {
-            border-bottom: 0;
-        }
-        .trust-grid-new,
-        .product-facts {
-            grid-template-columns: 1fr;
-        }
-    }
-
-
-    .sold-pill-new {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: #fff3e5;
-        border: 1px solid #f0cf9d;
-        color: #a34a22;
-        font-size: 13px;
-        font-weight: 900;
+    .product-market-body {
+        padding: 30px;
     }
 
 
     /* =========================================================
-       PREMIUM PRODUCT DETAIL UI - GIAO DIỆN ONLY
-       Không thay route / form / Blade logic / JS.
+       GALLERY
     ========================================================= */
 
-    .product-detail-page {
-        position: relative;
-        isolation: isolate;
-        padding-top: 34px !important;
-        padding-bottom: 70px !important;
+    .product-gallery-layout {
+        display: grid;
+
+        grid-template-columns:
+            82px
+            minmax(0,1fr);
+
+        gap: 14px;
+
+        position: sticky;
+
+        top: 145px;
     }
 
-    /* Nền trang mang cảm giác núi rừng, chỉ bằng CSS */
-    .product-detail-page::before {
-        content: "";
-        position: absolute;
-        z-index: -2;
-        top: -30px;
-        left: 50%;
-        width: min(100vw, 1680px);
-        height: 620px;
-        transform: translateX(-50%);
-        pointer-events: none;
-        background:
-            radial-gradient(circle at 8% 12%, rgba(242,193,92,.17), transparent 24%),
-            radial-gradient(circle at 90% 16%, rgba(72,99,59,.14), transparent 27%),
-            linear-gradient(180deg, rgba(255,250,240,.96), rgba(255,255,255,0));
+    .product-thumbnails {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 10px;
+
+        max-height: 555px;
+
+        overflow-y: auto;
+
+        padding-right: 2px;
+
+        scrollbar-width: thin;
     }
 
-    .product-detail-page::after {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        top: 40px;
-        right: -30px;
-        width: 230px;
-        height: 230px;
-        opacity: .17;
-        pointer-events: none;
-        border-radius: 42% 58% 64% 36% / 48% 42% 58% 52%;
-        background:
-            radial-gradient(circle at 32% 34%, #f2c15c 0 5px, transparent 6px),
-            repeating-radial-gradient(circle at 50% 50%, rgba(95,52,29,.17) 0 1px, transparent 1px 13px);
-        transform: rotate(16deg);
-    }
+    .product-thumb {
+        width: 76px;
+        height: 76px;
 
-    /* Nút quay lại / admin */
-    .product-detail-page > .row > .col-12 > .d-flex:first-child .btn {
-        min-height: 42px;
-        border-radius: 999px;
-        padding-inline: 18px;
-        font-weight: 800;
-        box-shadow: 0 5px 14px rgba(95,52,29,.07);
-    }
+        flex:
+            0 0 76px;
 
-    /* Khối sản phẩm chính */
-    .product-detail-page .product-detail-card {
-        position: relative;
-        border: 1px solid rgba(226,199,159,.78);
-        border-radius: 30px;
-        background:
-            linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,253,248,.98));
-        box-shadow:
-            0 26px 70px rgba(73,43,25,.12),
-            0 3px 12px rgba(73,43,25,.04);
-        overflow: visible;
-    }
+        padding: 4px;
 
-    .product-detail-page .product-detail-card::before {
-        content: "";
-        position: absolute;
-        top: -1px;
-        left: 5%;
-        right: 5%;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, transparent, #f2c15c 24%, #d97706 52%, #48633b 78%, transparent);
-        opacity: .82;
-    }
-
-    /* Khung ảnh */
-    .product-detail-page .product-image-wrapper {
-        border-radius: 26px;
-        border: 1px solid #ead8bf;
-        background:
-            radial-gradient(circle at 78% 20%, rgba(242,193,92,.24), transparent 26%),
-            radial-gradient(circle at 18% 82%, rgba(72,99,59,.09), transparent 28%),
-            linear-gradient(145deg, #fffdf9 0%, #fff7e9 100%);
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.95),
-            0 14px 34px rgba(95,52,29,.08);
-    }
-
-    .product-detail-page .product-image-wrapper::before,
-    .product-detail-page .product-image-wrapper::after {
-        content: "";
-        position: absolute;
-        width: 90px;
-        height: 90px;
-        border: 1px solid rgba(95,52,29,.09);
-        pointer-events: none;
-    }
-
-    .product-detail-page .product-image-wrapper::before {
-        top: 18px;
-        left: 18px;
-        border-right: 0;
-        border-bottom: 0;
-        border-radius: 18px 0 0 0;
-    }
-
-    .product-detail-page .product-image-wrapper::after {
-        right: 18px;
-        bottom: 18px;
-        border-left: 0;
-        border-top: 0;
-        border-radius: 0 0 18px 0;
-    }
-
-    .product-detail-page .product-image {
-        transition: transform .42s ease, filter .42s ease;
-        filter: drop-shadow(0 14px 20px rgba(95,52,29,.10));
-    }
-
-    .product-detail-page .product-image-wrapper:hover .product-image {
-        transform: scale(1.035);
-        filter: drop-shadow(0 18px 26px rgba(95,52,29,.14));
-    }
-
-    /* Danh mục + tiêu đề + rating */
-    .product-detail-page .product-category-badge {
-        background: linear-gradient(180deg,#fff9ed,#fff3db);
-        border-color: #e9cfaa;
-        box-shadow: 0 5px 14px rgba(95,52,29,.06);
-    }
-
-    .product-detail-page .product-title-new {
-        letter-spacing: -.8px;
-        text-wrap: balance;
-        text-shadow: 0 1px 0 #fff;
-    }
-
-    .product-detail-page .rating-row-new {
-        background: linear-gradient(90deg, rgba(255,250,240,.8), transparent);
-        padding: 11px 14px;
-        border: 1px solid #f1e3d1;
-        border-radius: 14px;
-    }
-
-    .product-detail-page .sold-pill-new {
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,.7);
-    }
-
-    /* Giá và khu mua hàng */
-    .product-detail-page .commerce-panel {
-        border-radius: 24px;
-        border-color: #e6d0b3;
-        box-shadow:
-            0 16px 38px rgba(95,52,29,.09),
-            inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .product-detail-page .commerce-price {
-        position: relative;
         overflow: hidden;
-        padding: 23px 24px;
+
+        border:
+            1px solid #e4d4c0;
+
+        border-radius: 12px;
+
+        background: #fff;
+
+        cursor: pointer;
+
+        transition:
+            .18s ease;
     }
 
-    .product-detail-page .commerce-price::after {
-        content: "🌿";
-        position: absolute;
-        right: 18px;
-        bottom: -16px;
-        font-size: 70px;
-        opacity: .055;
-        transform: rotate(-16deg);
-        pointer-events: none;
-    }
-
-    .product-detail-page .price-main {
-        font-size: clamp(30px,3vw,40px);
-        letter-spacing: -.8px;
-        text-shadow: 0 1px 0 rgba(255,255,255,.8);
-    }
-
-    .product-detail-page .sale-badge-new {
-        border-radius: 999px;
-        box-shadow: 0 5px 12px rgba(168,59,45,.16);
-    }
-
-    .product-detail-page .stock-pill {
-        border: 1px solid #cfe5c7;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .product-detail-page .stock-pill.out {
-        border-color: #f0ccc7;
-    }
-
-    .product-detail-page .benefit-strip {
-        background: linear-gradient(180deg,#fff,#fffdf9);
-    }
-
-    .product-detail-page .benefit-strip-item {
-        transition: background .18s ease, color .18s ease;
-    }
-
-    .product-detail-page .benefit-strip-item:hover {
-        background: #fff7e8;
-        color: #a83b2d;
-    }
-
-    .product-detail-page .purchase-area {
-        background:
-            radial-gradient(circle at 92% 85%, rgba(72,99,59,.05), transparent 28%),
-            #fff;
-    }
-
-    .product-detail-page .quantity-control-new {
-        box-shadow: 0 7px 18px rgba(95,52,29,.07);
-    }
-
-    .product-detail-page .quantity-control-new button {
-        transition: background .17s ease, color .17s ease, transform .17s ease;
-    }
-
-    .product-detail-page .quantity-control-new button:hover {
-        background: #5f341d;
-        color: #fff;
-    }
-
-    .product-detail-page .order-total-new {
-        background:
-            linear-gradient(135deg,#fff9e9,#fff4d9);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .product-detail-page .btn-cart-new {
-        position: relative;
-        overflow: hidden;
-        letter-spacing: .2px;
-        box-shadow: 0 10px 22px rgba(168,59,45,.18);
-        transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-    }
-
-    .product-detail-page .btn-cart-new::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -120%;
-        width: 70%;
+    .product-thumb img {
+        width: 100%;
         height: 100%;
-        transform: skewX(-20deg);
-        background: linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
-        transition: left .45s ease;
+
+        object-fit: cover;
+
+        border-radius: 8px;
     }
 
-    .product-detail-page .btn-cart-new:hover::after {
-        left: 145%;
+    .product-thumb:hover,
+    .product-thumb.active {
+        border-color:
+            #b56a35;
+
+        box-shadow:
+            0 0 0 2px
+            rgba(181,106,53,.13);
+
+        transform:
+            translateY(-1px);
     }
 
-    .product-detail-page .trust-item-new,
-    .product-detail-page .product-fact {
-        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
-    }
-
-    .product-detail-page .trust-item-new:hover,
-    .product-detail-page .product-fact:hover {
-        transform: translateY(-2px);
-        border-color: #ddc29d;
-        box-shadow: 0 8px 20px rgba(95,52,29,.07);
-    }
-
-    /* Các section dưới */
-    .product-detail-page .product-content-section,
-    .product-detail-page .review-section,
-    .product-detail-page .related-section {
-        border-radius: 28px;
-        border-color: #ead8bf;
-        box-shadow: 0 18px 48px rgba(95,52,29,.075);
-        background:
-            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
-    }
-
-    .product-detail-page .product-content-title {
+    .product-main-image-box {
         position: relative;
-        border-bottom: 0;
-        padding-bottom: 16px;
-    }
 
-    .product-detail-page .product-content-title::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 92px;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,#d97706,#a83b2d,#48633b);
-    }
+        min-height: 545px;
 
-    .product-detail-page .review-summary {
-        border-radius: 20px;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-    .product-detail-page .review-form-box {
-        border-radius: 20px;
+        overflow: hidden;
+
+        border:
+            1px solid #ead8bf;
+
+        border-radius: 22px;
+
         background:
-            radial-gradient(circle at 96% 10%, rgba(242,193,92,.11), transparent 24%),
+            radial-gradient(
+                circle at 82% 17%,
+                rgba(242,193,92,.18),
+                transparent 28%
+            ),
+
+            linear-gradient(
+                145deg,
+                #fffdf8,
+                #fff7eb
+            );
+    }
+
+    .product-main-image {
+        width: 100%;
+        height: 545px;
+
+        padding: 22px;
+
+        object-fit: contain;
+
+        cursor: zoom-in;
+
+        filter:
+            drop-shadow(
+                0 14px 22px
+                rgba(95,52,29,.10)
+            );
+
+        transition:
+            transform .25s ease;
+    }
+
+    .product-main-image:hover {
+        transform:
+            scale(1.025);
+    }
+
+    .gallery-nav-btn {
+        position: absolute;
+
+        z-index: 4;
+
+        top: 50%;
+
+        width: 42px;
+        height: 42px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            1px solid rgba(95,52,29,.14);
+
+        border-radius: 50%;
+
+        color: #5f341d;
+
+        background:
+            rgba(255,255,255,.92);
+
+        box-shadow:
+            0 8px 20px
+            rgba(68,42,25,.12);
+
+        transform:
+            translateY(-50%);
+
+        transition:
+            .18s ease;
+    }
+
+    .gallery-nav-btn:hover {
+        color: #fff;
+
+        background:
+            var(--brown);
+    }
+
+    .gallery-nav-btn.prev {
+        left: 14px;
+    }
+
+    .gallery-nav-btn.next {
+        right: 14px;
+    }
+
+    .gallery-count {
+        position: absolute;
+
+        right: 14px;
+        bottom: 14px;
+
+        z-index: 4;
+
+        padding:
+            7px 10px;
+
+        border-radius: 999px;
+
+        color: #fff;
+
+        background:
+            rgba(48,34,25,.78);
+
+        font-size: 11px;
+
+        font-weight: 900;
+
+        backdrop-filter:
+            blur(7px);
+    }
+
+    .product-no-image {
+        min-height: 545px;
+
+        width: 100%;
+
+        display: grid;
+        place-items: center;
+
+        color: #7d6d62;
+
+        text-align: center;
+    }
+
+    .product-no-image-mark {
+        font-size: 64px;
+    }
+
+
+    /* =========================================================
+       PRODUCT INFO
+    ========================================================= */
+
+    .product-category-chip {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 7px;
+
+        padding:
+            7px 11px;
+
+        border:
+            1px solid #e7d1b2;
+
+        border-radius: 999px;
+
+        color: #684126;
+
+        background:
+            #fff8e9;
+
+        font-size: 11px;
+
+        font-weight: 900;
+    }
+
+    .product-title-shop {
+        margin:
+            14px 0 10px;
+
+        color: var(--ink);
+
+        font-size:
+            clamp(29px,3vw,42px);
+
+        line-height: 1.12;
+
+        font-weight: 950;
+
+        letter-spacing: -.045em;
+    }
+
+    .product-rating-line {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        gap: 9px;
+
+        padding-bottom: 16px;
+
+        border-bottom:
+            1px solid #efe2d1;
+
+        color: #766a62;
+
+        font-size: 12px;
+    }
+
+    .product-stars {
+        color: #e8a20f;
+
+        letter-spacing: 1px;
+
+        font-size: 17px;
+    }
+
+    .sold-chip {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 5px;
+
+        padding:
+            5px 9px;
+
+        border-radius: 999px;
+
+        color: #9a4624;
+
+        background:
+            #fff2df;
+
+        font-weight: 900;
+    }
+
+    .product-short-copy {
+        margin:
+            17px 0;
+
+        color: #6c6059;
+
+        font-size: 14px;
+
+        line-height: 1.75;
+    }
+
+
+    /* =========================================================
+       PRICE / CART
+    ========================================================= */
+
+    .purchase-panel {
+        overflow: hidden;
+
+        border:
+            1px solid #e7d1b3;
+
+        border-radius: 20px;
+
+        background: #fffdf9;
+    }
+
+    .price-panel {
+        padding: 20px;
+
+        background:
+            radial-gradient(
+                circle at 95% 10%,
+                rgba(242,193,92,.18),
+                transparent 32%
+            ),
+
+            linear-gradient(
+                135deg,
+                #fffaf0,
+                #f8efe2
+            );
+    }
+
+    .price-label {
+        color: #8c7b6f;
+
+        font-size: 11px;
+    }
+
+    .price-main-shop {
+        color: var(--red);
+
+        font-size:
+            clamp(29px,3vw,38px);
+
+        font-weight: 950;
+
+        letter-spacing: -.03em;
+    }
+
+    .price-unit {
+        color: #5f402b;
+
+        font-size: 12px;
+
+        font-weight: 800;
+    }
+
+    .old-price-shop {
+        color: #948982;
+
+        font-size: 13px;
+
+        text-decoration:
+            line-through;
+    }
+
+    .sale-chip {
+        display: inline-flex;
+
+        margin-left: 7px;
+
+        padding:
+            4px 7px;
+
+        border-radius: 8px;
+
+        color: #fff;
+
+        background:
+            var(--red);
+
+        font-size: 10px;
+
+        font-weight: 950;
+    }
+
+    .stock-chip {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 6px;
+
+        padding:
+            7px 10px;
+
+        border-radius: 999px;
+
+        color: #37632f;
+
+        background:
+            #edf6e9;
+
+        font-size: 11px;
+
+        font-weight: 900;
+    }
+
+    .stock-chip::before {
+        content: "";
+
+        width: 6px;
+        height: 6px;
+
+        border-radius: 50%;
+
+        background:
+            #5d8c50;
+    }
+
+    .stock-chip.out {
+        color: #9d3f34;
+
+        background:
+            #fff0ed;
+    }
+
+    .stock-chip.out::before {
+        background:
+            #b64b3e;
+    }
+
+    .commerce-benefits {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(0,1fr)
+            );
+
+        border-top:
+            1px solid #ead8bf;
+
+        border-bottom:
+            1px solid #ead8bf;
+
+        background: #fff;
+    }
+
+    .commerce-benefit {
+        padding:
+            12px 8px;
+
+        text-align: center;
+
+        color: #604129;
+
+        font-size: 10px;
+
+        font-weight: 850;
+    }
+
+    .commerce-benefit:not(:last-child) {
+        border-right:
+            1px solid #eee1cf;
+    }
+
+    .purchase-body {
+        padding: 20px;
+    }
+
+    .quantity-heading {
+        color: var(--ink);
+
+        font-size: 13px;
+
+        font-weight: 900;
+    }
+
+    .quantity-hint {
+        margin-top: 3px;
+
+        color: #8a7b70;
+
+        font-size: 10px;
+    }
+
+    .quantity-control-shop {
+        display: inline-flex;
+
+        overflow: hidden;
+
+        border:
+            1px solid #d9c5aa;
+
+        border-radius: 11px;
+
+        background: #fff;
+    }
+
+    .quantity-control-shop button {
+        width: 45px;
+        height: 45px;
+
+        border: 0;
+
+        color: #5f341d;
+
+        background:
+            #f8efe2;
+
+        font-size: 20px;
+
+        font-weight: 900;
+    }
+
+    .quantity-control-shop input {
+        width: 105px;
+        height: 45px;
+
+        border: 0;
+
+        border-left:
+            1px solid #e5d5c1;
+
+        border-right:
+            1px solid #e5d5c1;
+
+        outline: 0;
+
+        text-align: center;
+
+        font-weight: 900;
+    }
+
+    .order-total-shop {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 12px;
+
+        margin:
+            16px 0;
+
+        padding:
+            13px 14px;
+
+        border:
+            1px dashed #dfbb77;
+
+        border-radius: 13px;
+
+        background:
+            #fff7e6;
+    }
+
+    .live-total-shop {
+        color: var(--red);
+
+        font-size: 23px;
+
+        font-weight: 950;
+    }
+
+    .btn-add-cart-shop {
+        min-height: 51px;
+
+        width: 100%;
+
+        border: 0;
+
+        border-radius: 12px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                #b43c2e,
+                #6d291f
+            );
+
+        box-shadow:
+            0 10px 22px
+            rgba(168,59,45,.18);
+
+        font-size: 13px;
+
+        font-weight: 950;
+
+        transition:
+            .18s ease;
+    }
+
+    .btn-add-cart-shop:hover {
+        color: #fff;
+
+        transform:
+            translateY(-1px);
+    }
+
+    .trust-grid-shop {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0,1fr)
+            );
+
+        gap: 8px;
+
+        margin-top: 12px;
+    }
+
+    .trust-item-shop {
+        padding: 10px;
+
+        border:
+            1px solid #eee1d0;
+
+        border-radius: 11px;
+
+        color: #67462e;
+
+        background: #fff;
+
+        font-size: 10px;
+
+        font-weight: 800;
+    }
+
+    .product-facts-shop {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(0,1fr)
+            );
+
+        gap: 9px;
+
+        margin-top: 14px;
+    }
+
+    .product-fact-shop {
+        padding: 11px;
+
+        border:
+            1px solid #eee1cf;
+
+        border-radius: 11px;
+
+        background:
             #fffdf9;
     }
 
-    .product-detail-page .review-item {
+    .product-fact-shop small {
+        display: block;
+
+        margin-bottom: 2px;
+
+        color: #94857a;
+
+        font-size: 9px;
+    }
+
+    .product-fact-shop strong {
+        color: #51382a;
+
+        font-size: 11px;
+    }
+
+    .admin-mode-shop {
+        margin-bottom: 14px;
+
+        padding: 13px;
+
+        border:
+            1px solid #efd897;
+
+        border-radius: 12px;
+
+        color: #6f4a19;
+
+        background:
+            #fff8df;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================================================
+       CONTENT SECTION
+    ========================================================= */
+
+    .shop-detail-section {
+        margin-top: 26px;
+
+        overflow: hidden;
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 22px;
+
+        background: #fff;
+
+        box-shadow:
+            0 12px 34px
+            rgba(77,47,28,.06);
+    }
+
+    .shop-detail-section-body {
+        padding: 28px;
+    }
+
+    .shop-section-title {
+        position: relative;
+
+        margin:
+            0 0 20px;
+
+        padding-bottom: 12px;
+
+        color: var(--ink);
+
+        font-size: 22px;
+
+        font-weight: 950;
+    }
+
+    .shop-section-title::after {
+        content: "";
+
+        position: absolute;
+
+        left: 0;
+        bottom: 0;
+
+        width: 76px;
+        height: 3px;
+
+        border-radius: 999px;
+
+        background:
+            linear-gradient(
+                90deg,
+                var(--red),
+                var(--gold),
+                var(--green)
+            );
+    }
+
+    .product-description-shop {
+        color: #625852;
+
+        font-size: 15px;
+
+        line-height: 1.9;
+
+        white-space: pre-line;
+    }
+
+
+    /* =========================================================
+       REVIEW
+    ========================================================= */
+
+    .review-head-shop {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 20px;
+
+        margin-bottom: 22px;
+    }
+
+    .review-score-shop {
+        min-width: 120px;
+
+        padding: 14px;
+
+        border:
+            1px solid #ead8bf;
+
+        border-radius: 15px;
+
+        text-align: center;
+
+        background:
+            #fff8ea;
+    }
+
+    .review-score-number {
+        color: var(--red);
+
+        font-size: 32px;
+
+        line-height: 1;
+
+        font-weight: 950;
+    }
+
+    .review-form-shop {
+        margin-bottom: 22px;
+
+        padding: 20px;
+
+        border:
+            1px solid #ead8bf;
+
         border-radius: 16px;
-        padding: 18px;
-        margin-bottom: 8px;
+
+        background:
+            #fffdf9;
+    }
+
+    .star-rating-input {
+        display: flex;
+
+        flex-direction:
+            row-reverse;
+
+        justify-content:
+            flex-end;
+
+        gap: 4px;
+    }
+
+    .star-rating-input input {
+        display: none;
+    }
+
+    .star-rating-input label {
+        margin: 0;
+
+        color: #d8d3ce;
+
+        font-size: 32px;
+
+        cursor: pointer;
+    }
+
+    .star-rating-input label:hover,
+    .star-rating-input label:hover ~ label,
+    .star-rating-input input:checked ~ label {
+        color: #e8a20f;
+    }
+
+    .review-item-shop {
+        padding:
+            18px 0;
+
+        border-bottom:
+            1px solid #eee2d2;
+    }
+
+    .review-item-shop:last-child {
         border-bottom: 0;
-        transition: background .18s ease, transform .18s ease;
     }
 
-    .product-detail-page .review-item:hover {
-        background: #fffaf2;
-        transform: translateX(2px);
+    .review-avatar-shop {
+        width: 42px;
+        height: 42px;
+
+        flex:
+            0 0 42px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 50%;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                #5f341d,
+                #48633b
+            );
+
+        font-weight: 950;
     }
 
-    .product-detail-page .review-avatar {
-        box-shadow: 0 7px 16px rgba(95,52,29,.14);
+
+    .product-reviews-compact .shop-detail-section-body {
+        padding: 20px;
     }
 
-    .product-detail-page .related-card {
-        border-radius: 20px;
-        box-shadow: 0 7px 22px rgba(95,52,29,.055);
+    .product-reviews-compact .review-head-shop {
+        gap: 12px;
+        margin-bottom: 12px;
     }
 
-    .product-detail-page .related-card:hover {
-        transform: translateY(-7px);
-        border-color: #dfc39c;
-        box-shadow: 0 18px 36px rgba(95,52,29,.13);
+    .product-reviews-compact .shop-section-title {
+        padding-bottom: 8px;
+        font-size: 20px;
     }
 
-    .product-detail-page .related-image {
-        transition: transform .32s ease;
+    .product-reviews-compact .review-score-shop {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        min-width: 0;
+        padding: 10px 12px;
     }
 
-    .product-detail-page .related-card:hover .related-image {
-        transform: scale(1.05);
+    .product-reviews-compact .review-score-number {
+        font-size: 24px;
     }
 
-    /* Form controls/detail */
-    .product-detail-page .form-control,
-    .product-detail-page .form-select {
-        border-radius: 13px;
-        border-color: #e4d3bc;
+    .product-reviews-compact .review-score-shop .mt-1 {
+        margin-top: 0 !important;
     }
 
-    .product-detail-page .form-control:focus,
-    .product-detail-page .form-select:focus {
-        border-color: #d9ad6a;
-        box-shadow: 0 0 0 .2rem rgba(217,119,6,.10);
+    .product-reviews-compact .review-score-shop .product-stars {
+        font-size: 16px;
+        white-space: nowrap;
     }
+
+    .product-reviews-compact .review-form-shop {
+        margin-bottom: 12px;
+        padding: 14px;
+    }
+
+    .product-reviews-compact .star-rating-input label {
+        font-size: 26px;
+    }
+
+    .product-reviews-compact .review-item-shop {
+        padding: 12px 0;
+    }
+
+    .product-reviews-compact .review-empty-shop {
+        padding: 12px 0 0;
+        border-top: 1px solid var(--border);
+    }
+
+    /* =========================================================
+       RELATED
+    ========================================================= */
+
+    .related-grid-shop {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                4,
+                minmax(0,1fr)
+            );
+
+        gap: 16px;
+    }
+
+    .related-card-shop {
+        overflow: hidden;
+
+        border:
+            1px solid #ead8bf;
+
+        border-radius: 16px;
+
+        background: #fff;
+
+        transition:
+            .2s ease;
+    }
+
+    .related-card-shop:hover {
+        transform:
+            translateY(-5px);
+
+        box-shadow:
+            0 15px 30px
+            rgba(77,47,28,.11);
+    }
+
+    .related-image-shop {
+        position: relative;
+
+        height: 185px;
+
+        overflow: hidden;
+
+        background:
+            #fff8ed;
+    }
+
+    .related-image-shop img {
+        width: 100%;
+        height: 100%;
+
+        object-fit: contain;
+
+        padding: 10px;
+    }
+
+    .related-body-shop {
+        padding: 14px;
+    }
+
+    .related-name-shop {
+        min-height: 42px;
+
+        display:
+            -webkit-box;
+
+        -webkit-line-clamp: 2;
+
+        -webkit-box-orient:
+            vertical;
+
+        overflow: hidden;
+
+        color: var(--ink);
+
+        font-size: 13px;
+
+        font-weight: 900;
+    }
+
+    .related-name-shop:hover {
+        color: var(--red);
+    }
+
+
+    /* =========================================================
+       LIGHTBOX
+    ========================================================= */
+
+    .gallery-lightbox {
+        position: fixed;
+
+        z-index: 9999;
+
+        inset: 0;
+
+        display: none;
+
+        align-items: center;
+        justify-content: center;
+
+        padding: 24px;
+
+        background:
+            rgba(20,14,10,.92);
+
+        backdrop-filter:
+            blur(7px);
+    }
+
+    .gallery-lightbox.show {
+        display: flex;
+    }
+
+    .gallery-lightbox-image {
+        max-width:
+            min(1100px,88vw);
+
+        max-height: 86vh;
+
+        object-fit: contain;
+
+        border-radius: 14px;
+
+        box-shadow:
+            0 25px 70px
+            rgba(0,0,0,.45);
+    }
+
+    .lightbox-close,
+    .lightbox-nav {
+        position: absolute;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            1px solid rgba(255,255,255,.2);
+
+        color: #fff;
+
+        background:
+            rgba(255,255,255,.09);
+
+        backdrop-filter:
+            blur(8px);
+    }
+
+    .lightbox-close {
+        top: 22px;
+        right: 22px;
+
+        width: 44px;
+        height: 44px;
+
+        border-radius: 50%;
+
+        font-size: 22px;
+    }
+
+    .lightbox-nav {
+        top: 50%;
+
+        width: 48px;
+        height: 48px;
+
+        border-radius: 50%;
+
+        transform:
+            translateY(-50%);
+
+        font-size: 27px;
+    }
+
+    .lightbox-nav.prev {
+        left: 22px;
+    }
+
+    .lightbox-nav.next {
+        right: 22px;
+    }
+
+    .lightbox-counter {
+        position: absolute;
+
+        left: 50%;
+        bottom: 20px;
+
+        padding:
+            7px 12px;
+
+        border-radius: 999px;
+
+        color: #fff;
+
+        background:
+            rgba(255,255,255,.09);
+
+        transform:
+            translateX(-50%);
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 1199.98px) {
+
+        .product-gallery-layout {
+            position: relative;
+
+            top: auto;
+        }
+
+        .product-main-image-box,
+        .product-main-image,
+        .product-no-image {
+            min-height: 470px;
+
+            height: 470px;
+        }
+
+    }
+
 
     @media (max-width: 991.98px) {
-        .product-detail-page {
-            padding-top: 22px !important;
+
+        .product-gallery-layout {
+            grid-template-columns:
+                1fr;
         }
 
-        .product-detail-page .product-detail-card {
-            border-radius: 24px;
+        .product-thumbnails {
+            order: 2;
+
+            flex-direction: row;
+
+            max-height: none;
+
+            overflow-x: auto;
+
+            padding:
+                2px 0 4px;
         }
 
-        .product-detail-page .product-image-wrapper {
-            min-height: 360px;
+        .product-thumb {
+            width: 68px;
+            height: 68px;
+
+            flex-basis: 68px;
         }
+
+        .related-grid-shop {
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(0,1fr)
+                );
+        }
+
     }
+
 
     @media (max-width: 575.98px) {
-        .product-detail-page::after {
-            display: none;
+
+        .ecom-product-page {
+            padding-top: 12px;
         }
 
-        .product-detail-page .product-detail-card,
-        .product-detail-page .product-content-section,
-        .product-detail-page .review-section,
-        .product-detail-page .related-section {
-            border-radius: 20px;
+        .product-market-card,
+        .shop-detail-section {
+            border-radius: 18px;
         }
 
-        .product-detail-page .product-image-wrapper {
-            min-height: 300px;
-            border-radius: 20px;
+        .product-market-body,
+        .shop-detail-section-body {
+            padding: 18px;
         }
 
-        .product-detail-page .rating-row-new {
-            padding: 10px;
+        .product-main-image-box,
+        .product-main-image,
+        .product-no-image {
+            min-height: 330px;
+
+            height: 330px;
         }
+
+        .product-main-image {
+            padding: 13px;
+        }
+
+        .commerce-benefits,
+        .trust-grid-shop,
+        .product-facts-shop {
+            grid-template-columns:
+                1fr;
+        }
+
+        .commerce-benefit:not(:last-child) {
+            border-right: 0;
+
+            border-bottom:
+                1px solid #eee1cf;
+        }
+
+        .review-head-shop {
+            align-items:
+                flex-start;
+
+            flex-direction:
+                column;
+        }
+
+        .related-grid-shop {
+            grid-template-columns:
+                1fr;
+        }
+
+        .lightbox-nav {
+            width: 40px;
+            height: 40px;
+        }
+
+        .lightbox-nav.prev {
+            left: 8px;
+        }
+
+        .lightbox-nav.next {
+            right: 8px;
+        }
+
     }
-
-    @media (prefers-reduced-motion: reduce) {
-        .product-detail-page *,
-        .product-detail-page *::before,
-        .product-detail-page *::after {
-            transition: none !important;
-            animation: none !important;
-        }
-    }
-
 </style>
 
-<div class="product-detail-page container py-4">
-    <div class="row justify-content-center">
-        <div class="col-12">
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <a
-                    href="{{ route('products.index') }}"
-                    class="btn btn-outline-secondary"
-                >
-                    ← Quay lại danh sách đặc sản
-                </a>
+<div class="ecom-product-page container">
 
-                @if(Auth::check() && Auth::user()->role === 'admin')
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a
-                            href="{{ route('admin.products.edit', $product) }}"
-                            class="btn btn-warning"
-                        >
-                            ✏️ Sửa sản phẩm
-                        </a>
 
-                        <a
-                            href="{{ route('admin.products.index') }}"
-                            class="btn btn-outline-dark"
-                        >
-                            ⚙️ Quản lý nâng cao
-                        </a>
-                    </div>
-                @endif
-            </div>
+    {{-- BREADCRUMB --}}
+    <div class="ecom-breadcrumb">
 
-            @if(session('error'))
-                <div class="alert alert-danger">
-                    {{ session('error') }}
-                </div>
-            @endif
+        <a href="{{ route('welcome') }}">
+            Trang chủ
+        </a>
 
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <span>›</span>
 
-            <div class="card product-detail-card">
-                <div class="card-body p-3 p-md-4 p-lg-5">
-                    <div class="row g-4 g-xl-5 align-items-start">
+        <a href="{{ route('products.index') }}">
+            Sản phẩm
+        </a>
 
-                        {{-- ẢNH SẢN PHẨM --}}
-                        <div class="col-lg-6">
-                            <div class="product-image-wrapper">
-                                @if($product->image)
-                                    <img
-                                        src="{{ asset('storage/' . $product->image) }}"
-                                        alt="{{ $product->name }}"
-                                        class="product-image"
-                                        onerror="
-                                            this.style.display='none';
-                                            this.nextElementSibling.style.display='flex';
+        <span>›</span>
+
+        <span>
+            {{ $product->name }}
+        </span>
+
+    </div>
+
+
+    @if(session('error'))
+
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+
+    @endif
+
+
+    @if(session('success'))
+
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+
+    @endif
+
+
+    {{-- =====================================================
+        KHỐI SẢN PHẨM CHÍNH
+    ====================================================== --}}
+    <div class="product-market-card">
+
+        <div class="product-market-body">
+
+            <div
+                class="
+                    row
+                    g-4
+                    g-xl-5
+                    align-items-start
+                "
+            >
+
+
+                {{-- =========================
+                    GALLERY
+                ========================== --}}
+                <div class="col-lg-6">
+
+
+                    @if($gallery->isNotEmpty())
+
+                        <div class="product-gallery-layout">
+
+
+                            {{-- THUMBNAILS --}}
+                            <div
+                                class="product-thumbnails"
+                                id="productThumbnails"
+                            >
+
+                                @foreach($gallery as $galleryItem)
+
+                                    <button
+                                        type="button"
+                                        class="
+                                            product-thumb
+                                            {{
+                                                $loop->first
+                                                ? 'active'
+                                                : ''
+                                            }}
+                                        "
+                                        data-gallery-index="{{
+                                            $loop->index
+                                        }}"
+                                        aria-label="
+                                            Xem ảnh
+                                            {{ $loop->iteration }}
                                         "
                                     >
-                                    <div class="no-image" style="display:none;">
-                                        🧺 Không tìm thấy ảnh sản phẩm
-                                    </div>
-                                @else
-                                    <div class="no-image">
-                                        🧺 Sản phẩm chưa có ảnh
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
 
-                        {{-- THÔNG TIN + MUA HÀNG --}}
-                        <div class="col-lg-6">
-                            @php
-                                $topReviewCount = $product->reviews()->count();
-                                $topAverageRating = $topReviewCount > 0
-                                    ? round((float) $product->reviews()->avg('rating'), 1)
-                                    : 0;
-
-                                $minQty = (float) ($product->min_quantity ?? 1);
-                                $stepQty = (float) ($product->quantity_step ?? 1);
-                                $stockQty = (float) $product->quantity;
-
-                                $stockText = rtrim(
-                                    rtrim(
-                                        number_format($stockQty, 2, '.', ''),
-                                        '0'
-                                    ),
-                                    '.'
-                                );
-                            @endphp
-
-                            <span class="product-category-badge mb-3">
-                                🌿 {{ $product->category?->name ?? 'Chưa phân loại' }}
-                            </span>
-
-                            <h1 class="product-title-new mb-3">
-                                {{ $product->name }}
-                            </h1>
-
-                            <div class="rating-row-new d-flex align-items-center flex-wrap gap-2 mb-3">
-                                <span class="star-display" style="font-size:18px;">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        {{ $i <= round($topAverageRating) ? '★' : '☆' }}
-                                    @endfor
-                                </span>
-                                <strong>{{ number_format($topAverageRating, 1) }}/5</strong>
-                                <span class="text-muted">· {{ $topReviewCount }} đánh giá</span>
-
-                                <span class="sold-pill-new">
-                                    🔥 Đã bán
-                                    {{ rtrim(rtrim(number_format((float) $product->sold_quantity, 2, '.', ''), '0'), '.') }} {{ $product->unit }}
-                                </span>
-                            </div>
-
-                            <div class="product-short-description mb-3">
-                                {{ \Illuminate\Support\Str::limit(
-                                    $product->description ?? 'Đặc sản Tây Bắc tuyển chọn, đảm bảo chất lượng và hương vị đặc trưng.',
-                                    180
-                                ) }}
-                            </div>
-
-                            @if(Auth::check() && Auth::user()->role === 'admin')
-                                <div class="admin-box mb-3">
-                                    <strong>👑 Chế độ quản trị</strong>
-                                    <div class="small text-muted mt-1">
-                                        Bạn đang xem sản phẩm với quyền Admin.
-                                    </div>
-                                </div>
-                            @endif
-
-                            <div class="commerce-panel">
-                                <div class="commerce-price">
-                                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-                                        <div>
-                                            <div class="small text-muted mb-1">Giá bán</div>
-
-                                            @if($product->isOnSale())
-                                                <div class="mb-1">
-                                                    <span class="sale-old-price">
-                                                        {{ number_format((float) $product->price, 0, ',', '.') }} đ
-                                                    </span>
-                                                    <span class="sale-badge-new">
-                                                        -{{ $product->getDiscountPercent() }}%
-                                                    </span>
-                                                </div>
-                                            @endif
-
-                                            <div>
-                                                <span class="price-main">
-                                                    {{ number_format($product->getCurrentPrice(), 0, ',', '.') }} đ
-                                                </span>
-                                                <strong style="color:#5f341d;">
-                                                    / {{ $product->unit ?? 'sản phẩm' }}
-                                                </strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="text-end">
-                                            <div class="small text-muted mb-2">Tình trạng</div>
-                                            <span class="stock-pill {{ $stockQty <= 0 ? 'out' : '' }}">
-                                                @if($stockQty > 0)
-                                                    ● Còn hàng · {{ $stockText }} {{ $product->unit ?? 'sản phẩm' }}
-                                                @else
-                                                    ● Hết hàng
-                                                @endif
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @if(!Auth::check() || Auth::user()->role !== 'admin')
-                                    <div class="benefit-strip">
-                                        <div class="benefit-strip-item">🚚 Giao toàn quốc</div>
-                                        <div class="benefit-strip-item">💳 COD / QR / Bank</div>
-                                        <div class="benefit-strip-item">🌿 Đặc sản chọn lọc</div>
-                                    </div>
-                                @endif
-
-                                @if(Auth::check() && Auth::user()->role === 'admin')
-                                    <div class="purchase-area">
-                                        <div class="d-flex gap-3 flex-wrap">
-                                            <a
-                                                href="{{ route('admin.products.edit', $product->id) }}"
-                                                class="btn btn-warning btn-lg flex-fill"
-                                            >
-                                                ✏️ Chỉnh sửa sản phẩm
-                                            </a>
-
-                                            <form
-                                                action="{{ route('admin.products.destroy', $product->id) }}"
-                                                method="POST"
-                                                class="flex-fill"
-                                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');"
-                                            >
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button type="submit" class="btn btn-danger btn-lg w-100">
-                                                    🗑️ Xóa sản phẩm
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-
-                                @elseif(Auth::check())
-                                    <div class="purchase-area">
-                                        <form
-                                            action="{{ route('cart.add', $product->id) }}"
-                                            method="POST"
-                                            id="addToCartForm"
+                                        <img
+                                            src="{{
+                                                $galleryItem['url']
+                                            }}"
+                                            alt="{{
+                                                $galleryItem['alt']
+                                            }}"
+                                            loading="lazy"
                                         >
-                                            @csrf
 
-                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                                                <div>
-                                                    <div class="purchase-label">
-                                                        {{
-                                                            ($product->unit ?? '') === 'kg'
-                                                                ? '⚖️ Chọn khối lượng'
-                                                                : '📦 Chọn số lượng'
-                                                        }}
-                                                    </div>
-                                                    <div class="small text-muted mt-1">
-                                                        Tối thiểu {{ $minQty }} {{ $product->unit ?? 'sản phẩm' }}
-                                                        · Bước {{ $stepQty }} {{ $product->unit ?? 'sản phẩm' }}
-                                                    </div>
-                                                </div>
+                                    </button>
 
-                                                <div class="quantity-control-new">
-                                                    <button type="button" id="minusBtn" aria-label="Giảm số lượng">−</button>
-                                                    <input
-                                                        type="number"
-                                                        id="buyQuantity"
-                                                        name="quantity"
-                                                        value="{{ $minQty }}"
-                                                        min="{{ $minQty }}"
-                                                        max="{{ $stockQty }}"
-                                                        step="{{ $stepQty }}"
-                                                        required
-                                                    >
-                                                    <button type="button" id="plusBtn" aria-label="Tăng số lượng">+</button>
-                                                </div>
-                                            </div>
+                                @endforeach
 
-                                            <div class="order-total-new d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                                                <div>
-                                                    <div class="small text-muted">Thành tiền</div>
-                                                    <div class="live-total" id="liveTotal">0 đ</div>
-                                                </div>
-                                                <strong id="quantityText">
-                                                    {{ $minQty }} {{ $product->unit ?? 'sản phẩm' }}
-                                                </strong>
-                                            </div>
+                            </div>
 
-                                            <button
-                                                type="submit"
-                                                class="btn btn-cart-new btn-lg w-100"
-                                                {{ $stockQty <= 0 ? 'disabled' : '' }}
-                                            >
-                                                @if($stockQty > 0)
-                                                    🛒 THÊM VÀO GIỎ HÀNG
-                                                @else
-                                                    ❌ SẢN PHẨM ĐÃ HẾT HÀNG
-                                                @endif
-                                            </button>
-                                        </form>
 
-                                        <div class="trust-grid-new">
-                                            <div class="trust-item-new">🛡️ Nguồn gốc rõ ràng</div>
-                                            <div class="trust-item-new">📦 Đóng gói cẩn thận</div>
-                                            <div class="trust-item-new">💵 Thanh toán linh hoạt</div>
-                                            <div class="trust-item-new">📞 Hỗ trợ 08:00–22:00</div>
-                                        </div>
-                                    </div>
+                            {{-- MAIN --}}
+                            <div class="product-main-image-box">
 
-                                @else
-                                    <div class="purchase-area">
-                                        <a href="{{ route('login') }}" class="btn btn-warning btn-lg w-100 fw-bold">
-                                            🔐 Đăng nhập để mua sản phẩm
-                                        </a>
+                                <img
+                                    id="productMainImage"
+                                    src="{{
+                                        $gallery
+                                            ->first()['url']
+                                    }}"
+                                    alt="{{
+                                        $gallery
+                                            ->first()['alt']
+                                    }}"
+                                    class="product-main-image"
+                                >
 
-                                        <div class="trust-grid-new">
-                                            <div class="trust-item-new">🚚 Giao hàng toàn quốc</div>
-                                            <div class="trust-item-new">💳 COD / Chuyển khoản / QR</div>
-                                            <div class="trust-item-new">🌿 Đặc sản Tây Bắc chọn lọc</div>
-                                            <div class="trust-item-new">📞 Hỗ trợ 08:00–22:00</div>
-                                        </div>
-                                    </div>
+
+                                @if($gallery->count() > 1)
+
+                                    <button
+                                        type="button"
+                                        class="
+                                            gallery-nav-btn
+                                            prev
+                                        "
+                                        id="galleryPrev"
+                                        aria-label="Ảnh trước"
+                                    >
+                                        ‹
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="
+                                            gallery-nav-btn
+                                            next
+                                        "
+                                        id="galleryNext"
+                                        aria-label="Ảnh tiếp theo"
+                                    >
+                                        ›
+                                    </button>
+
                                 @endif
+
+
+                                <div
+                                    class="gallery-count"
+                                    id="galleryCount"
+                                >
+                                    1 /
+                                    {{ $gallery->count() }}
+                                </div>
+
                             </div>
 
-                            <div class="product-facts">
-                                <div class="product-fact">
-                                    <small>Danh mục</small>
-                                    <strong>{{ $product->category?->name ?? 'Chưa phân loại' }}</strong>
-                                </div>
-                                <div class="product-fact">
-                                    <small>Đơn vị bán</small>
-                                    <strong>{{ $product->unit ?? 'sản phẩm' }}</strong>
-                                </div>
-                                <div class="product-fact">
-                                    <small>Tồn kho hiện tại</small>
-                                    <strong>
-                                        {{ $stockQty > 0 ? $stockText . ' ' . ($product->unit ?? 'sản phẩm') : 'Hết hàng' }}
-                                    </strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            {{-- =====================================================
-                 📖 MÔ TẢ CHI TIẾT
-            ====================================================== --}}
-            <div class="product-content-section">
-                <div class="p-4 p-lg-5">
-                    <h3 class="product-content-title">📖 Thông tin chi tiết sản phẩm</h3>
-                    <div class="product-long-description">{{ $product->description ?? 'Chưa có mô tả chi tiết cho sản phẩm này.' }}</div>
-                </div>
-            </div>
-
-            {{-- =====================================================
-                 ⭐ ĐÁNH GIÁ SẢN PHẨM
-            ====================================================== --}}
-            @php
-                $reviews = $product->reviews()
-                    ->with('user')
-                    ->latest()
-                    ->get();
-
-                $reviewCount = $reviews->count();
-                $averageRating = $reviewCount > 0
-                    ? round($reviews->avg('rating'), 1)
-                    : 0;
-
-                $myReview = Auth::check()
-                    ? $reviews->firstWhere('user_id', Auth::id())
-                    : null;
-            @endphp
-
-            <div class="review-section">
-                <div class="p-4 p-lg-5">
-
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-                        <div>
-                            <h3 class="fw-bold mb-1">⭐ Đánh giá sản phẩm</h3>
-                            <div class="text-muted">
-                                Nhận xét thực tế từ khách hàng đã mua sản phẩm.
-                            </div>
                         </div>
 
-                        <div class="review-summary text-center">
-                            <div class="rating-number">
-                                {{ number_format($averageRating, 1) }}
-                            </div>
 
-                            <div class="star-display">
-                                @for($i = 1; $i <= 5; $i++)
-                                    {{ $i <= round($averageRating) ? '★' : '☆' }}
-                                @endfor
-                            </div>
+                    @else
 
-                            <div class="small text-muted mt-1">
-                                {{ $reviewCount }} đánh giá
-                            </div>
-                        </div>
-                    </div>
+                        <div class="product-main-image-box">
 
-                    @if(Auth::check() && Auth::user()->role !== 'admin')
-                        <div class="review-form-box mb-4">
-                            <h5 class="fw-bold mb-3">
-                                {{ $myReview ? '✏️ Chỉnh sửa đánh giá của bạn' : '✍️ Viết đánh giá' }}
-                            </h5>
+                            <div class="product-no-image">
 
-                            <form
-                                action="{{ route('reviews.store', $product->id) }}"
-                                method="POST"
-                            >
-                                @csrf
+                                <div>
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">
-                                        Bạn đánh giá sản phẩm này thế nào?
-                                    </label>
-
-                                    <div class="star-rating">
-                                        @for($star = 5; $star >= 1; $star--)
-                                            <input
-                                                type="radio"
-                                                id="rating{{ $star }}"
-                                                name="rating"
-                                                value="{{ $star }}"
-                                                {{ (int) old('rating', $myReview?->rating ?? 0) === $star ? 'checked' : '' }}
-                                                required
-                                            >
-                                            <label
-                                                for="rating{{ $star }}"
-                                                title="{{ $star }} sao"
-                                            >
-                                                ★
-                                            </label>
-                                        @endfor
+                                    <div class="product-no-image-mark">
+                                        🧺
                                     </div>
 
-                                    @error('rating')
-                                        <div class="text-danger small mt-1">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                    <strong>
+                                        Sản phẩm chưa có ảnh
+                                    </strong>
+
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="comment" class="form-label fw-bold">
-                                        Nhận xét
-                                    </label>
+                            </div>
 
-                                    <textarea
-                                        id="comment"
-                                        name="comment"
-                                        class="form-control"
-                                        rows="4"
-                                        maxlength="1000"
-                                        placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
-                                    >{{ old('comment', $myReview?->comment) }}</textarea>
-
-                                    @error('comment')
-                                        <div class="text-danger small mt-1">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-
-                                <button type="submit" class="btn btn-tb px-4">
-                                    ⭐ {{ $myReview ? 'Cập nhật đánh giá' : 'Gửi đánh giá' }}
-                                </button>
-                            </form>
                         </div>
-                    @elseif(!Auth::check())
-                        <div class="alert alert-light border mb-4">
-                            🔐
-                            <a href="{{ route('login') }}" class="fw-bold">
-                                Đăng nhập
-                            </a>
-                            để đánh giá sản phẩm.
-                        </div>
+
                     @endif
 
-                    <div>
-                        <h5 class="fw-bold mb-2">
-                            💬 Nhận xét của khách hàng
-                        </h5>
+                </div>
 
-                        @forelse($reviews as $review)
-                            <div class="review-item">
-                                <div class="d-flex gap-3">
-                                    <div class="review-avatar">
-                                        {{ strtoupper(substr($review->user?->name ?? 'K', 0, 1)) }}
+
+                {{-- =========================
+                    THÔNG TIN SẢN PHẨM
+                ========================== --}}
+                <div class="col-lg-6">
+
+
+                    <span class="product-category-chip">
+
+                        🌿
+                        {{
+                            $product
+                                ->category
+                                ?->name
+                            ??
+                            'Chưa phân loại'
+                        }}
+
+                    </span>
+
+
+                    <h1 class="product-title-shop">
+
+                        {{ $product->name }}
+
+                    </h1>
+
+
+                    <div class="product-rating-line">
+
+                        <span class="product-stars">
+
+                            @for(
+                                $i = 1;
+                                $i <= 5;
+                                $i++
+                            )
+
+                                {{
+                                    $i
+                                    <=
+                                    round($averageRating)
+
+                                    ? '★'
+                                    : '☆'
+                                }}
+
+                            @endfor
+
+                        </span>
+
+
+                        <strong>
+                            {{
+                                number_format(
+                                    $averageRating,
+                                    1
+                                )
+                            }}/5
+                        </strong>
+
+
+                        <span>
+                            {{ $reviewCount }}
+                            đánh giá
+                        </span>
+
+
+                        <span class="sold-chip">
+
+                            🔥 Đã bán
+                            {{ $soldText }}
+                            {{ $product->unit }}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-short-copy">
+
+                        {{
+                            \Illuminate\Support\Str::limit(
+                                $product->description
+                                ??
+                                'Đặc sản Tây Bắc tuyển chọn, mang hương vị đặc trưng của vùng cao.',
+                                190
+                            )
+                        }}
+
+                    </div>
+
+
+                    @if(
+                        Auth::check()
+                        &&
+                        Auth::user()->role
+                        ===
+                        'admin'
+                    )
+
+                        <div class="admin-mode-shop">
+
+                            👑 Bạn đang xem sản phẩm
+                            với quyền quản trị viên.
+
+                        </div>
+
+                    @endif
+
+
+                    {{-- PURCHASE PANEL --}}
+                    <div class="purchase-panel">
+
+
+                        {{-- PRICE --}}
+                        <div class="price-panel">
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-start
+                                    gap-3
+                                    flex-wrap
+                                "
+                            >
+
+                                <div>
+
+                                    <div class="price-label mb-1">
+                                        Giá bán
                                     </div>
 
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-                                            <div>
-                                                <div class="fw-bold">
-                                                    {{ $review->user?->name ?? 'Khách hàng' }}
-                                                </div>
 
-                                                <div class="star-display" style="font-size:17px;">
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        {{ $i <= $review->rating ? '★' : '☆' }}
-                                                    @endfor
-                                                </div>
-                                            </div>
+                                    @if($product->isOnSale())
 
-                                            <div class="small text-muted">
-                                                {{ $review->created_at->format('d/m/Y H:i') }}
-                                            </div>
+                                        <div class="mb-1">
+
+                                            <span class="old-price-shop">
+
+                                                {{
+                                                    number_format(
+                                                        (float)
+                                                        $product->price,
+                                                        0,
+                                                        ',',
+                                                        '.'
+                                                    )
+                                                }}
+                                                đ
+
+                                            </span>
+
+
+                                            <span class="sale-chip">
+
+                                                -{{
+                                                    $product
+                                                        ->getDiscountPercent()
+                                                }}%
+
+                                            </span>
+
                                         </div>
 
-                                        @if($review->comment)
-                                            <p class="mb-0 mt-2 text-secondary" style="white-space:pre-line;">
-                                                {{ $review->comment }}
-                                            </p>
-                                        @endif
+                                    @endif
 
-                                        @if(Auth::check() && Auth::user()->role === 'admin')
-                                            <form
-                                                action="{{ route('admin.reviews.destroy', $review->id) }}"
-                                                method="POST"
-                                                class="mt-2"
-                                                onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?');"
-                                            >
-                                                @csrf
-                                                @method('DELETE')
 
-                                                <button
-                                                    type="submit"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                >
-                                                    🗑️ Xóa đánh giá
-                                                </button>
-                                            </form>
-                                        @endif
+                                    <div>
+
+                                        <span class="price-main-shop">
+
+                                            {{
+                                                number_format(
+                                                    $product
+                                                        ->getCurrentPrice(),
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                            }}
+                                            đ
+
+                                        </span>
+
+
+                                        <span class="price-unit">
+
+                                            /
+                                            {{
+                                                $product->unit
+                                                ??
+                                                'sản phẩm'
+                                            }}
+
+                                        </span>
+
                                     </div>
+
                                 </div>
+
+
+                                <div class="text-end">
+
+                                    <div class="price-label mb-2">
+                                        Tình trạng
+                                    </div>
+
+
+                                    <span
+                                        class="
+                                            stock-chip
+                                            {{
+                                                $stockQty <= 0
+                                                ? 'out'
+                                                : ''
+                                            }}
+                                        "
+                                    >
+
+                                        @if($stockQty > 0)
+
+                                            Còn
+                                            {{ $stockText }}
+                                            {{
+                                                $product->unit
+                                                ??
+                                                'sản phẩm'
+                                            }}
+
+                                        @else
+
+                                            Hết hàng
+
+                                        @endif
+
+                                    </span>
+
+                                </div>
+
                             </div>
-                        @empty
-                            <div class="text-center py-5 text-muted">
-                                <div style="font-size:42px;">⭐</div>
-                                <div class="fw-bold mt-2">
-                                    Chưa có đánh giá nào
+
+                        </div>
+
+
+                        @if(
+                            !Auth::check()
+                            ||
+                            Auth::user()->role
+                            !==
+                            'admin'
+                        )
+
+                            <div class="commerce-benefits">
+
+                                <div class="commerce-benefit">
+                                    🚚 Giao hàng toàn quốc
                                 </div>
-                                <div class="small">
-                                    Hãy là khách hàng đầu tiên chia sẻ cảm nhận.
+
+                                <div class="commerce-benefit">
+                                    💳 COD / chuyển khoản
                                 </div>
+
+                                <div class="commerce-benefit">
+                                    🌿 Đặc sản chọn lọc
+                                </div>
+
                             </div>
-                        @endforelse
+
+                        @endif
+
+
+                        {{-- ADMIN --}}
+                        @if(
+                            Auth::check()
+                            &&
+                            Auth::user()->role
+                            ===
+                            'admin'
+                        )
+
+                            <div class="purchase-body">
+
+                                <div class="d-grid gap-2">
+
+                                    <a
+                                        href="{{
+                                            route(
+                                                'admin.products.edit',
+                                                $product
+                                            )
+                                        }}"
+                                        class="
+                                            btn
+                                            btn-warning
+                                            fw-bold
+                                        "
+                                    >
+                                        ✏️ Chỉnh sửa sản phẩm
+                                    </a>
+
+
+                                    <a
+                                        href="{{
+                                            route(
+                                                'admin.products.index'
+                                            )
+                                        }}"
+                                        class="
+                                            btn
+                                            btn-outline-secondary
+                                        "
+                                    >
+                                        ⚙️ Quản lý sản phẩm
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+
+                        {{-- CUSTOMER --}}
+                        @elseif(Auth::check())
+
+                            <div class="purchase-body">
+
+                                <form
+                                    action="{{
+                                        route(
+                                            'cart.add',
+                                            $product->id
+                                        )
+                                    }}"
+                                    method="POST"
+                                    id="addToCartForm"
+                                >
+
+                                    @csrf
+
+
+                                    <div
+                                        class="
+                                            d-flex
+                                            justify-content-between
+                                            align-items-center
+                                            flex-wrap
+                                            gap-3
+                                        "
+                                    >
+
+                                        <div>
+
+                                            <div class="quantity-heading">
+
+                                                {{
+                                                    (
+                                                        $product->unit
+                                                        ??
+                                                        ''
+                                                    )
+                                                    ===
+                                                    'kg'
+
+                                                    ? '⚖️ Chọn khối lượng'
+
+                                                    : '📦 Chọn số lượng'
+                                                }}
+
+                                            </div>
+
+
+                                            <div class="quantity-hint">
+
+                                                Tối thiểu
+                                                {{ $minQty }}
+                                                {{
+                                                    $product->unit
+                                                    ??
+                                                    'sản phẩm'
+                                                }}
+
+                                                · bước
+                                                {{ $stepQty }}
+                                                {{
+                                                    $product->unit
+                                                    ??
+                                                    'sản phẩm'
+                                                }}
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="quantity-control-shop">
+
+                                            <button
+                                                type="button"
+                                                id="minusBtn"
+                                                aria-label="Giảm số lượng"
+                                            >
+                                                −
+                                            </button>
+
+
+                                            <input
+                                                type="number"
+                                                id="buyQuantity"
+                                                name="quantity"
+                                                value="{{ $minQty }}"
+                                                min="{{ $minQty }}"
+                                                max="{{ $stockQty }}"
+                                                step="{{ $stepQty }}"
+                                                required
+                                            >
+
+
+                                            <button
+                                                type="button"
+                                                id="plusBtn"
+                                                aria-label="Tăng số lượng"
+                                            >
+                                                +
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="order-total-shop">
+
+                                        <div>
+
+                                            <div class="price-label">
+                                                Thành tiền
+                                            </div>
+
+                                            <div
+                                                class="live-total-shop"
+                                                id="liveTotal"
+                                            >
+                                                0 đ
+                                            </div>
+
+                                        </div>
+
+
+                                        <strong id="quantityText">
+
+                                            {{ $minQty }}
+                                            {{
+                                                $product->unit
+                                                ??
+                                                'sản phẩm'
+                                            }}
+
+                                        </strong>
+
+                                    </div>
+
+
+                                    <button
+                                        type="submit"
+                                        class="btn-add-cart-shop"
+                                        {{
+                                            $stockQty <= 0
+                                            ? 'disabled'
+                                            : ''
+                                        }}
+                                    >
+
+                                        @if($stockQty > 0)
+
+                                            🛒 THÊM VÀO GIỎ HÀNG
+
+                                        @else
+
+                                            SẢN PHẨM ĐÃ HẾT HÀNG
+
+                                        @endif
+
+                                    </button>
+
+                                </form>
+
+
+                                <div class="trust-grid-shop">
+
+                                    <div class="trust-item-shop">
+                                        🛡️ Nguồn gốc rõ ràng
+                                    </div>
+
+                                    <div class="trust-item-shop">
+                                        📦 Đóng gói cẩn thận
+                                    </div>
+
+                                    <div class="trust-item-shop">
+                                        💵 Thanh toán linh hoạt
+                                    </div>
+
+                                    <div class="trust-item-shop">
+                                        ☎️ Hỗ trợ khi cần
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                        {{-- GUEST --}}
+                        @else
+
+                            <div class="purchase-body">
+
+                                <a
+                                    href="{{ route('login') }}"
+                                    class="
+                                        btn
+                                        btn-warning
+                                        btn-lg
+                                        w-100
+                                        fw-bold
+                                    "
+                                >
+                                    🔐 Đăng nhập để mua sản phẩm
+                                </a>
+
+
+                                <div class="trust-grid-shop">
+
+                                    <div class="trust-item-shop">
+                                        🚚 Giao hàng toàn quốc
+                                    </div>
+
+                                    <div class="trust-item-shop">
+                                        💳 COD / chuyển khoản
+                                    </div>
+
+                                    <div class="trust-item-shop">
+                                        🌿 Đặc sản Tây Bắc
+                                    </div>
+
+                                    <div class="trust-item-shop">
+                                        📦 Theo dõi đơn hàng
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        @endif
+
+                    </div>
+
+
+                    {{-- FACTS --}}
+                    <div class="product-facts-shop">
+
+                        <div class="product-fact-shop">
+
+                            <small>
+                                Danh mục
+                            </small>
+
+                            <strong>
+                                {{
+                                    $product
+                                        ->category
+                                        ?->name
+                                    ??
+                                    'Chưa phân loại'
+                                }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="product-fact-shop">
+
+                            <small>
+                                Đơn vị bán
+                            </small>
+
+                            <strong>
+                                {{
+                                    $product->unit
+                                    ??
+                                    'sản phẩm'
+                                }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="product-fact-shop">
+
+                            <small>
+                                Ảnh sản phẩm
+                            </small>
+
+                            <strong>
+                                {{ $gallery->count() }}
+                                ảnh
+                            </strong>
+
+                        </div>
+
                     </div>
 
                 </div>
+
             </div>
 
-            {{-- =====================================================
-                 🌿 SẢN PHẨM TƯƠNG TỰ
-            ====================================================== --}}
-            @php
-                $relatedProducts = \App\Models\Product::query()
-                    ->where('category_id', $product->category_id)
-                    ->where('id', '!=', $product->id)
-                    ->orderBy('name', 'asc')
-                    ->limit(4)
-                    ->get();
-            @endphp
+        </div>
 
-            @if($relatedProducts->isNotEmpty())
-                <div class="related-section">
-                    <div class="p-4 p-lg-5">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-                            <div>
-                                <h3 class="fw-bold mb-1" style="color:#5f341d;">🌿 Sản phẩm tương tự</h3>
-                                <div class="text-muted">Khám phá thêm đặc sản trong {{ $product->category?->name ?? 'cùng danh mục' }}.</div>
-                            </div>
-                            <a href="{{ route('products.index', ['category_id' => $product->category_id]) }}" class="btn btn-outline-secondary">Xem thêm →</a>
-                        </div>
+    </div>
 
-                        <div class="row g-4">
-                            @foreach($relatedProducts as $related)
-                                <div class="col-6 col-lg-3">
-                                    <div class="related-card">
-                                        <a href="{{ route('products.show', $related) }}" class="text-decoration-none">
-                                            <div class="related-image-wrap">
-                                                @if($related->image)
-                                                    <img src="{{ asset('storage/' . $related->image) }}" alt="{{ $related->name }}" class="related-image">
-                                                @else
-                                                    <div class="h-100 d-flex align-items-center justify-content-center text-muted">🧺 Chưa có ảnh</div>
-                                                @endif
-                                                @if($related->isOnSale())
-                                                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">-{{ $related->getDiscountPercent() }}%</span>
-                                                @endif
-                                            </div>
-                                        </a>
-                                        <div class="p-3">
-                                            <a href="{{ route('products.show', $related) }}" class="related-name">{{ $related->name }}</a>
-                                            <div class="small text-warning mt-2">
-                                                @php
-                                                    $relatedAvg = round((float) $related->reviews()->avg('rating'), 1);
-                                                @endphp
-                                                ★ {{ number_format($relatedAvg, 1) }}
-                                            </div>
-                                            <div class="mt-2">
-                                                @if($related->isOnSale())
-                                                    <div class="small text-muted text-decoration-line-through">{{ number_format((float) $related->price, 0, ',', '.') }} đ</div>
-                                                @endif
-                                                <strong style="color:#a83b2d;font-size:18px;">{{ number_format($related->getCurrentPrice(), 0, ',', '.') }} đ</strong>
-                                                <span class="small text-muted">/ {{ $related->unit ?? 'sản phẩm' }}</span>
-                                            </div>
-                                            <a href="{{ route('products.show', $related) }}" class="btn btn-tb w-100 mt-3">Xem sản phẩm</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            @endif
+
+    {{-- =====================================================
+        DESCRIPTION
+    ====================================================== --}}
+    <section class="shop-detail-section">
+
+        <div class="shop-detail-section-body">
+
+            <h2 class="shop-section-title">
+                Thông tin chi tiết sản phẩm
+            </h2>
+
+
+            <div class="product-description-shop">
+
+                {{
+                    $product->description
+                    ??
+                    'Chưa có mô tả chi tiết cho sản phẩm này.'
+                }}
+
+            </div>
 
         </div>
-    </div>
+
+    </section>
+
+
+    {{-- =====================================================
+        RELATED PRODUCTS
+    ====================================================== --}}
+    @if($relatedProducts->isNotEmpty())
+
+        <section class="shop-detail-section">
+
+            <div class="shop-detail-section-body">
+
+
+                <div
+                    class="
+                        d-flex
+                        justify-content-between
+                        align-items-end
+                        flex-wrap
+                        gap-3
+                        mb-4
+                    "
+                >
+
+                    <div>
+
+                        <h2 class="shop-section-title mb-1">
+                            Sản phẩm tương tự
+                        </h2>
+
+                        <div class="text-muted small">
+
+                            Khám phá thêm sản phẩm trong
+
+                            {{
+                                $product
+                                    ->category
+                                    ?->name
+                                ??
+                                'cùng danh mục'
+                            }}.
+
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="{{
+                            route(
+                                'products.index',
+                                [
+                                    'category_id'
+                                    =>
+                                    $product->category_id
+                                ]
+                            )
+                        }}"
+                        class="
+                            btn
+                            btn-outline-secondary
+                        "
+                    >
+                        Xem thêm →
+                    </a>
+
+                </div>
+
+
+                <div class="related-grid-shop">
+
+
+                    @foreach($relatedProducts as $related)
+
+                        <article class="related-card-shop">
+
+
+                            <a
+                                href="{{
+                                    route(
+                                        'products.show',
+                                        $related
+                                    )
+                                }}"
+                            >
+
+                                <div class="related-image-shop">
+
+
+                                    @if(
+                                        $related->image
+                                        &&
+                                        Storage::disk('public')
+                                            ->exists(
+                                                $related->image
+                                            )
+                                    )
+
+                                        <img
+                                            src="{{
+                                                Storage::disk('public')
+                                                    ->url(
+                                                        $related->image
+                                                    )
+                                            }}"
+                                            alt="{{ $related->name }}"
+                                            loading="lazy"
+                                        >
+
+                                    @else
+
+                                        <div
+                                            style="
+                                                height:100%;
+                                                display:grid;
+                                                place-items:center;
+                                                color:#8b7c72;
+                                            "
+                                        >
+                                            🧺 Chưa có ảnh
+                                        </div>
+
+                                    @endif
+
+
+                                    @if($related->isOnSale())
+
+                                        <span
+                                            class="
+                                                badge
+                                                bg-danger
+                                                position-absolute
+                                                top-0
+                                                start-0
+                                                m-2
+                                            "
+                                        >
+                                            -{{
+                                                $related
+                                                    ->getDiscountPercent()
+                                            }}%
+                                        </span>
+
+                                    @endif
+
+                                </div>
+
+                            </a>
+
+
+                            <div class="related-body-shop">
+
+                                <a
+                                    href="{{
+                                        route(
+                                            'products.show',
+                                            $related
+                                        )
+                                    }}"
+                                    class="related-name-shop"
+                                >
+                                    {{ $related->name }}
+                                </a>
+
+
+                                <div class="small text-warning mt-2">
+
+                                    ★
+                                    {{
+                                        number_format(
+                                            round(
+                                                (float)
+                                                $related
+                                                    ->reviews()
+                                                    ->avg('rating'),
+                                                1
+                                            ),
+                                            1
+                                        )
+                                    }}
+
+                                </div>
+
+
+                                <div class="mt-2">
+
+
+                                    @if($related->isOnSale())
+
+                                        <div
+                                            class="
+                                                small
+                                                text-muted
+                                                text-decoration-line-through
+                                            "
+                                        >
+                                            {{
+                                                number_format(
+                                                    (float)
+                                                    $related->price,
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                            }}
+                                            đ
+                                        </div>
+
+                                    @endif
+
+
+                                    <strong
+                                        style="
+                                            color:#a83b2d;
+                                            font-size:17px;
+                                        "
+                                    >
+                                        {{
+                                            number_format(
+                                                $related
+                                                    ->getCurrentPrice(),
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}
+                                        đ
+                                    </strong>
+
+
+                                    <span class="small text-muted">
+
+                                        /
+                                        {{
+                                            $related->unit
+                                            ??
+                                            'sản phẩm'
+                                        }}
+
+                                    </span>
+
+                                </div>
+
+
+                                <a
+                                    href="{{
+                                        route(
+                                            'products.show',
+                                            $related
+                                        )
+                                    }}"
+                                    class="
+                                        btn
+                                        btn-outline-dark
+                                        w-100
+                                        mt-3
+                                    "
+                                >
+                                    Xem sản phẩm
+                                </a>
+
+                            </div>
+
+                        </article>
+
+                    @endforeach
+
+                </div>
+
+            </div>
+
+        </section>
+
+    @endif
+
+
+    {{-- =====================================================
+        REVIEWS
+    ====================================================== --}}
+    <section class="shop-detail-section product-reviews-compact">
+
+        <div class="shop-detail-section-body">
+
+
+            <div class="review-head-shop">
+
+                <div>
+
+                    <h2 class="shop-section-title mb-1">
+                        Đánh giá sản phẩm
+                    </h2>
+
+                    <div class="text-muted small">
+
+                        Nhận xét từ khách hàng
+                        đã trải nghiệm sản phẩm.
+
+                    </div>
+
+                </div>
+
+
+                <div class="review-score-shop">
+
+                    <div class="review-score-number">
+
+                        {{
+                            number_format(
+                                $averageRating,
+                                1
+                            )
+                        }}
+
+                    </div>
+
+
+                    <div class="product-stars mt-1">
+
+                        @for(
+                            $i = 1;
+                            $i <= 5;
+                            $i++
+                        )
+
+                            {{
+                                $i
+                                <=
+                                round($averageRating)
+
+                                ? '★'
+                                : '☆'
+                            }}
+
+                        @endfor
+
+                    </div>
+
+
+                    <div class="small text-muted mt-1">
+
+                        {{ $reviewCount }}
+                        đánh giá
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- REVIEW FORM --}}
+            @if(
+                Auth::check()
+                &&
+                Auth::user()->role
+                !==
+                'admin'
+            )
+
+                <div class="review-form-shop">
+
+                    <h5 class="fw-bold mb-3">
+
+                        {{
+                            $myReview
+
+                            ? '✏️ Chỉnh sửa đánh giá của bạn'
+
+                            : '✍️ Viết đánh giá'
+                        }}
+
+                    </h5>
+
+
+                    <form
+                        action="{{
+                            route(
+                                'reviews.store',
+                                $product->id
+                            )
+                        }}"
+                        method="POST"
+                    >
+
+                        @csrf
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-bold">
+                                Số sao
+                            </label>
+
+
+                            <div class="star-rating-input">
+
+                                @for(
+                                    $star = 5;
+                                    $star >= 1;
+                                    $star--
+                                )
+
+                                    <input
+                                        type="radio"
+                                        id="rating{{ $star }}"
+                                        name="rating"
+                                        value="{{ $star }}"
+                                        {{
+                                            (
+                                                (int)
+                                                old(
+                                                    'rating',
+                                                    $myReview?->rating
+                                                    ??
+                                                    0
+                                                )
+                                            )
+                                            ===
+                                            $star
+
+                                            ? 'checked'
+                                            : ''
+                                        }}
+                                        required
+                                    >
+
+
+                                    <label
+                                        for="rating{{ $star }}"
+                                        title="{{ $star }} sao"
+                                    >
+                                        ★
+                                    </label>
+
+                                @endfor
+
+                            </div>
+
+
+                            @error('rating')
+
+                                <div class="text-danger small mt-1">
+                                    {{ $message }}
+                                </div>
+
+                            @enderror
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label
+                                for="comment"
+                                class="form-label fw-bold"
+                            >
+                                Nhận xét
+                            </label>
+
+
+                            <textarea
+                                id="comment"
+                                name="comment"
+                                class="form-control"
+                                rows="3"
+                                maxlength="1000"
+                                placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
+                            >{{ old('comment', $myReview?->comment) }}</textarea>
+
+
+                            @error('comment')
+
+                                <div class="text-danger small mt-1">
+                                    {{ $message }}
+                                </div>
+
+                            @enderror
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="
+                                btn
+                                btn-dark
+                                px-4
+                            "
+                        >
+                            ⭐
+                            {{
+                                $myReview
+
+                                ? 'Cập nhật đánh giá'
+
+                                : 'Gửi đánh giá'
+                            }}
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+            @elseif(!Auth::check())
+
+                <div class="alert alert-light border mb-2">
+
+                    🔐
+
+                    <a
+                        href="{{ route('login') }}"
+                        class="fw-bold"
+                    >
+                        Đăng nhập
+                    </a>
+
+                    để đánh giá sản phẩm.
+
+                </div>
+
+            @endif
+
+
+            {{-- REVIEW LIST --}}
+            <div>
+
+                @forelse( $reviews as $review)
+
+                    <div class="review-item-shop">
+
+                        <div class="d-flex gap-3">
+
+
+                            <div class="review-avatar-shop">
+
+                                {{
+                                    strtoupper(
+                                        substr(
+                                            $review
+                                                ->user
+                                                ?->name
+                                            ??
+                                            'K',
+                                            0,
+                                            1
+                                        )
+                                    )
+                                }}
+
+                            </div>
+
+
+                            <div class="flex-grow-1">
+
+
+                                <div
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-start
+                                        gap-3
+                                        flex-wrap
+                                    "
+                                >
+
+                                    <div>
+
+                                        <div class="fw-bold">
+
+                                            {{
+                                                $review
+                                                    ->user
+                                                    ?->name
+                                                ??
+                                                'Khách hàng'
+                                            }}
+
+                                        </div>
+
+
+                                        <div
+                                            class="product-stars"
+                                            style="font-size:15px;"
+                                        >
+
+                                            @for(
+                                                $i = 1;
+                                                $i <= 5;
+                                                $i++
+                                            )
+
+                                                {{
+                                                    $i
+                                                    <=
+                                                    $review->rating
+
+                                                    ? '★'
+                                                    : '☆'
+                                                }}
+
+                                            @endfor
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="small text-muted">
+
+                                        {{
+                                            $review
+                                                ->created_at
+                                                ->format(
+                                                    'd/m/Y H:i'
+                                                )
+                                        }}
+
+                                    </div>
+
+                                </div>
+
+
+                                @if($review->comment)
+
+                                    <p
+                                        class="
+                                            mb-0
+                                            mt-2
+                                            text-secondary
+                                        "
+                                        style="
+                                            white-space:pre-line;
+                                        "
+                                    >
+                                        {{ $review->comment }}
+                                    </p>
+
+                                @endif
+
+
+                                @if(
+                                    Auth::check()
+                                    &&
+                                    Auth::user()->role
+                                    ===
+                                    'admin'
+                                )
+
+                                    <form
+                                        action="{{
+                                            route(
+                                                'admin.reviews.destroy',
+                                                $review->id
+                                            )
+                                        }}"
+                                        method="POST"
+                                        class="mt-2"
+                                        onsubmit="
+                                            return confirm(
+                                                'Bạn có chắc muốn xóa đánh giá này?'
+                                            );
+                                        "
+                                    >
+
+                                        @csrf
+                                        @method('DELETE')
+
+
+                                        <button
+                                            type="submit"
+                                            class="
+                                                btn
+                                                btn-sm
+                                                btn-outline-danger
+                                            "
+                                        >
+                                            🗑️ Xóa đánh giá
+                                        </button>
+
+                                    </form>
+
+                                @endif
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                @empty
+
+                    <div class="review-empty-shop text-muted">
+                        <div class="fw-bold">
+                            Chưa có đánh giá nào
+                        </div>
+
+                        <div class="small">
+                            Hãy là người đầu tiên chia sẻ cảm nhận.
+                        </div>
+
+                    </div>
+
+                @endforelse
+
+            </div>
+
+        </div>
+
+    </section>
+
 </div>
 
-@if(Auth::check() && Auth::user()->role !== 'admin')
-<script>
-(() => {
-    const input = document.getElementById('buyQuantity');
-    const minus = document.getElementById('minusBtn');
-    const plus = document.getElementById('plusBtn');
-    const total = document.getElementById('liveTotal');
-    const quantityText = document.getElementById('quantityText');
 
-    if (!input || !minus || !plus || !total) {
-        return;
-    }
+{{-- =========================================================
+    LIGHTBOX
+========================================================= --}}
+@if($gallery->isNotEmpty())
 
-    const price = Number(@json((float) $product->getCurrentPrice()));
-    const min = Number(@json((float) ($product->min_quantity ?? 1)));
-    const step = Number(@json((float) ($product->quantity_step ?? 1)));
-    const max = Number(@json((float) $product->quantity));
-    const unit = @json($product->unit ?? 'sản phẩm');
+    <div
+        class="gallery-lightbox"
+        id="galleryLightbox"
+        aria-hidden="true"
+    >
 
-    const clampAndSnap = (value) => {
-        if (!Number.isFinite(value)) {
-            value = min;
-        }
+        <button
+            type="button"
+            class="lightbox-close"
+            id="lightboxClose"
+            aria-label="Đóng"
+        >
+            ×
+        </button>
 
-        value = Math.max(min, Math.min(max, value));
 
-        const steps = Math.round((value - min) / step);
-        value = min + (steps * step);
+        @if($gallery->count() > 1)
 
-        return Math.round(value * 100) / 100;
-    };
+            <button
+                type="button"
+                class="
+                    lightbox-nav
+                    prev
+                "
+                id="lightboxPrev"
+                aria-label="Ảnh trước"
+            >
+                ‹
+            </button>
 
-    const formatQty = (value) => {
-        return Number(value.toFixed(2)).toString();
-    };
+        @endif
 
-    const update = () => {
-        const value = clampAndSnap(Number(input.value));
-        input.value = formatQty(value);
 
-        total.textContent =
-            new Intl.NumberFormat('vi-VN')
-                .format(Math.round(price * value))
-            + ' đ';
+        <img
+            src="{{
+                $gallery
+                    ->first()['url']
+            }}"
+            alt="{{
+                $gallery
+                    ->first()['alt']
+            }}"
+            class="gallery-lightbox-image"
+            id="lightboxImage"
+        >
 
-        if (quantityText) {
-            quantityText.textContent =
-                formatQty(value) + ' ' + unit;
-        }
 
-        minus.disabled = value <= min;
-        plus.disabled = value + step > max + 0.00001;
-    };
+        @if($gallery->count() > 1)
 
-    minus.addEventListener('click', () => {
-        input.value = Number(input.value || min) - step;
-        update();
-    });
+            <button
+                type="button"
+                class="
+                    lightbox-nav
+                    next
+                "
+                id="lightboxNext"
+                aria-label="Ảnh tiếp theo"
+            >
+                ›
+            </button>
 
-    plus.addEventListener('click', () => {
-        input.value = Number(input.value || min) + step;
-        update();
-    });
+        @endif
 
-    input.addEventListener('change', update);
-    input.addEventListener('input', update);
 
-    update();
-})();
-</script>
+        <div
+            class="lightbox-counter"
+            id="lightboxCounter"
+        >
+            1 /
+            {{ $gallery->count() }}
+        </div>
+
+    </div>
+
 @endif
+
+
+<script>
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | PRODUCT GALLERY
+        |--------------------------------------------------------------------------
+        */
+
+        const galleryImages =
+            @json(
+                $gallery
+                    ->pluck('url')
+                    ->values()
+            );
+
+
+        const galleryAlts =
+            @json(
+                $gallery
+                    ->pluck('alt')
+                    ->values()
+            );
+
+
+        const mainImage =
+            document.getElementById(
+                'productMainImage'
+            );
+
+
+        const thumbnails =
+            Array.from(
+                document.querySelectorAll(
+                    '[data-gallery-index]'
+                )
+            );
+
+
+        const galleryCount =
+            document.getElementById(
+                'galleryCount'
+            );
+
+
+        const galleryPrev =
+            document.getElementById(
+                'galleryPrev'
+            );
+
+
+        const galleryNext =
+            document.getElementById(
+                'galleryNext'
+            );
+
+
+        const lightbox =
+            document.getElementById(
+                'galleryLightbox'
+            );
+
+
+        const lightboxImage =
+            document.getElementById(
+                'lightboxImage'
+            );
+
+
+        const lightboxCounter =
+            document.getElementById(
+                'lightboxCounter'
+            );
+
+
+        const lightboxClose =
+            document.getElementById(
+                'lightboxClose'
+            );
+
+
+        const lightboxPrev =
+            document.getElementById(
+                'lightboxPrev'
+            );
+
+
+        const lightboxNext =
+            document.getElementById(
+                'lightboxNext'
+            );
+
+
+        let currentIndex = 0;
+
+
+        function normalizeIndex(index) {
+
+            if (!galleryImages.length) {
+                return 0;
+            }
+
+
+            return (
+                index
+                +
+                galleryImages.length
+            )
+            %
+            galleryImages.length;
+
+        }
+
+
+        function setGalleryImage(index) {
+
+            if (
+                !mainImage
+                ||
+                !galleryImages.length
+            ) {
+                return;
+            }
+
+
+            currentIndex =
+                normalizeIndex(
+                    index
+                );
+
+
+            mainImage.src =
+                galleryImages[
+                    currentIndex
+                ];
+
+
+            mainImage.alt =
+                galleryAlts[
+                    currentIndex
+                ]
+                ||
+                'Ảnh sản phẩm';
+
+
+            if (galleryCount) {
+
+                galleryCount.textContent =
+                    `${currentIndex + 1} / ${galleryImages.length}`;
+
+            }
+
+
+            thumbnails.forEach(
+                function (
+                    thumb,
+                    thumbIndex
+                ) {
+
+                    thumb.classList.toggle(
+                        'active',
+                        thumbIndex
+                        ===
+                        currentIndex
+                    );
+
+                }
+            );
+
+        }
+
+
+        thumbnails.forEach(
+            function (thumb) {
+
+                thumb.addEventListener(
+                    'click',
+                    function () {
+
+                        setGalleryImage(
+                            Number(
+                                this.dataset
+                                    .galleryIndex
+                            )
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        if (galleryPrev) {
+
+            galleryPrev.addEventListener(
+                'click',
+                function () {
+
+                    setGalleryImage(
+                        currentIndex
+                        -
+                        1
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (galleryNext) {
+
+            galleryNext.addEventListener(
+                'click',
+                function () {
+
+                    setGalleryImage(
+                        currentIndex
+                        +
+                        1
+                    );
+
+                }
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | LIGHTBOX
+        |--------------------------------------------------------------------------
+        */
+
+        function openLightbox() {
+
+            if (
+                !lightbox
+                ||
+                !lightboxImage
+                ||
+                !galleryImages.length
+            ) {
+                return;
+            }
+
+
+            lightboxImage.src =
+                galleryImages[
+                    currentIndex
+                ];
+
+
+            lightboxImage.alt =
+                galleryAlts[
+                    currentIndex
+                ]
+                ||
+                'Ảnh sản phẩm';
+
+
+            if (lightboxCounter) {
+
+                lightboxCounter.textContent =
+                    `${currentIndex + 1} / ${galleryImages.length}`;
+
+            }
+
+
+            lightbox.classList.add(
+                'show'
+            );
+
+
+            lightbox.setAttribute(
+                'aria-hidden',
+                'false'
+            );
+
+
+            document.body.style.overflow =
+                'hidden';
+
+        }
+
+
+        function closeLightbox() {
+
+            if (!lightbox) {
+                return;
+            }
+
+
+            lightbox.classList.remove(
+                'show'
+            );
+
+
+            lightbox.setAttribute(
+                'aria-hidden',
+                'true'
+            );
+
+
+            document.body.style.overflow =
+                '';
+
+        }
+
+
+        function moveLightbox(step) {
+
+            currentIndex =
+                normalizeIndex(
+                    currentIndex
+                    +
+                    step
+                );
+
+
+            setGalleryImage(
+                currentIndex
+            );
+
+
+            if (lightboxImage) {
+
+                lightboxImage.src =
+                    galleryImages[
+                        currentIndex
+                    ];
+
+
+                lightboxImage.alt =
+                    galleryAlts[
+                        currentIndex
+                    ]
+                    ||
+                    'Ảnh sản phẩm';
+
+            }
+
+
+            if (lightboxCounter) {
+
+                lightboxCounter.textContent =
+                    `${currentIndex + 1} / ${galleryImages.length}`;
+
+            }
+
+        }
+
+
+        if (mainImage) {
+
+            mainImage.addEventListener(
+                'click',
+                openLightbox
+            );
+
+        }
+
+
+        if (lightboxClose) {
+
+            lightboxClose.addEventListener(
+                'click',
+                closeLightbox
+            );
+
+        }
+
+
+        if (lightboxPrev) {
+
+            lightboxPrev.addEventListener(
+                'click',
+                function () {
+                    moveLightbox(-1);
+                }
+            );
+
+        }
+
+
+        if (lightboxNext) {
+
+            lightboxNext.addEventListener(
+                'click',
+                function () {
+                    moveLightbox(1);
+                }
+            );
+
+        }
+
+
+        if (lightbox) {
+
+            lightbox.addEventListener(
+                'click',
+                function (event) {
+
+                    if (
+                        event.target
+                        ===
+                        lightbox
+                    ) {
+                        closeLightbox();
+                    }
+
+                }
+            );
+
+        }
+
+
+        document.addEventListener(
+            'keydown',
+            function (event) {
+
+                if (
+                    !lightbox
+                    ||
+                    !lightbox
+                        .classList
+                        .contains(
+                            'show'
+                        )
+                ) {
+                    return;
+                }
+
+
+                if (
+                    event.key
+                    ===
+                    'Escape'
+                ) {
+
+                    closeLightbox();
+
+                }
+                else if (
+                    event.key
+                    ===
+                    'ArrowLeft'
+                ) {
+
+                    moveLightbox(-1);
+
+                }
+                else if (
+                    event.key
+                    ===
+                    'ArrowRight'
+                ) {
+
+                    moveLightbox(1);
+
+                }
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | QUANTITY / TOTAL
+        |--------------------------------------------------------------------------
+        */
+
+        const input =
+            document.getElementById(
+                'buyQuantity'
+            );
+
+
+        const minus =
+            document.getElementById(
+                'minusBtn'
+            );
+
+
+        const plus =
+            document.getElementById(
+                'plusBtn'
+            );
+
+
+        const total =
+            document.getElementById(
+                'liveTotal'
+            );
+
+
+        const quantityText =
+            document.getElementById(
+                'quantityText'
+            );
+
+
+        if (
+            !input
+            ||
+            !minus
+            ||
+            !plus
+            ||
+            !total
+        ) {
+            return;
+        }
+
+
+        const price =
+            Number(
+                @json(
+                    (float)
+                    $product
+                        ->getCurrentPrice()
+                )
+            );
+
+
+        const min =
+            Number(
+                @json($minQty)
+            );
+
+
+        const step =
+            Number(
+                @json($stepQty)
+            );
+
+
+        const max =
+            Number(
+                @json($stockQty)
+            );
+
+
+        const unit =
+            @json(
+                $product->unit
+                ??
+                'sản phẩm'
+            );
+
+
+        const clampAndSnap =
+            function (value) {
+
+                if (
+                    !Number.isFinite(
+                        value
+                    )
+                ) {
+                    value = min;
+                }
+
+
+                value =
+                    Math.max(
+                        min,
+                        Math.min(
+                            max,
+                            value
+                        )
+                    );
+
+
+                const steps =
+                    Math.round(
+                        (
+                            value
+                            -
+                            min
+                        )
+                        /
+                        step
+                    );
+
+
+                value =
+                    min
+                    +
+                    (
+                        steps
+                        *
+                        step
+                    );
+
+
+                return Math.round(
+                    value * 100
+                )
+                /
+                100;
+
+            };
+
+
+        const formatQty =
+            function (value) {
+
+                return Number(
+                    value.toFixed(2)
+                )
+                .toString();
+
+            };
+
+
+        const updateQuantity =
+            function () {
+
+                const value =
+                    clampAndSnap(
+                        Number(
+                            input.value
+                        )
+                    );
+
+
+                input.value =
+                    formatQty(
+                        value
+                    );
+
+
+                total.textContent =
+                    new Intl.NumberFormat(
+                        'vi-VN'
+                    )
+                    .format(
+                        Math.round(
+                            price
+                            *
+                            value
+                        )
+                    )
+                    +
+                    ' đ';
+
+
+                if (quantityText) {
+
+                    quantityText.textContent =
+                        formatQty(value)
+                        +
+                        ' '
+                        +
+                        unit;
+
+                }
+
+
+                minus.disabled =
+                    value <= min;
+
+
+                plus.disabled =
+                    value + step
+                    >
+                    max
+                    +
+                    0.00001;
+
+            };
+
+
+        minus.addEventListener(
+            'click',
+            function () {
+
+                input.value =
+                    Number(
+                        input.value
+                        ||
+                        min
+                    )
+                    -
+                    step;
+
+
+                updateQuantity();
+
+            }
+        );
+
+
+        plus.addEventListener(
+            'click',
+            function () {
+
+                input.value =
+                    Number(
+                        input.value
+                        ||
+                        min
+                    )
+                    +
+                    step;
+
+
+                updateQuantity();
+
+            }
+        );
+
+
+        input.addEventListener(
+            'change',
+            updateQuantity
+        );
+
+
+        input.addEventListener(
+            'input',
+            updateQuantity
+        );
+
+
+        updateQuantity();
+
+    }
+);
+</script>
 
 @endsection

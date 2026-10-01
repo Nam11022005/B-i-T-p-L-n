@@ -108,7 +108,7 @@ box-shadow:0 10px 22px rgba(95,52,29,.17)}
                 </div>
 
                 <aside class="category-card category-preview">
-                    <div class="category-preview-icon">🌿</div>
+                    <div class="category-preview-icon">{{ $category->icon }}</div>
                     <div class="small fw-bold mb-2" style="color:#48633b;">DANH MỤC HIỆN TẠI</div>
                     <h4 class="fw-bold mb-2">{{ $category->name }}</h4>
                     <p class="text-muted mb-0">ID danh mục: <strong>#{{ $category->id }}</strong></p>

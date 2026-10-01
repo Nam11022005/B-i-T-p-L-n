@@ -1,938 +1,2881 @@
 @extends('layouts.app')
 
-@section('title', 'Chi tiết đơn hàng')
+@section('title', 'Chi tiết đơn hàng | Tinh Hoa Tây Bắc')
 
 @section('content')
 
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | TRẠNG THÁI ĐƠN HÀNG
+    |--------------------------------------------------------------------------
+    */
+
+    $statusConfig = [
+        'pending' => [
+            'label' => 'Chờ xác nhận',
+            'icon' => '⏳',
+            'class' => 'pending',
+            'step' => 1,
+        ],
+
+        'confirmed' => [
+            'label' => 'Đã xác nhận',
+            'icon' => '✓',
+            'class' => 'confirmed',
+            'step' => 2,
+        ],
+
+        'shipped' => [
+            'label' => 'Đang giao hàng',
+            'icon' => '🚚',
+            'class' => 'shipped',
+            'step' => 3,
+        ],
+
+        'delivered' => [
+            'label' => 'Đã giao hàng',
+            'icon' => '✅',
+            'class' => 'delivered',
+            'step' => 4,
+        ],
+
+        'cancelled' => [
+            'label' => 'Đã hủy',
+            'icon' => '✕',
+            'class' => 'cancelled',
+            'step' => 0,
+        ],
+    ];
+
+
+    $currentStatus =
+        $statusConfig[
+            $order->status
+        ]
+        ??
+        [
+            'label' => 'Không xác định',
+            'icon' => '📦',
+            'class' => 'pending',
+            'step' => 0,
+        ];
+
+
+    $statusStep =
+        $currentStatus['step'];
+
+
+    $progressWidth =
+        match ($statusStep) {
+            1 => '0%',
+            2 => '33.33%',
+            3 => '66.66%',
+            4 => '100%',
+            default => '0%',
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | THANH TOÁN
+    |--------------------------------------------------------------------------
+    */
+
+    $paymentStatusConfig = [
+        'unpaid' => [
+            'label' => 'Chưa thanh toán',
+            'icon' => '○',
+            'class' => 'unpaid',
+        ],
+
+        'pending_confirmation' => [
+            'label' => 'Chờ xác nhận thanh toán',
+            'icon' => '⏳',
+            'class' => 'waiting',
+        ],
+
+        'paid' => [
+            'label' => 'Đã thanh toán',
+            'icon' => '✓',
+            'class' => 'paid',
+        ],
+
+        'failed' => [
+            'label' => 'Thanh toán lỗi',
+            'icon' => '✕',
+            'class' => 'failed',
+        ],
+    ];
+
+
+    $paymentStatus =
+        $paymentStatusConfig[
+            $order->payment_status
+        ]
+        ??
+        [
+            'label' => 'Chưa xác định',
+            'icon' => '○',
+            'class' => 'unpaid',
+        ];
+
+
+    $paymentMethodLabel =
+        match ($order->payment_method) {
+            'cod' =>
+                'Thanh toán khi nhận hàng',
+
+            'bank' =>
+                'Chuyển khoản ngân hàng',
+
+            default =>
+                strtoupper(
+                    $order->payment_method
+                    ??
+                    'Không xác định'
+                ),
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VẬN CHUYỂN
+    |--------------------------------------------------------------------------
+    */
+
+    $shippingMethodLabel =
+        match ($order->shipping_method) {
+            'standard' =>
+                'Giao hàng tiết kiệm',
+
+            'fast' =>
+                'Giao hàng nhanh',
+
+            'express' =>
+                'Giao hàng hỏa tốc',
+
+            default =>
+                $order->shipping_method
+                ??
+                'Chưa xác định',
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT SỐ LƯỢNG
+    |--------------------------------------------------------------------------
+    */
+
+    $formatQuantity =
+        function ($value) {
+
+            return rtrim(
+                rtrim(
+                    number_format(
+                        (float) $value,
+                        2,
+                        '.',
+                        ''
+                    ),
+                    '0'
+                ),
+                '.'
+            );
+
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ĐÁNH GIÁ CỦA KHÁCH
+    |--------------------------------------------------------------------------
+    |
+    | Lấy 1 lần thay vì query từng sản phẩm.
+    |
+    */
+
+    $myReviews =
+        collect();
+
+
+    if (
+        $order->status === 'delivered'
+        &&
+        $order->items->isNotEmpty()
+    ) {
+
+        $myReviews =
+            \App\Models\Review::query()
+
+                ->where(
+                    'user_id',
+                    Auth::id()
+                )
+
+                ->whereIn(
+                    'product_id',
+                    $order
+                        ->items
+                        ->pluck(
+                            'product_id'
+                        )
+                        ->filter()
+                        ->unique()
+                )
+
+                ->get()
+
+                ->keyBy(
+                    'product_id'
+                );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | THÔNG TIN QR BANK
+    |--------------------------------------------------------------------------
+    |
+    | Giữ nguyên thông tin thanh toán hiện tại của project.
+    |
+    */
+
+    $bankCode =
+        'MB';
+
+
+    $bankName =
+        'MB BANK';
+
+
+    $accountNumber =
+        '0385742505';
+
+
+    $accountNameQr =
+        'DO PHUONG NAM';
+
+
+    $accountNameDisplay =
+        'ĐỖ PHƯƠNG NAM';
+
+
+    $qrAmount =
+        (int) round(
+            (float)
+            $order->total_price
+        );
+
+
+    $qrContent =
+        $order->payment_code;
+
+
+    $qrUrl =
+        'https://img.vietqr.io/image/'
+        .
+        $bankCode
+        .
+        '-'
+        .
+        $accountNumber
+        .
+        '-compact2.png?amount='
+        .
+        $qrAmount
+        .
+        '&addInfo='
+        .
+        urlencode(
+            $qrContent
+            ??
+            ''
+        )
+        .
+        '&accountName='
+        .
+        urlencode(
+            $accountNameQr
+        );
+@endphp
+
+
 <style>
+    /* =========================================================
+       ORDER DETAIL - TINH HOA TAY BAC
+    ========================================================= */
 
-    .order-card {
-        border-radius: 18px;
-        overflow: hidden;
-        transition: all 0.25s ease;
-    }
+    .order-detail-page {
+        --od-green: #35562f;
+        --od-green-dark: #274522;
 
-    .order-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08) !important;
-    }
+        --od-brown: #633820;
+        --od-brown-dark: #3d2316;
 
-    .order-header {
-        background: linear-gradient(90deg, #f8f9ff, #eef2ff);
-        border-bottom: 1px solid #e5e7eb;
-    }
+        --od-red: #b43e2e;
+        --od-red-dark: #8d3025;
 
-    .status-badge {
-        font-size: 14px;
-        padding: 9px 15px;
-        border-radius: 30px;
-    }
+        --od-gold: #e5ad42;
+        --od-gold-soft: #fff0c9;
 
-    .tracking-wrapper {
-        position: relative;
-        margin-top: 25px;
-        margin-bottom: 30px;
-    }
+        --od-border: #e7dfd5;
 
-    .tracking-line {
-        position: absolute;
-        top: 23px;
-        left: 12.5%;
-        right: 12.5%;
-        height: 4px;
-        background: #e5e7eb;
-        z-index: 1;
-    }
+        --od-text: #302923;
+        --od-muted: #776d66;
 
-    .tracking-progress {
-        position: absolute;
-        top: 23px;
-        left: 12.5%;
-        height: 4px;
-        background: #198754;
-        z-index: 2;
-        transition: width 0.4s ease;
-    }
+        --od-shadow:
+            0 8px 28px
+            rgba(54, 40, 29, .07);
 
-    .tracking-step {
-        position: relative;
-        z-index: 3;
-        text-align: center;
-    }
+        --od-shadow-lg:
+            0 18px 48px
+            rgba(54, 40, 29, .12);
 
-    .tracking-circle {
-        width: 48px;
-        height: 48px;
-        margin: auto;
-        border-radius: 50%;
-        background: #e5e7eb;
-        color: #6c757d;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 20px;
-        font-weight: bold;
-        border: 4px solid white;
-        box-shadow: 0 2px 8px rgba(0,0,0,.08);
-    }
-
-    .tracking-circle.active {
-        background: #198754;
-        color: white;
-    }
-
-    .tracking-circle.current {
-        background: #0d6efd;
-        color: white;
-    }
-
-    .tracking-label {
-        margin-top: 8px;
-        font-size: 13px;
-        color: #6c757d;
-    }
-
-    .tracking-label.active {
-        color: #198754;
-        font-weight: bold;
-    }
-
-    .tracking-label.current {
-        color: #0d6efd;
-        font-weight: bold;
-    }
-
-    .info-box {
-        background: #f8f9fa;
-        border-radius: 14px;
-        padding: 18px;
-        height: 100%;
-    }
-
-    .product-table th {
-        white-space: nowrap;
-    }
-
-    .filter-btn {
-        border-radius: 25px;
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
-    @media (max-width: 768px) {
-        .tracking-label {
-            font-size: 11px;
-        }
-
-        .tracking-circle {
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
-        }
-
-        .tracking-line,
-        .tracking-progress {
-            top: 19px;
-        }
+        color:
+            var(--od-text);
     }
 
 
-    .review-action-btn {
-        border-radius: 10px;
-        font-weight: 700;
-        white-space: nowrap;
+    .order-detail-page *,
+    .order-detail-page *::before,
+    .order-detail-page *::after {
+        box-sizing: border-box;
     }
 
-    .order-review-box {
-        background: #fffaf0;
-        border: 1px solid #ead8bf;
-        border-radius: 14px;
-        padding: 18px;
-    }
 
-    .order-review-stars {
-        display: flex;
-        flex-direction: row-reverse;
-        justify-content: flex-end;
-        gap: 4px;
+    .order-detail-page a {
+        text-decoration: none;
     }
-
-    .order-review-stars input {
-        display: none;
-    }
-
-    .order-review-stars label {
-        cursor: pointer;
-        font-size: 30px;
-        color: #d6d3d1;
-        transition: .15s ease;
-        margin: 0;
-    }
-
-    .order-review-stars label:hover,
-    .order-review-stars label:hover ~ label,
-    .order-review-stars input:checked ~ label {
-        color: #f59e0b;
-    }
-
 
 
     /* =========================================================
-       ORDER DETAIL PREMIUM UI
-       CHỈ NÂNG GIAO DIỆN - KHÔNG ĐỔI ROUTE / DATA / JS / FORM
+       BREADCRUMB
     ========================================================= */
 
-    .order-detail-premium-page {
+    .od-breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        gap: 7px;
+
+        margin-bottom: 14px;
+
+        color: #958b84;
+
+        font-size: 11px;
+    }
+
+
+    .od-breadcrumb a {
+        color: #665349;
+
+        font-weight: 800;
+    }
+
+
+    .od-breadcrumb a:hover {
+        color:
+            var(--od-red);
+    }
+
+
+    /* =========================================================
+       HERO
+    ========================================================= */
+
+    .od-hero {
         position: relative;
+
         isolation: isolate;
-        padding-top: 34px;
-        padding-bottom: 76px;
-    }
 
-    .order-detail-premium-page::before {
-        content: "";
-        position: absolute;
-        z-index: -3;
-        top: -30px;
-        left: 50%;
-        width: min(100vw, 1680px);
-        height: 800px;
-        transform: translateX(-50%);
-        pointer-events: none;
-        background:
-            radial-gradient(circle at 7% 8%, rgba(242,193,92,.18), transparent 24%),
-            radial-gradient(circle at 94% 12%, rgba(72,99,59,.13), transparent 28%),
-            linear-gradient(180deg,rgba(255,250,240,.98),rgba(255,255,255,0));
-    }
-
-    .order-detail-premium-page::after {
-        content: "";
-        position: absolute;
-        z-index: -2;
-        top: 145px;
-        right: -55px;
-        width: 215px;
-        height: 215px;
-        opacity: .10;
-        pointer-events: none;
-        border-radius: 50%;
-        background:
-            repeating-radial-gradient(
-                circle at center,
-                rgba(95,52,29,.35) 0 1px,
-                transparent 1px 13px
-            );
-    }
-
-    /* HERO */
-    .order-detail-hero {
-        position: relative;
         overflow: hidden;
-        min-height: 170px;
+
+        min-height: 185px;
+
         display: flex;
         align-items: center;
         justify-content: space-between;
+
         gap: 28px;
-        padding: 32px 35px;
-        border: 1px solid rgba(255,255,255,.10);
-        border-radius: 28px;
+
+        margin-bottom: 18px;
+
+        padding:
+            30px 34px;
+
+        border-radius: 19px;
+
         color: #fff;
+
         background:
-            radial-gradient(circle at 88% 16%, rgba(242,193,92,.22), transparent 29%),
-            radial-gradient(circle at 12% 120%, rgba(168,59,45,.28), transparent 35%),
-            linear-gradient(135deg,#2c1810 0%,#5f341d 53%,#48633b 100%);
+            radial-gradient(
+                circle at 88% 15%,
+                rgba(229,173,66,.25),
+                transparent 27%
+            ),
+            linear-gradient(
+                125deg,
+                #284525 0%,
+                #3f6338 47%,
+                #673a23 100%
+            );
+
         box-shadow:
-            0 23px 58px rgba(44,24,16,.18),
-            inset 0 1px 0 rgba(255,255,255,.07);
+            var(--od-shadow-lg);
     }
 
-    .order-detail-hero::before {
+
+    .od-hero::before {
         content: "";
+
         position: absolute;
-        right: -26px;
-        bottom: -50px;
-        width: 310px;
-        height: 174px;
-        opacity: .10;
-        pointer-events: none;
-        clip-path: polygon(0 100%,18% 57%,35% 73%,54% 25%,70% 58%,86% 33%,100% 66%,100% 100%);
-        background: linear-gradient(135deg,#fff,#f2c15c);
+
+        z-index: -2;
+
+        inset: 0;
+
+        opacity: .06;
+
+        background-image:
+            repeating-linear-gradient(
+                135deg,
+                #fff 0,
+                #fff 1px,
+                transparent 1px,
+                transparent 24px
+            );
     }
 
-    .order-detail-hero > * {
+
+    .od-hero::after {
+        content: "";
+
+        position: absolute;
+
+        z-index: -1;
+
+        right: -30px;
+        bottom: -55px;
+
+        width: 325px;
+        height: 180px;
+
+        opacity: .1;
+
+        background: #fff;
+
+        clip-path:
+            polygon(
+                0 100%,
+                20% 54%,
+                38% 72%,
+                57% 24%,
+                76% 61%,
+                100% 14%,
+                100% 100%
+            );
+    }
+
+
+    .od-hero-copy {
         position: relative;
+
         z-index: 2;
     }
 
-    .order-detail-kicker {
+
+    .od-kicker {
         display: inline-flex;
         align-items: center;
-        padding: 6px 11px;
-        margin-bottom: 9px;
-        border: 1px solid rgba(242,193,92,.30);
+
+        gap: 5px;
+
+        padding:
+            6px 10px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.16);
+
         border-radius: 999px;
-        color: #f6d98c;
-        background: rgba(255,255,255,.055);
-        font-size: 12px;
+
+        color: #ffda8b;
+
+        background:
+            rgba(255,255,255,.06);
+
+        font-size: 10px;
+
         font-weight: 900;
+
         letter-spacing: .09em;
+
+        text-transform: uppercase;
     }
 
-    .order-detail-hero h2 {
+
+    .od-title {
+        margin:
+            10px 0 0;
+
         color: #fff;
-        font-size: clamp(29px,3vw,42px);
-        letter-spacing: -.7px;
-        text-shadow: 0 2px 14px rgba(0,0,0,.16);
+
+        font-size:
+            clamp(
+                29px,
+                3vw,
+                40px
+            );
+
+        line-height: 1.08;
+
+        font-weight: 950;
+
+        letter-spacing: -.045em;
     }
 
-    .order-detail-hero p {
-        color: rgba(255,255,255,.76);
+
+    .od-description {
+        margin-top: 7px;
+
+        color:
+            rgba(255,255,255,.72);
+
+        font-size: 12.5px;
+
         line-height: 1.65;
     }
 
-    .order-back-btn {
-        min-height: 44px;
+
+    .od-hero-side {
+        position: relative;
+
+        z-index: 2;
+
+        display: flex;
+        align-items: flex-end;
+        flex-direction: column;
+
+        gap: 9px;
+    }
+
+
+    .od-status {
         display: inline-flex;
         align-items: center;
-        padding: 9px 17px;
+
+        gap: 6px;
+
+        padding:
+            8px 12px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.2);
+
         border-radius: 999px;
-        border: 1px solid rgba(255,255,255,.26);
+
+        font-size: 10.5px;
+
+        font-weight: 900;
+
+        backdrop-filter:
+            blur(8px);
+    }
+
+
+    .od-status.pending {
+        color: #513c0e;
+
+        background:
+            #ffe79f;
+    }
+
+
+    .od-status.confirmed {
+        color: #175c6d;
+
+        background:
+            #dff3f8;
+    }
+
+
+    .od-status.shipped {
+        color: #1f588a;
+
+        background:
+            #e0efff;
+    }
+
+
+    .od-status.delivered {
+        color: #315f2b;
+
+        background:
+            #e6f4e2;
+    }
+
+
+    .od-status.cancelled {
+        color: #963a31;
+
+        background:
+            #fce6e3;
+    }
+
+
+    .od-back {
+        min-height: 38px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding:
+            0 12px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.24);
+
+        border-radius: 9px;
+
         color: #fff;
-        background: rgba(255,255,255,.08);
-        font-weight: 800;
-        backdrop-filter: blur(10px);
-        transition:
-            background .18s ease,
-            transform .18s ease,
-            border-color .18s ease;
+
+        background:
+            rgba(255,255,255,.07);
+
+        font-size: 9.5px;
+
+        font-weight: 850;
     }
 
-    .order-back-btn:hover {
+
+    .od-back:hover {
         color: #fff;
-        background: rgba(255,255,255,.15);
-        border-color: rgba(255,255,255,.40);
-        transform: translateY(-1px);
+
+        background:
+            rgba(255,255,255,.14);
     }
 
-    /* AUTO PAYMENT */
-    .auto-payment-premium-card {
+
+    /* =========================================================
+       PAYMENT QR
+    ========================================================= */
+
+    .od-payment-card {
         overflow: hidden;
-        border: 1px solid #dcc096 !important;
-        border-radius: 24px !important;
-        box-shadow: 0 18px 45px rgba(95,52,29,.10) !important;
-    }
 
-    .auto-payment-premium-card > .card-header {
-        border: 0;
-        padding: 15px 20px !important;
-        background:
-            linear-gradient(135deg,#5f341d,#48633b) !important;
-    }
+        margin-bottom: 18px;
 
-    .auto-payment-premium-card .bg-white.border.rounded-4 {
-        border-color: #ead8bf !important;
-        box-shadow: 0 13px 30px rgba(95,52,29,.10) !important;
-    }
+        border:
+            1px solid #dec399;
 
-    .auto-payment-premium-card .input-group {
-        border-radius: 12px;
-        box-shadow: 0 6px 16px rgba(95,52,29,.05);
-    }
+        border-radius: 17px;
 
-    /* ORDER MAIN CARD */
-    .order-detail-premium-page .order-card {
-        position: relative;
-        border: 1px solid #e5d0b3 !important;
-        border-radius: 26px;
-        background:
-            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
-        box-shadow:
-            0 20px 52px rgba(95,52,29,.09) !important,
-            inset 0 1px 0 rgba(255,255,255,.94);
-    }
-
-    .order-detail-premium-page .order-card::before {
-        content: "";
-        position: absolute;
-        z-index: 2;
-        top: 0;
-        left: 7%;
-        right: 7%;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,transparent,#f2c15c,#d97706,#48633b,transparent);
-        opacity: .60;
-    }
-
-    .order-detail-premium-page .order-card:hover {
-        transform: none;
-        box-shadow:
-            0 24px 58px rgba(95,52,29,.115) !important;
-    }
-
-    .order-detail-premium-page .order-header {
-        padding: 24px !important;
-        border-bottom-color: #ead8bf;
-        background:
-            radial-gradient(circle at 94% 10%, rgba(242,193,92,.14), transparent 24%),
-            linear-gradient(90deg,#fffaf0,#f8efe2);
-    }
-
-    .order-detail-premium-page .status-badge {
-        box-shadow: 0 6px 14px rgba(0,0,0,.08);
-    }
-
-    /* TRACKING */
-    .order-detail-premium-page .tracking-wrapper {
-        margin-top: 32px;
-        padding: 24px 10px 8px;
-        border: 1px solid #ead8bf;
-        border-radius: 20px;
-        background:
-            linear-gradient(180deg,#fffdf9,#fff9ef);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.95);
-    }
-
-    .order-detail-premium-page .tracking-line {
-        top: 47px;
-        height: 5px;
-        border-radius: 999px;
-        background: #eee3d5;
-    }
-
-    .order-detail-premium-page .tracking-progress {
-        top: 47px;
-        height: 5px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,#48633b,#68a15a);
-        box-shadow: 0 0 0 2px rgba(72,99,59,.06);
-    }
-
-    .order-detail-premium-page .tracking-circle {
-        width: 52px;
-        height: 52px;
-        border: 5px solid #fff;
-        background: #eee7df;
-        color: #8e8177;
-        box-shadow:
-            0 5px 15px rgba(95,52,29,.09),
-            0 0 0 1px #ead8bf;
-        transition:
-            transform .2s ease,
-            box-shadow .2s ease;
-    }
-
-    .order-detail-premium-page .tracking-circle.active {
-        background: linear-gradient(135deg,#48633b,#5f8b4d);
-    }
-
-    .order-detail-premium-page .tracking-circle.current {
-        background: linear-gradient(135deg,#a83b2d,#d97706);
-        box-shadow:
-            0 7px 18px rgba(168,59,45,.18),
-            0 0 0 5px rgba(242,193,92,.12);
-        transform: scale(1.06);
-    }
-
-    .order-detail-premium-page .tracking-label.active {
-        color: #48633b;
-    }
-
-    .order-detail-premium-page .tracking-label.current {
-        color: #a83b2d;
-    }
-
-    /* INFO BOXES */
-    .order-detail-premium-page .info-box {
-        position: relative;
-        overflow: hidden;
-        border: 1px solid #ead8bf;
-        border-radius: 18px;
-        background:
-            radial-gradient(circle at 100% 0%, rgba(242,193,92,.10), transparent 28%),
-            linear-gradient(180deg,#fffdf9,#fff9f1);
-        box-shadow: 0 8px 22px rgba(95,52,29,.055);
-    }
-
-    .order-detail-premium-page .info-box::after {
-        content: "🌿";
-        position: absolute;
-        right: 13px;
-        bottom: -8px;
-        font-size: 60px;
-        opacity: .035;
-        transform: rotate(-14deg);
-        pointer-events: none;
-    }
-
-    .order-detail-premium-page .info-box h5 {
-        position: relative;
-        padding-bottom: 11px;
-        color: #392820;
-    }
-
-    .order-detail-premium-page .info-box h5::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 62px;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,#d97706,#48633b);
-    }
-
-    .order-detail-premium-page .info-box .badge {
-        padding: 7px 10px;
-        border-radius: 999px;
-    }
-
-    /* PRODUCT TABLE */
-    .order-detail-premium-page .table-responsive {
-        overflow: hidden;
-        border: 1px solid #ead8bf;
-        border-radius: 18px;
         background: #fff;
-        box-shadow: 0 8px 24px rgba(95,52,29,.055);
+
+        box-shadow:
+            var(--od-shadow-lg);
     }
 
-    .order-detail-premium-page .product-table thead th {
-        padding: 15px 16px;
-        border-bottom-color: #e8d7c0;
-        background: linear-gradient(180deg,#fff8ea,#f8efe2);
-        color: #5f341d;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: .02em;
-    }
 
-    .order-detail-premium-page .product-table tbody td {
-        padding: 17px 16px;
-        border-color: #f0e4d5;
-    }
+    .od-payment-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
 
-    .order-detail-premium-page .product-table tbody tr {
-        transition: background .17s ease;
-    }
+        gap: 15px;
 
-    .order-detail-premium-page .product-table tbody tr:hover {
-        background: #fffaf2;
-    }
+        padding:
+            14px 17px;
 
-    .order-detail-premium-page .product-table .badge.bg-light {
-        padding: 7px 10px;
-        border-radius: 999px;
-        background: #fff8eb !important;
-        border-color: #e6cfad !important;
-    }
+        color: #fff;
 
-    /* REVIEW */
-    .order-detail-premium-page .review-action-btn {
-        border-radius: 999px;
-        padding: 7px 12px;
-    }
-
-    .order-detail-premium-page .order-review-box {
-        border-radius: 18px;
-        border-color: #e4c99e;
         background:
-            radial-gradient(circle at 96% 8%, rgba(242,193,92,.12), transparent 25%),
-            linear-gradient(180deg,#fffaf0,#fff6e7);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+            linear-gradient(
+                135deg,
+                var(--od-brown-dark),
+                var(--od-brown)
+            );
     }
 
-    .order-detail-premium-page .order-review-stars label {
-        transition: transform .14s ease, color .14s ease;
+
+    .od-payment-head strong {
+        font-size: 13.5px;
+
+        font-weight: 950;
     }
 
-    .order-detail-premium-page .order-review-stars label:hover {
-        transform: scale(1.10);
+
+    .od-payment-head span {
+        color:
+            rgba(255,255,255,.7);
+
+        font-size: 9.5px;
     }
 
-    /* FOOTER */
-    .order-detail-premium-page .order-card .card-footer {
-        padding: 16px 20px !important;
-        border-top-color: #ead8bf !important;
+
+    .od-payment-body {
+        padding: 19px;
+    }
+
+
+    .od-payment-waiting {
+        display: grid;
+
+        grid-template-columns:
+            330px
+            minmax(0, 1fr);
+
+        gap: 26px;
+
+        align-items: center;
+    }
+
+
+    .od-qr-side {
+        text-align: center;
+    }
+
+
+    .od-qr-box {
+        display: inline-block;
+
+        padding: 13px;
+
+        border:
+            1px solid #e5d4bb;
+
+        border-radius: 16px;
+
+        background: #fff;
+
+        box-shadow:
+            0 12px 28px
+            rgba(54,40,29,.1);
+    }
+
+
+    .od-qr-box img {
+        width: 280px;
+        max-width: 100%;
+
+        display: block;
+    }
+
+
+    .od-qr-help {
+        margin-top: 8px;
+
+        color:
+            var(--od-muted);
+
+        font-size: 9.5px;
+    }
+
+
+    .od-payment-alert {
+        margin-bottom: 15px;
+
+        padding:
+            11px 13px;
+
+        border:
+            1px solid #e9d59b;
+
+        border-radius: 10px;
+
+        color: #6d5618;
+
+        background: #fff8d9;
+
+        font-size: 10.5px;
+
+        line-height: 1.55;
+    }
+
+
+    .od-bank-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 9px;
+    }
+
+
+    .od-bank-info {
+        min-width: 0;
+
+        padding:
+            10px 11px;
+
+        border:
+            1px solid #ece3d8;
+
+        border-radius: 10px;
+
         background:
-            linear-gradient(180deg,#fffaf4,#f8efe2) !important;
+            #fbfaf8;
     }
 
-    .order-detail-premium-page .order-card .card-footer .btn-primary {
-        border: 0;
-        border-radius: 12px;
-        background: linear-gradient(135deg,#a83b2d,#5f341d);
-        font-weight: 800;
-        box-shadow: 0 8px 18px rgba(168,59,45,.15);
+
+    .od-bank-info.full {
+        grid-column:
+            1 / -1;
     }
 
-    /* ALERTS */
-    .order-detail-premium-page .alert {
+
+    .od-bank-label {
+        color:
+            #958981;
+
+        font-size: 8.5px;
+    }
+
+
+    .od-bank-value {
+        overflow-wrap: anywhere;
+
+        margin-top: 2px;
+
+        color: #41362e;
+
+        font-size: 12px;
+
+        font-weight: 950;
+    }
+
+
+    .od-bank-value.money {
+        color:
+            var(--od-red);
+
+        font-size: 20px;
+    }
+
+
+    .od-payment-code-row {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            auto;
+
+        gap: 6px;
+
+        margin-top: 5px;
+    }
+
+
+    .od-payment-code {
+        min-width: 0;
+        height: 39px;
+
+        padding:
+            0 11px;
+
+        border:
+            1px dashed #d6b16b;
+
+        border-radius: 8px;
+
+        outline: 0;
+
+        color:
+            var(--od-red);
+
+        background: #fff;
+
+        font-size: 11px;
+
+        font-weight: 950;
+
+        letter-spacing: .04em;
+    }
+
+
+    .od-copy-btn {
+        min-height: 39px;
+
+        padding:
+            0 11px;
+
+        border:
+            1px solid #d7c1a1;
+
+        border-radius: 8px;
+
+        color:
+            var(--od-brown);
+
+        background: #fff;
+
+        font-size: 9px;
+
+        font-weight: 900;
+    }
+
+
+    .od-copy-btn:hover {
+        color: #fff;
+
+        border-color:
+            var(--od-brown);
+
+        background:
+            var(--od-brown);
+    }
+
+
+    .od-copy-feedback {
+        min-height: 18px;
+
+        margin-top: 4px;
+
+        color:
+            var(--od-green);
+
+        font-size: 8.5px;
+
+        font-weight: 850;
+    }
+
+
+    .od-payment-checking {
+        margin-top: 10px;
+
+        padding:
+            9px 11px;
+
+        border:
+            1px solid #cbdccd;
+
+        border-radius: 9px;
+
+        color:
+            var(--od-green-dark);
+
+        background:
+            #f1f7ef;
+
+        font-size: 9.5px;
+
+        line-height: 1.5;
+    }
+
+
+    .od-payment-success {
+        padding:
+            25px;
+
+        border:
+            1px solid #bcd5b7;
+
+        border-radius: 13px;
+
+        color:
+            #315d2c;
+
+        background:
+            #edf7ea;
+
+        text-align: center;
+    }
+
+
+    .od-payment-success-icon {
+        font-size: 43px;
+    }
+
+
+    .od-payment-success h3 {
+        margin:
+            7px 0 3px;
+
+        font-size: 19px;
+
+        font-weight: 950;
+    }
+
+
+    .od-payment-success p {
+        margin: 0;
+
+        font-size: 10.5px;
+    }
+    /* =========================================================
+   PAYMENT COUNTDOWN
+========================================================= */
+
+.od-payment-countdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    margin-bottom: 15px;
+
+    padding:
+        13px 15px;
+
+    border:
+        1px solid
+        #e7c978;
+
+    border-radius:
+        11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff8dc,
+            #fff1c1
+        );
+}
+
+
+.od-payment-countdown-left {
+    min-width: 0;
+}
+
+
+.od-payment-countdown-label {
+    color:
+        #75623c;
+
+    font-size:
+        9px;
+
+    font-weight:
+        900;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .06em;
+}
+
+
+.od-payment-countdown-note {
+    margin-top:
+        3px;
+
+    color:
+        #7b6b58;
+
+    font-size:
+        9px;
+
+    line-height:
+        1.5;
+}
+
+
+.od-payment-timer {
+    flex:
+        0 0 auto;
+
+    color:
+        var(--od-red);
+
+    font-size:
+        28px;
+
+    line-height:
+        1;
+
+    font-weight:
+        950;
+
+    font-variant-numeric:
+        tabular-nums;
+
+    letter-spacing:
+        .02em;
+}
+
+
+.od-payment-timer.urgent {
+    animation:
+        odTimerPulse
+        .8s
+        infinite;
+}
+
+
+@keyframes odTimerPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
+    }
+}
+
+
+/* =========================================================
+   PAYMENT EXPIRED
+========================================================= */
+
+.od-payment-expired {
+    padding:
+        27px 22px;
+
+    border:
+        1px solid
+        #e5b8b3;
+
+    border-radius:
+        13px;
+
+    color:
+        #8e342c;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fff4f2,
+            #fffafa
+        );
+
+    text-align:
+        center;
+}
+
+
+.od-payment-expired-icon {
+    margin-bottom:
+        7px;
+
+    font-size:
+        42px;
+}
+
+
+.od-payment-expired h3 {
+    margin:
+        0 0 6px;
+
+    color:
+        #963a31;
+
+    font-size:
+        19px;
+
+    font-weight:
+        950;
+}
+
+
+.od-payment-expired p {
+    max-width:
+        600px;
+
+    margin:
+        0 auto;
+
+    color:
+        #7b5b57;
+
+    font-size:
+        10.5px;
+
+    line-height:
+        1.65;
+}
+
+
+@media (max-width: 575.98px) {
+
+    .od-payment-countdown {
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+    }
+
+
+    .od-payment-timer {
+        font-size:
+            26px;
+    }
+
+}
+
+
+    /* =========================================================
+       TWO COLUMN LAYOUT
+    ========================================================= */
+
+    .od-layout {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            350px;
+
+        gap: 18px;
+
+        align-items: start;
+    }
+
+
+    .od-main {
+        min-width: 0;
+
+        display: grid;
+
+        gap: 15px;
+    }
+
+
+    .od-side {
+        position: sticky;
+
+        top: 177px;
+
+        display: grid;
+
+        gap: 13px;
+    }
+
+
+    /* =========================================================
+       GENERIC CARD
+    ========================================================= */
+
+    .od-card {
+        overflow: hidden;
+
+        border:
+            1px solid
+            var(--od-border);
+
         border-radius: 15px;
-        border-width: 1px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--od-shadow);
     }
 
-    @media (max-width: 768px) {
-        .order-detail-premium-page {
-            padding-top: 22px;
+
+    .od-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 12px;
+
+        padding:
+            14px 16px;
+
+        border-bottom:
+            1px solid
+            var(--od-border);
+
+        background:
+            linear-gradient(
+                180deg,
+                #fff,
+                #fffcf8
+            );
+    }
+
+
+    .od-card-title {
+        margin: 0;
+
+        color: #463a32;
+
+        font-size: 13.5px;
+
+        font-weight: 950;
+    }
+
+
+    .od-card-subtitle {
+        margin-top: 2px;
+
+        color:
+            var(--od-muted);
+
+        font-size: 9.5px;
+    }
+
+
+    .od-card-body {
+        padding:
+            16px;
+    }
+
+
+    /* =========================================================
+       CANCELLED
+    ========================================================= */
+
+    .od-cancelled {
+        display: flex;
+        align-items: flex-start;
+
+        gap: 12px;
+
+        padding:
+            15px;
+
+        border:
+            1px solid #ebc3bd;
+
+        border-radius: 12px;
+
+        color: #8e3931;
+
+        background:
+            #fff1ef;
+    }
+
+
+    .od-cancelled-icon {
+        font-size: 28px;
+    }
+
+
+    .od-cancelled strong {
+        font-size: 12px;
+    }
+
+
+    .od-cancelled p {
+        margin:
+            4px 0 0;
+
+        font-size: 10px;
+
+        line-height: 1.5;
+    }
+
+
+    /* =========================================================
+       TRACKING
+    ========================================================= */
+
+    .od-tracking {
+        position: relative;
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                4,
+                1fr
+            );
+
+        margin-top: 8px;
+    }
+
+
+    .od-track-line {
+        position: absolute;
+
+        z-index: 1;
+
+        top: 22px;
+        left: 12.5%;
+        right: 12.5%;
+
+        height: 4px;
+
+        overflow: hidden;
+
+        border-radius: 999px;
+
+        background:
+            #e8e3de;
+    }
+
+
+    .od-track-progress {
+        height: 100%;
+
+        border-radius: 999px;
+
+        background:
+            linear-gradient(
+                90deg,
+                var(--od-green),
+                #72a561
+            );
+
+        transition:
+            width .25s ease;
+    }
+
+
+    .od-track-step {
+        position: relative;
+
+        z-index: 2;
+
+        text-align: center;
+    }
+
+
+    .od-track-circle {
+        width: 46px;
+        height: 46px;
+
+        display: grid;
+        place-items: center;
+
+        margin: 0 auto;
+
+        border:
+            4px solid #fff;
+
+        border-radius: 50%;
+
+        color: #958d87;
+
+        background:
+            #e9e5e1;
+
+        box-shadow:
+            0 3px 10px
+            rgba(49,38,30,.08);
+
+        font-size: 17px;
+
+        font-weight: 950;
+    }
+
+
+    .od-track-circle.done {
+        color: #fff;
+
+        background:
+            var(--od-green);
+    }
+
+
+    .od-track-circle.current {
+        color: #fff;
+
+        background:
+            var(--od-red);
+
+        box-shadow:
+            0 0 0 5px
+            rgba(180,62,46,.09);
+    }
+
+
+    .od-track-label {
+        margin-top: 7px;
+
+        color:
+            #92877e;
+
+        font-size: 9px;
+
+        line-height: 1.35;
+
+        font-weight: 750;
+    }
+
+
+    .od-track-label.done {
+        color:
+            var(--od-green);
+
+        font-weight: 900;
+    }
+
+
+    .od-track-label.current {
+        color:
+            var(--od-red);
+
+        font-weight: 950;
+    }
+
+
+    /* =========================================================
+       PRODUCTS
+    ========================================================= */
+
+    .od-products {
+        display: grid;
+    }
+
+
+    .od-product {
+        display: grid;
+
+        grid-template-columns:
+            78px
+            minmax(0, 1fr)
+            auto;
+
+        align-items: center;
+
+        gap: 12px;
+
+        padding:
+            13px 0;
+
+        border-bottom:
+            1px solid #eee7df;
+    }
+
+
+    .od-product:last-child {
+        border-bottom: 0;
+    }
+
+
+    .od-product-image {
+        width: 78px;
+        height: 78px;
+
+        overflow: hidden;
+
+        border:
+            1px solid #e9dfd4;
+
+        border-radius: 11px;
+
+        background:
+            #faf8f5;
+    }
+
+
+    .od-product-image img {
+        width: 100%;
+        height: 100%;
+
+        padding: 4px;
+
+        object-fit: contain;
+    }
+
+
+    .od-product-fallback {
+        width: 100%;
+        height: 100%;
+
+        display: grid;
+        place-items: center;
+
+        color: #9a8d82;
+
+        font-size: 29px;
+    }
+
+
+    .od-product-info {
+        min-width: 0;
+    }
+
+
+    .od-product-name {
+        color: #38302a;
+
+        font-size: 12px;
+
+        line-height: 1.45;
+
+        font-weight: 950;
+
+        display: -webkit-box;
+
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+
+        overflow: hidden;
+    }
+
+
+    a.od-product-name:hover {
+        color:
+            var(--od-red);
+    }
+
+
+    .od-product-meta {
+        margin-top: 4px;
+
+        color:
+            var(--od-muted);
+
+        font-size: 9.5px;
+    }
+
+
+    .od-product-subtotal {
+        color:
+            var(--od-red);
+
+        font-size: 13px;
+
+        font-weight: 950;
+
+        text-align: right;
+
+        white-space: nowrap;
+    }
+
+
+    .od-product-unit-price {
+        margin-top: 3px;
+
+        color: #9a8e85;
+
+        font-size: 8.5px;
+
+        font-weight: 650;
+    }
+
+
+    .od-review-area {
+        grid-column:
+            1 / -1;
+
+        margin-top: 2px;
+
+        padding-top: 10px;
+
+        border-top:
+            1px dashed #e3d8cc;
+    }
+
+
+    .od-review-toggle {
+        min-height: 32px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 4px;
+
+        padding:
+            0 9px;
+
+        border:
+            1px solid #dfc486;
+
+        border-radius: 8px;
+
+        color: #725114;
+
+        background:
+            #fff7db;
+
+        font-size: 8.5px;
+
+        font-weight: 900;
+    }
+
+
+    .od-review-toggle.reviewed {
+        color: #396734;
+
+        border-color: #bcd2b7;
+
+        background:
+            #edf6ea;
+    }
+
+
+    .od-review-box {
+        margin-top: 9px;
+
+        padding:
+            13px;
+
+        border:
+            1px solid #e7d5b4;
+
+        border-radius: 10px;
+
+        background:
+            #fffaf0;
+    }
+
+
+    .od-review-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 10px;
+
+        margin-bottom: 10px;
+    }
+
+
+    .od-review-head strong {
+        font-size: 11px;
+    }
+
+
+    .od-review-current {
+        padding:
+            4px 7px;
+
+        border-radius: 999px;
+
+        color:
+            var(--od-green-dark);
+
+        background:
+            #e8f3e4;
+
+        font-size: 8px;
+
+        font-weight: 900;
+    }
+
+
+    .od-review-stars {
+        display: flex;
+
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+
+        gap: 2px;
+
+        margin-bottom: 10px;
+    }
+
+
+    .od-review-stars input {
+        display: none;
+    }
+
+
+    .od-review-stars label {
+        margin: 0;
+
+        color: #d7d1cb;
+
+        cursor: pointer;
+
+        font-size: 28px;
+
+        line-height: 1;
+
+        transition:
+            color .14s ease,
+            transform .14s ease;
+    }
+
+
+    .od-review-stars label:hover,
+    .od-review-stars label:hover ~ label,
+    .od-review-stars input:checked ~ label {
+        color: #eda519;
+    }
+
+
+    .od-review-stars label:hover {
+        transform:
+            scale(1.08);
+    }
+
+
+    .od-review-textarea {
+        width: 100%;
+
+        min-height: 88px;
+
+        padding:
+            9px 10px;
+
+        border:
+            1px solid #ddd1c4;
+
+        border-radius: 8px;
+
+        outline: 0;
+
+        font-size: 10.5px;
+
+        resize: vertical;
+    }
+
+
+    .od-review-textarea:focus {
+        border-color:
+            var(--od-gold);
+
+        box-shadow:
+            0 0 0 3px
+            rgba(229,173,66,.1);
+    }
+
+
+    .od-review-submit {
+        min-height: 34px;
+
+        margin-top: 7px;
+
+        padding:
+            0 11px;
+
+        border: 0;
+
+        border-radius: 8px;
+
+        color: #fff;
+
+        background:
+            var(--od-green);
+
+        font-size: 9px;
+
+        font-weight: 900;
+    }
+
+
+    .od-review-submit:hover {
+        background:
+            var(--od-green-dark);
+    }
+
+
+    /* =========================================================
+       HISTORY
+    ========================================================= */
+
+    .od-history {
+        position: relative;
+
+        display: grid;
+
+        gap: 0;
+    }
+
+
+    .od-history-item {
+        position: relative;
+
+        display: grid;
+
+        grid-template-columns:
+            34px
+            minmax(0, 1fr);
+
+        gap: 10px;
+
+        padding-bottom: 17px;
+    }
+
+
+    .od-history-item:last-child {
+        padding-bottom: 0;
+    }
+
+
+    .od-history-icon-wrap {
+        position: relative;
+
+        display: flex;
+        justify-content: center;
+    }
+
+
+    .od-history-icon-wrap::after {
+        content: "";
+
+        position: absolute;
+
+        top: 32px;
+        bottom: -1px;
+
+        width: 2px;
+
+        background:
+            #e7dfd5;
+    }
+
+
+    .od-history-item:last-child
+    .od-history-icon-wrap::after {
+        display: none;
+    }
+
+
+    .od-history-icon {
+        position: relative;
+
+        z-index: 2;
+
+        width: 30px;
+        height: 30px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            1px solid #dcc8aa;
+
+        border-radius: 50%;
+
+        background:
+            #fff7e8;
+
+        font-size: 12px;
+    }
+
+
+    .od-history-title {
+        color: #473b33;
+
+        font-size: 10.5px;
+
+        font-weight: 950;
+    }
+
+
+    .od-history-note {
+        margin-top: 2px;
+
+        color:
+            var(--od-muted);
+
+        font-size: 9px;
+
+        line-height: 1.5;
+    }
+
+
+    .od-history-time {
+        margin-top: 4px;
+
+        color: #9e938b;
+
+        font-size: 8px;
+    }
+
+
+    /* =========================================================
+       SUMMARY
+    ========================================================= */
+
+    .od-summary-head {
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--od-brown-dark),
+                var(--od-brown)
+            );
+    }
+
+
+    .od-summary-head
+    .od-card-title {
+        color: #fff;
+    }
+
+
+    .od-summary-head
+    .od-card-subtitle {
+        color:
+            rgba(255,255,255,.67);
+    }
+
+
+    .od-summary-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 12px;
+
+        margin-bottom: 10px;
+
+        color:
+            var(--od-muted);
+
+        font-size: 10.5px;
+    }
+
+
+    .od-summary-row strong {
+        color: #4a3e36;
+
+        font-size: 11px;
+
+        text-align: right;
+    }
+
+
+    .od-summary-discount strong {
+        color:
+            var(--od-green);
+    }
+
+
+    .od-summary-divider {
+        height: 1px;
+
+        margin:
+            14px 0;
+
+        background:
+            #eae1d7;
+    }
+
+
+    .od-summary-total {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        gap: 10px;
+    }
+
+
+    .od-summary-total-label {
+        color: #40352e;
+
+        font-size: 12px;
+
+        font-weight: 950;
+    }
+
+
+    .od-summary-total-price {
+        color:
+            var(--od-red);
+
+        font-size: 22px;
+
+        line-height: 1;
+
+        font-weight: 950;
+
+        letter-spacing: -.035em;
+
+        text-align: right;
+    }
+
+
+    .od-payment-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 5px;
+
+        min-height: 36px;
+
+        margin-top: 13px;
+
+        padding:
+            6px 9px;
+
+        border-radius: 8px;
+
+        font-size: 9px;
+
+        font-weight: 900;
+
+        text-align: center;
+    }
+
+
+    .od-payment-status.unpaid {
+        color: #98463c;
+
+        background:
+            #fbeae7;
+    }
+
+
+    .od-payment-status.waiting {
+        color: #765815;
+
+        background:
+            #fff1c4;
+    }
+
+
+    .od-payment-status.paid {
+        color:
+            var(--od-green-dark);
+
+        background:
+            #eaf5e7;
+    }
+
+
+    .od-payment-status.failed {
+        color: #9a3932;
+
+        background:
+            #f9e1df;
+    }
+
+
+    /* =========================================================
+       INFORMATION
+    ========================================================= */
+
+    .od-info-list {
+        display: grid;
+
+        gap: 11px;
+    }
+
+
+    .od-info-item {
+        display: grid;
+
+        grid-template-columns:
+            31px
+            minmax(0, 1fr);
+
+        gap: 9px;
+    }
+
+
+    .od-info-icon {
+        width: 31px;
+        height: 31px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 8px;
+
+        background:
+            #fff1d5;
+
+        font-size: 14px;
+    }
+
+
+    .od-info-label {
+        color: #978b83;
+
+        font-size: 8.5px;
+    }
+
+
+    .od-info-value {
+        margin-top: 1px;
+
+        color: #4b4038;
+
+        font-size: 10px;
+
+        line-height: 1.5;
+
+        font-weight: 850;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .od-notes {
+        margin-top: 13px;
+
+        padding:
+            10px;
+
+        border:
+            1px solid #ead9bd;
+
+        border-radius: 9px;
+
+        color: #69543d;
+
+        background:
+            #fff9e8;
+
+        font-size: 9.5px;
+
+        line-height: 1.55;
+    }
+
+
+    .od-continue {
+        min-height: 42px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-top: 12px;
+
+        border-radius: 9px;
+
+        color: #fff;
+
+        background:
+            var(--od-green);
+
+        font-size: 10px;
+
+        font-weight: 900;
+    }
+
+
+    .od-continue:hover {
+        color: #fff;
+
+        background:
+            var(--od-green-dark);
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 1199.98px) {
+
+        .od-layout {
+            grid-template-columns:
+                minmax(0, 1fr)
+                315px;
         }
 
-        .order-detail-premium-page::after {
+
+        .od-payment-waiting {
+            grid-template-columns:
+                280px
+                minmax(0, 1fr);
+        }
+
+    }
+
+
+    @media (max-width: 991.98px) {
+
+        .od-layout {
+            grid-template-columns: 1fr;
+        }
+
+
+        .od-side {
+            position: static;
+        }
+
+
+        .od-payment-waiting {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 767.98px) {
+
+        .od-hero {
+            align-items: flex-start;
+
+            flex-direction: column;
+
+            padding:
+                25px 22px;
+        }
+
+
+        .od-hero-side {
+            align-items: flex-start;
+        }
+
+
+        .od-tracking {
+            grid-template-columns: 1fr;
+
+            gap: 10px;
+
+            margin-top: 0;
+        }
+
+
+        .od-track-line {
             display: none;
         }
 
-        .order-detail-hero {
-            align-items: flex-start;
-            flex-direction: column;
-            padding: 25px 22px;
-            border-radius: 22px;
+
+        .od-track-step {
+            display: grid;
+
+            grid-template-columns:
+                44px
+                minmax(0, 1fr);
+
+            align-items: center;
+
+            gap: 8px;
+
+            text-align: left;
         }
 
-        .order-detail-premium-page .order-card {
-            border-radius: 20px;
-        }
 
-        .order-detail-premium-page .tracking-wrapper {
-            padding-inline: 2px;
-        }
-
-        .order-detail-premium-page .tracking-line,
-        .order-detail-premium-page .tracking-progress {
-            top: 43px;
-        }
-
-        .order-detail-premium-page .tracking-circle {
-            width: 44px;
-            height: 44px;
-            font-size: 16px;
-        }
-
-        .order-detail-premium-page .table-responsive {
-            border-radius: 15px;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .order-detail-premium-page .tracking-label {
-            font-size: 10px;
-        }
-
-        .order-detail-premium-page .tracking-circle {
+        .od-track-circle {
             width: 40px;
             height: 40px;
-            border-width: 4px;
+
+            margin: 0;
+
+            border-width: 3px;
         }
 
-        .order-detail-premium-page .tracking-line,
-        .order-detail-premium-page .tracking-progress {
-            top: 41px;
+
+        .od-track-label {
+            margin-top: 0;
         }
 
-        .order-detail-premium-page .info-box {
-            padding: 16px;
-        }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-        .order-detail-premium-page *,
-        .order-detail-premium-page *::before,
-        .order-detail-premium-page *::after {
-            transition: none !important;
-            animation: none !important;
-        }
-    }
 
+    @media (max-width: 575.98px) {
+
+        .od-payment-body,
+        .od-card-body {
+            padding: 13px;
+        }
+
+
+        .od-bank-grid {
+            grid-template-columns: 1fr;
+        }
+
+
+        .od-bank-info.full {
+            grid-column: auto;
+        }
+
+
+        .od-payment-code-row {
+            grid-template-columns: 1fr;
+        }
+
+
+        .od-product {
+            grid-template-columns:
+                62px
+                minmax(0, 1fr);
+        }
+
+
+        .od-product-image {
+            width: 62px;
+            height: 62px;
+        }
+
+
+        .od-product-subtotal {
+            grid-column: 2;
+
+            justify-self: start;
+
+            text-align: left;
+        }
+
+
+        .od-summary-total-price {
+            font-size: 19px;
+        }
+
+    }
 </style>
 
-<div class="order-detail-premium-page row justify-content-center">
-    <div class="col-xl-11 col-lg-12">
 
-        <section class="order-detail-hero mb-4">
-            <div>
-                <div class="order-detail-kicker">🌿 TINH HOA TÂY BẮC</div>
+<div class="order-detail-page">
 
-                <h2 class="fw-bold mb-2">
-                    📦 Chi tiết đơn hàng
-                    #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}
-                </h2>
 
-                <p class="mb-0">
-                    Theo dõi trạng thái, thanh toán và toàn bộ sản phẩm trong đơn hàng.
-                </p>
+    {{-- =====================================================
+        BREADCRUMB
+    ====================================================== --}}
+    <div class="od-breadcrumb">
+
+        <a href="{{ url('/') }}">
+            Trang chủ
+        </a>
+
+        <span>›</span>
+
+        <a href="{{ route('orders.index') }}">
+            Đơn hàng của tôi
+        </a>
+
+        <span>›</span>
+
+        <span>
+
+            #{{
+                str_pad(
+                    $order->id,
+                    6,
+                    '0',
+                    STR_PAD_LEFT
+                )
+            }}
+
+        </span>
+
+    </div>
+
+
+    {{-- =====================================================
+        HERO
+    ====================================================== --}}
+    <section class="od-hero">
+
+
+        <div class="od-hero-copy">
+
+            <div class="od-kicker">
+                🌿 Tinh Hoa Tây Bắc
             </div>
 
-            <a href="{{ route('orders.index') }}" class="order-back-btn btn">
-                ← Quay lại danh sách
-            </a>
-        </section>
 
-        @php
-            $statusClass = [
-                'pending' => 'warning',
-                'confirmed' => 'info',
-                'shipped' => 'primary',
-                'delivered' => 'success',
-                'cancelled' => 'danger',
-            ][$order->status] ?? 'secondary';
+            <h1 class="od-title">
 
-            $statusText = [
-                'pending' => '⏳ Chờ xác nhận',
-                'confirmed' => '✓ Đã xác nhận',
-                'shipped' => '🚚 Đang giao hàng',
-                'delivered' => '✅ Đã giao hàng',
-                'cancelled' => '❌ Đã hủy',
-            ][$order->status] ?? 'Không xác định';
+                Đơn hàng
+                #{{
+                    str_pad(
+                        $order->id,
+                        6,
+                        '0',
+                        STR_PAD_LEFT
+                    )
+                }}
 
-            $statusStep = [
-                'pending' => 1,
-                'confirmed' => 2,
-                'shipped' => 3,
-                'delivered' => 4,
-            ][$order->status] ?? 0;
-
-            $progressWidth = match($statusStep) {
-                1 => '0%',
-                2 => '33.33%',
-                3 => '66.66%',
-                4 => '75%',
-                default => '0%',
-            };
-        @endphp
+            </h1>
 
 
-        @if($order->payment_method === 'bank')
-            <div
-                class="card shadow-sm border-0 mb-4 auto-payment-premium-card"
-                id="autoPaymentCard"
-                data-payment-status-url="{{ route('orders.paymentStatus', $order->id) }}"
+            <div class="od-description">
+
+                Đặt lúc
+
+                <strong>
+
+                    {{
+                        $order
+                            ->created_at
+                            ->format(
+                                'H:i · d/m/Y'
+                            )
+                    }}
+
+                </strong>
+
+                · Theo dõi vận chuyển,
+                thanh toán và sản phẩm
+                trong đơn hàng.
+
+            </div>
+
+        </div>
+
+
+        <div class="od-hero-side">
+
+            <span
+                class="
+                    od-status
+                    {{ $currentStatus['class'] }}
+                "
             >
-                <div class="card-header bg-primary text-white py-3">
-                    <strong>💳 Thanh toán QR tự động</strong>
+
+                {{ $currentStatus['icon'] }}
+
+                {{ $currentStatus['label'] }}
+
+            </span>
+
+
+            <a
+                href="{{ route('orders.index') }}"
+                class="od-back"
+            >
+                ← Quay lại đơn hàng
+            </a>
+
+        </div>
+
+    </section>
+
+
+    {{-- =====================================================
+    BANK PAYMENT
+====================================================== --}}
+
+@if($order->payment_method === 'bank')
+
+    <section
+        class="od-payment-card"
+        id="autoPaymentCard"
+
+        data-payment-status-url="{{
+            route(
+                'orders.paymentStatus',
+                $order
+            )
+        }}"
+
+        data-payment-expires-at="{{
+            $order->payment_expires_at
+                ? $order
+                    ->payment_expires_at
+                    ->toIso8601String()
+                : ''
+        }}"
+    >
+
+
+        {{-- =================================================
+            HEADER
+        ================================================== --}}
+
+        <div class="od-payment-head">
+
+            <div>
+
+                <strong>
+                    💳 Thanh toán QR tự động
+                </strong>
+
+                <span>
+                    · SePay xác nhận giao dịch
+                </span>
+
+            </div>
+
+
+            <div>
+
+                Mã đơn
+                #{{
+                    str_pad(
+                        $order->id,
+                        6,
+                        '0',
+                        STR_PAD_LEFT
+                    )
+                }}
+
+            </div>
+
+        </div>
+
+
+        <div class="od-payment-body">
+
+
+            {{-- =================================================
+                ĐÃ THANH TOÁN
+            ================================================== --}}
+
+            @if($order->payment_status === 'paid')
+
+                <div
+                    class="od-payment-success"
+                    id="paymentSuccessBox"
+                >
+
+                    <div class="od-payment-success-icon">
+                        ✅
+                    </div>
+
+
+                    <h3>
+                        Thanh toán thành công
+                    </h3>
+
+
+                    <p>
+
+                        Hệ thống đã ghi nhận
+                        thanh toán cho đơn hàng
+                        #{{
+                            str_pad(
+                                $order->id,
+                                6,
+                                '0',
+                                STR_PAD_LEFT
+                            )
+                        }}.
+
+                    </p>
+
                 </div>
 
-                <div class="card-body p-4">
 
-                    @if($order->payment_status === 'paid')
+            {{-- =================================================
+                ĐÃ HẾT HẠN / BỊ HỦY
+            ================================================== --}}
 
-                        <div class="alert alert-success mb-0" id="paymentSuccessBox">
-                            <h5 class="fw-bold mb-1">✅ Thanh toán thành công</h5>
-                            <div>
-                                Hệ thống đã ghi nhận thanh toán cho đơn
-                                #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}.
+            @elseif($order->status === 'cancelled')
+
+                <div
+                    class="od-payment-expired"
+                    id="paymentExpiredBox"
+                >
+
+                    <div class="od-payment-expired-icon">
+                        ⏰
+                    </div>
+
+
+                    <h3>
+                        Đã hết thời gian thanh toán
+                    </h3>
+
+
+                    <p>
+
+                        Đơn hàng đã bị hủy vì
+                        không nhận được thanh toán
+                        chuyển khoản trong vòng
+                        5 phút.
+
+                        Số lượng sản phẩm đã được
+                        hoàn lại vào kho.
+
+                    </p>
+
+                </div>
+
+
+            {{-- =================================================
+                ĐANG CHỜ THANH TOÁN
+            ================================================== --}}
+
+            @else
+
+                <div id="paymentWaitingBox">
+
+
+                    {{-- =========================================
+                        COUNTDOWN
+                    ========================================== --}}
+
+                    <div class="od-payment-countdown">
+
+                        <div class="od-payment-countdown-left">
+
+                            <div class="od-payment-countdown-label">
+                                Thời gian thanh toán còn lại
                             </div>
+
+
+                            <div class="od-payment-countdown-note">
+
+                                Đơn hàng sẽ tự động bị hủy
+                                nếu chưa nhận được thanh toán
+                                khi đồng hồ về 00:00.
+
+                            </div>
+
                         </div>
 
-                    @else
-
-                        <div id="paymentWaitingBox">
-                            <div class="alert alert-warning">
-                                ⏳ Đang chờ thanh toán. Hãy chuyển
-                                <strong>đúng số tiền</strong> và giữ nguyên
-                                <strong>nội dung chuyển khoản</strong>.
-                            </div>
-
-                            <div class="row g-4 align-items-center">
-                                <div class="col-lg-5 text-center">
-                                    @php
-                                        $bankCode = 'MB';
-                                        $accountNumber = '0385742505';
-                                        $accountName = 'DO PHUONG NAM';
-                                        $qrAmount = (int) round((float) $order->total_price);
-                                        $qrContent = $order->payment_code;
-
-                                        $qrUrl =
-                                            'https://img.vietqr.io/image/' .
-                                            $bankCode . '-' .
-                                            $accountNumber .
-                                            '-compact2.png?amount=' .
-                                            $qrAmount .
-                                            '&addInfo=' .
-                                            urlencode($qrContent) .
-                                            '&accountName=' .
-                                            urlencode($accountName);
-                                    @endphp
-
-                                    <div class="bg-white border rounded-4 p-3 d-inline-block shadow-sm">
-                                        <img
-                                            src="{{ $qrUrl }}"
-                                            alt="QR thanh toán đơn hàng"
-                                            class="img-fluid"
-                                            style="width:300px;max-width:100%;"
-                                        >
-                                    </div>
-
-                                    <div class="small text-muted mt-2">
-                                        Mở ứng dụng ngân hàng và quét mã QR
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-7">
-                                    <div class="mb-3">
-                                        <div class="text-muted small">Ngân hàng</div>
-                                        <div class="fw-bold fs-5">MB BANK</div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="text-muted small">Số tài khoản</div>
-                                        <div class="fw-bold fs-4 text-primary">0385742505</div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="text-muted small">Chủ tài khoản</div>
-                                        <div class="fw-bold">ĐỖ PHƯƠNG NAM</div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="text-muted small">Số tiền</div>
-                                        <div class="fw-bold fs-3 text-danger">
-                                            {{ number_format($order->total_price, 0, ',', '.') }} đ
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="text-muted small">Nội dung chuyển khoản</div>
-
-                                        <div class="input-group">
-                                            <input
-                                                type="text"
-                                                id="orderPaymentCode"
-                                                class="form-control fw-bold"
-                                                value="{{ $order->payment_code }}"
-                                                readonly
-                                            >
-
-                                            <button
-                                                class="btn btn-outline-primary"
-                                                type="button"
-                                                onclick="copyOrderPaymentCode()"
-                                            >
-                                                📋 Sao chép
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="alert alert-info mb-0">
-                                        🔄 Trang đang tự kiểm tra trạng thái thanh toán.
-                                        Khi SePay nhận giao dịch hợp lệ, thông báo thành công
-                                        sẽ tự xuất hiện mà không cần tải lại trang.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <div
-                            class="alert alert-success d-none mb-0"
-                            id="paymentSuccessBox"
+                            class="od-payment-timer"
+                            id="paymentCountdownTimer"
                         >
-                            <h5 class="fw-bold mb-1">✅ Thanh toán thành công</h5>
-                            <div>
-                                Hệ thống đã nhận được tiền và xác nhận thanh toán cho đơn hàng.
-                            </div>
-                        </div>
-
-                    @endif
-
-                </div>
-            </div>
-        @endif
-
-
-                <div class="card order-card shadow-sm border-0 mb-4">
-
-
-                    {{-- ==============================
-                        HEADER ĐƠN HÀNG
-                    ============================== --}}
-                    <div class="card-header order-header p-4">
-
-                        <div class="row align-items-center">
-
-
-                            <div class="col-md-6">
-
-                                <div class="text-muted small mb-1">
-                                    Mã đơn hàng
-                                </div>
-
-                                <h5 class="fw-bold mb-1">
-
-                                    #{{ str_pad(
-                                        $order->id,
-                                        6,
-                                        '0',
-                                        STR_PAD_LEFT
-                                    ) }}
-
-                                </h5>
-
-
-                                <small class="text-muted">
-
-                                    🕐 Đặt lúc:
-
-                                    {{ $order->created_at
-                                        ->format('d/m/Y H:i') }}
-
-                                </small>
-
-                            </div>
-
-
-                            <div class="col-md-6 text-md-end mt-3 mt-md-0">
-
-                                <div class="text-muted small mb-2">
-
-                                    Trạng thái hiện tại
-
-                                </div>
-
-
-                                <span class="
-                                    badge
-                                    bg-{{ $statusClass }}
-                                    status-badge">
-
-                                    {{ $statusText }}
-
-                                </span>
-
-                            </div>
-
-
+                            05:00
                         </div>
 
                     </div>
 
 
+                    {{-- =========================================
+                        ALERT
+                    ========================================== --}}
 
-                    <div class="card-body p-4">
+                    <div class="od-payment-alert">
+
+                        ⏳ Đơn hàng đang chờ thanh toán.
+
+                        Hãy chuyển
+
+                        <strong>
+                            đúng số tiền
+                        </strong>
+
+                        và giữ nguyên
+
+                        <strong>
+                            nội dung chuyển khoản
+                        </strong>
+
+                        để hệ thống nhận diện
+                        giao dịch tự động.
+
+                    </div>
 
 
-                        {{-- ==============================
-                            ĐƠN HÀNG BỊ HỦY
-                        ============================== --}}
-                        @if($order->status === 'cancelled')
+                    <div class="od-payment-waiting">
 
-                            <div class="alert alert-danger">
 
-                                <div class="d-flex align-items-center">
+                        {{-- =====================================
+                            QR
+                        ====================================== --}}
 
-                                    <div class="fs-2 me-3">
-                                        ❌
+                        <div class="od-qr-side">
+
+                            <div class="od-qr-box">
+
+                                <img
+                                    src="{{ $qrUrl }}"
+                                    alt="QR thanh toán đơn hàng"
+                                >
+
+                            </div>
+
+
+                            <div class="od-qr-help">
+
+                                Mở ứng dụng ngân hàng
+                                và quét mã QR
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- =====================================
+                            BANK INFO
+                        ====================================== --}}
+
+                        <div>
+
+                            <div class="od-bank-grid">
+
+
+                                <div class="od-bank-info">
+
+                                    <div class="od-bank-label">
+                                        Ngân hàng
                                     </div>
 
-                                    <div>
+                                    <div class="od-bank-value">
+                                        {{ $bankName }}
+                                    </div>
 
-                                        <strong>
-                                            Đơn hàng đã bị hủy
-                                        </strong>
+                                </div>
 
-                                        <div class="small mt-1">
 
-                                            Đơn hàng này hiện không còn
-                                            trong quá trình giao hàng.
+                                <div class="od-bank-info">
 
-                                        </div>
+                                    <div class="od-bank-label">
+                                        Chủ tài khoản
+                                    </div>
 
+                                    <div class="od-bank-value">
+                                        {{ $accountNameDisplay }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="od-bank-info full">
+
+                                    <div class="od-bank-label">
+                                        Số tài khoản
+                                    </div>
+
+                                    <div class="od-bank-value">
+                                        {{ $accountNumber }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="od-bank-info full">
+
+                                    <div class="od-bank-label">
+                                        Số tiền cần chuyển
+                                    </div>
+
+
+                                    <div
+                                        class="
+                                            od-bank-value
+                                            money
+                                        "
+                                    >
+
+                                        {{
+                                            number_format(
+                                                (float)
+                                                    $order
+                                                        ->total_price,
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}đ
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="od-bank-info full">
+
+                                    <div class="od-bank-label">
+                                        Nội dung chuyển khoản
+                                    </div>
+
+
+                                    <div class="od-payment-code-row">
+
+                                        <input
+                                            type="text"
+                                            id="orderPaymentCode"
+                                            class="od-payment-code"
+                                            value="{{
+                                                $order
+                                                    ->payment_code
+                                            }}"
+                                            readonly
+                                        >
+
+
+                                        <button
+                                            type="button"
+                                            class="od-copy-btn"
+                                            id="copyPaymentButton"
+                                        >
+                                            📋 Sao chép
+                                        </button>
+
+                                    </div>
+
+
+                                    <div
+                                        class="od-copy-feedback"
+                                        id="copyPaymentFeedback"
+                                    >
                                     </div>
 
                                 </div>
@@ -940,871 +2883,2180 @@
                             </div>
 
 
-                        @else
+                            <div class="od-payment-checking">
+
+                                🔄 Hệ thống đang tự động
+                                kiểm tra thanh toán
+                                mỗi 3 giây.
+
+                                Khi SePay nhận được
+                                giao dịch hợp lệ,
+                                trạng thái sẽ tự động
+                                chuyển sang
+                                thanh toán thành công.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
 
-                            {{-- ==============================
-                                THEO DÕI ĐƠN HÀNG
-                            ============================== --}}
-                            <div class="mb-5">
+                {{-- =============================================
+                    SUCCESS BOX - JS SẼ HIỆN
+                ============================================== --}}
+
+                <div
+                    class="
+                        od-payment-success
+                        d-none
+                    "
+                    id="paymentSuccessBox"
+                >
+
+                    <div class="od-payment-success-icon">
+                        ✅
+                    </div>
 
 
-                                <h5 class="fw-bold mb-1">
-
-                                    🚚 Theo dõi đơn hàng
-
-                                </h5>
+                    <h3>
+                        Thanh toán thành công
+                    </h3>
 
 
-                                <p class="text-muted small">
+                    <p>
 
-                                    Trạng thái được cập nhật bởi cửa hàng
+                        Hệ thống đã nhận được tiền
+                        và xác nhận thanh toán
+                        cho đơn hàng này.
+
+                    </p>
+
+                </div>
+
+
+                {{-- =============================================
+                    EXPIRED BOX - JS SẼ HIỆN
+                ============================================== --}}
+
+                <div
+                    class="
+                        od-payment-expired
+                        d-none
+                    "
+                    id="paymentExpiredBox"
+                >
+
+                    <div class="od-payment-expired-icon">
+                        ⏰
+                    </div>
+
+
+                    <h3>
+                        Đã hết thời gian thanh toán
+                    </h3>
+
+
+                    <p>
+
+                        Đã quá 5 phút
+                        nhưng hệ thống chưa nhận được
+                        thanh toán hợp lệ.
+
+                        Đơn hàng đã tự động bị hủy
+                        và tồn kho được hoàn lại.
+
+                    </p>
+
+                </div>
+
+            @endif
+
+        </div>
+
+    </section>
+
+@endif
+
+
+    {{-- =====================================================
+        MAIN LAYOUT
+    ====================================================== --}}
+    <div class="od-layout">
+
+
+        {{-- =================================================
+            LEFT
+        ================================================== --}}
+        <div class="od-main">
+
+
+            {{-- =============================================
+                TRACKING
+            ============================================== --}}
+            <section class="od-card">
+
+
+                <div class="od-card-head">
+
+                    <div>
+
+                        <h2 class="od-card-title">
+                            🚚 Theo dõi đơn hàng
+                        </h2>
+
+                        <div class="od-card-subtitle">
+                            Trạng thái được cập nhật bởi cửa hàng.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="od-card-body">
+
+
+                    @if($order->status === 'cancelled')
+
+                        <div class="od-cancelled">
+
+                            <div class="od-cancelled-icon">
+                                ❌
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+                                    Đơn hàng đã bị hủy
+                                </strong>
+
+
+                                <p>
+
+                                    Đơn hàng này hiện
+                                    không còn trong quá trình
+                                    xử lý và vận chuyển.
 
                                 </p>
 
+                            </div>
+
+                        </div>
 
 
-                                <div class="tracking-wrapper">
+                    @else
+
+                        <div class="od-tracking">
 
 
-                                    {{-- Đường xám --}}
-                                    <div class="tracking-line"></div>
+                            <div class="od-track-line">
+
+                                <div
+                                    class="od-track-progress"
+                                    style="
+                                        width:
+                                        {{ $progressWidth }};
+                                    "
+                                >
+                                </div>
+
+                            </div>
 
 
-                                    {{-- Đường xanh --}}
-                                    <div class="tracking-progress"
-                                         style="width: {{ $progressWidth }};">
+                            {{-- PENDING --}}
+                            <div class="od-track-step">
+
+                                <div
+                                    class="
+                                        od-track-circle
+                                        {{
+                                            $statusStep > 1
+                                            ? 'done'
+                                            : ''
+                                        }}
+                                        {{
+                                            $statusStep === 1
+                                            ? 'current'
+                                            : ''
+                                        }}
+                                    "
+                                >
+                                    🛒
+                                </div>
+
+
+                                <div
+                                    class="
+                                        od-track-label
+                                        {{
+                                            $statusStep > 1
+                                            ? 'done'
+                                            : ''
+                                        }}
+                                        {{
+                                            $statusStep === 1
+                                            ? 'current'
+                                            : ''
+                                        }}
+                                    "
+                                >
+                                    Chờ xác nhận
+                                </div>
+
+                            </div>
+
+
+                            {{-- CONFIRMED --}}
+                            <div class="od-track-step">
+
+                                <div
+                                    class="
+                                        od-track-circle
+                                        {{
+                                            $statusStep > 2
+                                            ? 'done'
+                                            : ''
+                                        }}
+                                        {{
+                                            $statusStep === 2
+                                            ? 'current'
+                                            : ''
+                                        }}
+                                    "
+                                >
+                                    ✓
+                                </div>
+
+
+                                <div
+                                    class="
+                                        od-track-label
+                                        {{
+                                            $statusStep > 2
+                                            ? 'done'
+                                            : ''
+                                        }}
+                                        {{
+                                            $statusStep === 2
+                                            ? 'current'
+                                            : ''
+                                        }}
+                                    "
+                                >
+                                    Đã xác nhận
+                                </div>
+
+                            </div>
+
+
+                            {{-- SHIPPED --}}
+                            <div class="od-track-step">
+
+                                <div
+                                    class="
+                                        od-track-circle
+                                        {{
+                                            $statusStep > 3
+                                            ? 'done'
+                                            : ''
+                                        }}
+                                        {{
+                                            $statusStep === 3
+                                            ? 'current'
+                                            : ''
+                                        }}
+                                    "
+                                >
+                                    🚚
+                                </div>
+
+
+                                <div
+                                    class="
+                                        od-track-label
+                                        {{
+                                            $statusStep > 3
+                                            ? 'done'
+                                            : ''
+                                        }}
+                                        {{
+                                            $statusStep === 3
+                                            ? 'current'
+                                            : ''
+                                        }}
+                                    "
+                                >
+                                    Đang giao
+                                </div>
+
+                            </div>
+
+
+                            {{-- DELIVERED --}}
+                            <div class="od-track-step">
+
+                                <div
+                                    class="
+                                        od-track-circle
+                                        {{
+                                            $statusStep >= 4
+                                            ? 'done'
+                                            : ''
+                                        }}
+                                    "
+                                >
+                                    ✅
+                                </div>
+
+
+                                <div
+                                    class="
+                                        od-track-label
+                                        {{
+                                            $statusStep >= 4
+                                            ? 'done'
+                                            : ''
+                                        }}
+                                    "
+                                >
+                                    Đã giao
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    @endif
+
+                </div>
+
+            </section>
+
+
+            {{-- =============================================
+                PRODUCTS
+            ============================================== --}}
+            <section class="od-card">
+
+
+                <div class="od-card-head">
+
+                    <div>
+
+                        <h2 class="od-card-title">
+                            📦 Sản phẩm trong đơn
+                        </h2>
+
+                        <div class="od-card-subtitle">
+
+                            {{
+                                $order
+                                    ->items
+                                    ->count()
+                            }}
+                            dòng sản phẩm
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="od-card-body">
+
+                    <div class="od-products">
+
+
+                        @forelse($order->items as $item)
+
+                            @php
+                                $product =
+                                    $item->product;
+
+
+                                $productImage =
+                                    null;
+
+
+                                if (
+                                    $product
+                                    &&
+                                    $product->image
+                                ) {
+
+                                    $productImage =
+                                        str_starts_with(
+                                            $product->image,
+                                            'http'
+                                        )
+
+                                        ? $product->image
+
+                                        : asset(
+                                            'storage/'
+                                            .
+                                            ltrim(
+                                                $product->image,
+                                                '/'
+                                            )
+                                        );
+
+                                }
+
+
+                                $unit =
+                                    $product?->unit
+                                    ??
+                                    'sản phẩm';
+
+
+                                $quantity =
+                                    (float)
+                                    $item->quantity;
+
+
+                                $itemPrice =
+                                    (float)
+                                    $item->price;
+
+
+                                $itemSubtotal =
+                                    $itemPrice
+                                    *
+                                    $quantity;
+
+
+                                $myReview =
+                                    $myReviews->get(
+                                        $item->product_id
+                                    );
+
+
+                                $reviewCollapseId =
+                                    'order-review-'
+                                    .
+                                    $item->id;
+                            @endphp
+
+
+                            <article class="od-product">
+
+
+                                {{-- IMAGE --}}
+                                <div class="od-product-image">
+
+                                    @if($productImage)
+
+                                        <img
+                                            src="{{ $productImage }}"
+                                            alt="{{
+                                                $product?->name
+                                                ??
+                                                'Sản phẩm'
+                                            }}"
+                                            loading="lazy"
+                                            onerror="
+                                                this.style.display='none';
+                                                this.nextElementSibling.style.display='grid';
+                                            "
+                                        >
+
+
+                                        <div
+                                            class="od-product-fallback"
+                                            style="display:none;"
+                                        >
+                                            🧺
+                                        </div>
+
+                                    @else
+
+                                        <div class="od-product-fallback">
+                                            🧺
+                                        </div>
+
+                                    @endif
+
+                                </div>
+
+
+                                {{-- INFO --}}
+                                <div class="od-product-info">
+
+
+                                    @if($product)
+
+                                        <a
+                                            href="{{
+                                                route(
+                                                    'products.show',
+                                                    $product
+                                                )
+                                            }}"
+                                            class="od-product-name"
+                                        >
+                                            {{ $product->name }}
+                                        </a>
+
+                                    @else
+
+                                        <div class="od-product-name">
+                                            Sản phẩm không còn tồn tại
+                                        </div>
+
+                                    @endif
+
+
+                                    <div class="od-product-meta">
+
+                                        Số lượng:
+
+                                        <strong>
+
+                                            {{
+                                                $formatQuantity(
+                                                    $quantity
+                                                )
+                                            }}
+
+                                            {{ $unit }}
+
+                                        </strong>
+
                                     </div>
 
 
+                                    <div class="od-product-unit-price">
 
-                                    <div class="row g-0">
+                                        Đơn giá:
 
+                                        {{
+                                            number_format(
+                                                $itemPrice,
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}đ
 
-                                        {{-- =====================
-                                            BƯỚC 1
-                                        ===================== --}}
-                                        <div class="col tracking-step">
-
-
-                                            <div class="
-                                                tracking-circle
-                                                {{ $statusStep > 1
-                                                    ? 'active'
-                                                    : '' }}
-
-                                                {{ $statusStep === 1
-                                                    ? 'current'
-                                                    : '' }}
-                                            ">
-
-                                                🛒
-
-                                            </div>
-
-
-                                            <div class="
-                                                tracking-label
-                                                {{ $statusStep > 1
-                                                    ? 'active'
-                                                    : '' }}
-
-                                                {{ $statusStep === 1
-                                                    ? 'current'
-                                                    : '' }}
-                                            ">
-
-                                                Chờ xác nhận
-
-                                            </div>
-
-                                        </div>
-
-
-
-                                        {{-- =====================
-                                            BƯỚC 2
-                                        ===================== --}}
-                                        <div class="col tracking-step">
-
-
-                                            <div class="
-                                                tracking-circle
-
-                                                {{ $statusStep > 2
-                                                    ? 'active'
-                                                    : '' }}
-
-                                                {{ $statusStep === 2
-                                                    ? 'current'
-                                                    : '' }}
-                                            ">
-
-                                                ✓
-
-                                            </div>
-
-
-                                            <div class="
-                                                tracking-label
-
-                                                {{ $statusStep > 2
-                                                    ? 'active'
-                                                    : '' }}
-
-                                                {{ $statusStep === 2
-                                                    ? 'current'
-                                                    : '' }}
-                                            ">
-
-                                                Đã xác nhận
-
-                                            </div>
-
-                                        </div>
-
-
-
-                                        {{-- =====================
-                                            BƯỚC 3
-                                        ===================== --}}
-                                        <div class="col tracking-step">
-
-
-                                            <div class="
-                                                tracking-circle
-
-                                                {{ $statusStep > 3
-                                                    ? 'active'
-                                                    : '' }}
-
-                                                {{ $statusStep === 3
-                                                    ? 'current'
-                                                    : '' }}
-                                            ">
-
-                                                🚚
-
-                                            </div>
-
-
-                                            <div class="
-                                                tracking-label
-
-                                                {{ $statusStep > 3
-                                                    ? 'active'
-                                                    : '' }}
-
-                                                {{ $statusStep === 3
-                                                    ? 'current'
-                                                    : '' }}
-                                            ">
-
-                                                Đang giao
-
-                                            </div>
-
-                                        </div>
-
-
-
-                                        {{-- =====================
-                                            BƯỚC 4
-                                        ===================== --}}
-                                        <div class="col tracking-step">
-
-
-                                            <div class="
-                                                tracking-circle
-
-                                                {{ $statusStep >= 4
-                                                    ? 'active'
-                                                    : '' }}
-                                            ">
-
-                                                ✅
-
-                                            </div>
-
-
-                                            <div class="
-                                                tracking-label
-
-                                                {{ $statusStep >= 4
-                                                    ? 'active'
-                                                    : '' }}
-                                            ">
-
-                                                Đã giao
-
-                                            </div>
-
-                                        </div>
-
+                                        / {{ $unit }}
 
                                     </div>
 
                                 </div>
 
+
+                                {{-- SUBTOTAL --}}
+                                <div class="od-product-subtotal">
+
+                                    {{
+                                        number_format(
+                                            $itemSubtotal,
+                                            0,
+                                            ',',
+                                            '.'
+                                        )
+                                    }}đ
+
+                                </div>
+
+
+                                {{-- REVIEW --}}
+                                @if($order->status === 'delivered' && $product)
+
+                                    <div class="od-review-area">
+
+
+                                        <button
+                                            type="button"
+                                            class="
+                                                od-review-toggle
+                                                {{
+                                                    $myReview
+                                                    ? 'reviewed'
+                                                    : ''
+                                                }}
+                                            "
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#{{
+                                                $reviewCollapseId
+                                            }}"
+                                            aria-expanded="false"
+                                        >
+
+                                            @if($myReview)
+
+                                                ⭐ Đã đánh giá
+                                                {{ $myReview->rating }}/5
+
+                                            @else
+
+                                                ⭐ Đánh giá sản phẩm
+
+                                            @endif
+
+                                        </button>
+
+
+                                        <div
+                                            class="collapse"
+                                            id="{{ $reviewCollapseId }}"
+                                        >
+
+                                            <div class="od-review-box">
+
+
+                                                <div class="od-review-head">
+
+                                                    <strong>
+
+                                                        {{
+                                                            $myReview
+                                                            ? 'Chỉnh sửa đánh giá'
+                                                            : 'Đánh giá sản phẩm'
+                                                        }}
+
+                                                    </strong>
+
+
+                                                    @if($myReview)
+
+                                                        <span class="od-review-current">
+
+                                                            {{
+                                                                $myReview->rating
+                                                            }}/5 sao
+
+                                                        </span>
+
+                                                    @endif
+
+                                                </div>
+
+
+                                                <form
+                                                    action="{{
+                                                        route(
+                                                            'reviews.store',
+                                                            $item->product_id
+                                                        )
+                                                    }}"
+                                                    method="POST"
+                                                >
+
+                                                    @csrf
+
+
+                                                    <div class="od-review-stars">
+
+
+                                                        @for($star = 5; $star >= 1; $star--)
+
+                                                            <input
+                                                                type="radio"
+                                                                id="item{{
+                                                                    $item->id
+                                                                }}Star{{
+                                                                    $star
+                                                                }}"
+                                                                name="rating"
+                                                                value="{{
+                                                                    $star
+                                                                }}"
+                                                                {{
+                                                                    (int)
+                                                                    old(
+                                                                        'rating',
+                                                                        $myReview
+                                                                            ?->rating
+                                                                        ??
+                                                                        0
+                                                                    )
+                                                                    ===
+                                                                    $star
+                                                                    ? 'checked'
+                                                                    : ''
+                                                                }}
+                                                                required
+                                                            >
+
+
+                                                            <label
+                                                                for="item{{
+                                                                    $item->id
+                                                                }}Star{{
+                                                                    $star
+                                                                }}"
+                                                                title="{{
+                                                                    $star
+                                                                }} sao"
+                                                            >
+                                                                ★
+                                                            </label>
+
+                                                        @endfor
+
+                                                    </div>
+
+
+                                                    <textarea
+                                                        name="comment"
+                                                        class="od-review-textarea"
+                                                        maxlength="1000"
+                                                        placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
+                                                    >{{ old(
+                                                        'comment',
+                                                        $myReview
+                                                            ?->comment
+                                                    ) }}</textarea>
+
+
+                                                    <button
+                                                        type="submit"
+                                                        class="od-review-submit"
+                                                    >
+
+                                                        @if($myReview)
+
+                                                            ⭐ Cập nhật đánh giá
+
+                                                        @else
+
+                                                            ⭐ Gửi đánh giá
+
+                                                        @endif
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                @endif
+
+                            </article>
+
+
+                        @empty
+
+                            <div
+                                class="
+                                    text-center
+                                    text-muted
+                                    py-5
+                                "
+                            >
+
+                                📦
+
+                                <div class="mt-2">
+                                    Không có sản phẩm trong đơn hàng.
+                                </div>
+
                             </div>
 
-                        @endif
+                        @endforelse
+
+                    </div>
+
+                </div>
+
+            </section>
 
 
-
-                        {{-- ==============================
-                            THÔNG TIN ĐƠN HÀNG
-                        ============================== --}}
-                        <div class="row g-4 mb-4">
-
-
-                            {{-- GIAO HÀNG --}}
-                            <div class="col-md-7">
-
-                                <div class="info-box">
-
-                                    <h5 class="fw-bold mb-3">
-
-                                        📍 Thông tin giao hàng
-
-                                    </h5>
+            {{-- =============================================
+                ORDER HISTORY
+            ============================================== --}}
+            <section class="od-card">
 
 
-                                    <div class="mb-2">
+                <div class="od-card-head">
 
-                                        <span class="text-muted">
+                    <div>
 
-                                            Người nhận:
+                        <h2 class="od-card-title">
+                            🕐 Lịch sử đơn hàng
+                        </h2>
 
-                                        </span>
+                        <div class="od-card-subtitle">
+                            Các mốc cập nhật của đơn hàng.
+                        </div>
 
-                                        <strong>
+                    </div>
 
-                                            {{ $order->customer_name
-                                                ?? 'Chưa cập nhật' }}
+                </div>
 
-                                        </strong>
+
+                <div class="od-card-body">
+
+
+                    <div class="od-history">
+
+
+                        @forelse($order->statusHistories as $history)
+
+                            @php
+                                $historyConfig =
+                                    $statusConfig[
+                                        $history->status
+                                    ]
+                                    ??
+                                    [
+                                        'icon'
+                                            =>
+                                            '📦',
+                                    ];
+                            @endphp
+
+
+                            <div class="od-history-item">
+
+
+                                <div class="od-history-icon-wrap">
+
+                                    <div class="od-history-icon">
+
+                                        {{
+                                            $historyConfig['icon']
+                                        }}
+
+                                    </div>
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="od-history-title">
+
+                                        {{
+                                            $history->title
+                                            ??
+                                            'Trạng thái đơn hàng thay đổi'
+                                        }}
 
                                     </div>
 
 
-                                    <div class="mb-2">
+                                    @if($history->note)
 
-                                        <span class="text-muted">
+                                        <div class="od-history-note">
 
-                                            Số điện thoại:
-
-                                        </span>
-
-                                        <strong>
-
-                                            {{ $order->customer_phone
-                                                ?? 'Chưa cập nhật' }}
-
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="mb-2">
-
-                                        <span class="text-muted">
-
-                                            Địa chỉ:
-
-                                        </span>
-
-                                        <strong>
-
-                                            {{ $order->shipping_address
-                                                ?? 'Chưa cập nhật' }}
-
-                                        </strong>
-
-                                    </div>
-
-
-                                    @if($order->notes)
-
-                                        <div class="mt-3">
-
-                                            <span class="text-muted">
-
-                                                Ghi chú:
-
-                                            </span>
-
-                                            {{ $order->notes }}
+                                            {{ $history->note }}
 
                                         </div>
 
                                     @endif
 
 
+                                    <div class="od-history-time">
+
+                                        {{
+                                            $history
+                                                ->created_at
+                                                ->format(
+                                                    'H:i · d/m/Y'
+                                                )
+                                        }}
+
+
+                                        @if($history->user)
+
+                                            · cập nhật bởi
+
+                                            {{
+                                                $history
+                                                    ->user
+                                                    ->name
+                                            }}
+
+                                        @endif
+
+                                    </div>
+
                                 </div>
 
                             </div>
 
 
+                        @empty
 
-{{-- THANH TOÁN --}}
-<div class="col-md-5">
+                            <div
+                                class="
+                                    text-center
+                                    text-muted
+                                    py-3
+                                "
+                                style="font-size:10px;"
+                            >
 
-    <div class="info-box">
+                                Chưa có lịch sử cập nhật.
 
-        <h5 class="fw-bold mb-3">
-            💳 Thanh toán
-        </h5>
+                            </div>
 
+                        @endforelse
 
-        {{-- PHƯƠNG THỨC THANH TOÁN --}}
-        <div class="mb-3">
+                    </div>
 
-            <div class="text-muted small mb-1">
-                Phương thức
-            </div>
+                </div>
 
-            @if($order->payment_method === 'cod')
-
-                <span class="badge bg-secondary">
-                    💵 Thanh toán khi nhận hàng
-                </span>
-
-            @elseif($order->payment_method === 'bank')
-
-                <span class="badge bg-primary">
-                    🏦 Chuyển khoản ngân hàng
-                </span>
-
-            @else
-
-                <span class="badge bg-secondary">
-                    {{ strtoupper(
-                        $order->payment_method ?? 'Không xác định'
-                    ) }}
-                </span>
-
-            @endif
+            </section>
 
         </div>
 
 
-        <hr>
+        {{-- =================================================
+            RIGHT
+        ================================================== --}}
+        <aside class="od-side">
 
 
-        {{-- TRẠNG THÁI THANH TOÁN --}}
-        <div class="mb-3">
-
-            <div class="text-muted small mb-2">
-                Trạng thái thanh toán
-            </div>
+            {{-- =============================================
+                SUMMARY
+            ============================================== --}}
+            <section class="od-card">
 
 
-            {{-- ĐÃ THANH TOÁN --}}
-            @if($order->payment_status === 'paid')
+                <div
+                    class="
+                        od-card-head
+                        od-summary-head
+                    "
+                >
 
-                <div class="alert alert-success mb-0">
+                    <div>
 
-                    <strong>
-                        ✅ Đã thanh toán
-                    </strong>
+                        <h2 class="od-card-title">
+                            🧾 Tổng đơn hàng
+                        </h2>
 
-                    <div class="small mt-1">
-                        Shop đã xác nhận nhận được tiền.
+                        <div class="od-card-subtitle">
+
+                            #{{
+                                str_pad(
+                                    $order->id,
+                                    6,
+                                    '0',
+                                    STR_PAD_LEFT
+                                )
+                            }}
+
+                        </div>
+
                     </div>
 
                 </div>
 
 
-            {{-- CHỜ ADMIN XÁC NHẬN --}}
-            @elseif($order->payment_status === 'pending_confirmation')
+                <div class="od-card-body">
 
-                <div class="alert alert-warning">
 
-                    <strong>
-                        ⏳ Chờ xác nhận chuyển khoản
-                    </strong>
+                    <div class="od-summary-row">
 
-                    <div class="small mt-1">
-                        Shop đang kiểm tra giao dịch chuyển khoản của bạn.
-                        Trạng thái sẽ được cập nhật sau khi thanh toán được xác nhận.
+                        <span>
+                            Tiền sản phẩm
+                        </span>
+
+                        <strong>
+
+                            {{
+                                number_format(
+                                    (float)
+                                    (
+                                        $order->subtotal
+                                        ??
+                                        0
+                                    ),
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="od-summary-row">
+
+                        <span>
+                            Phí vận chuyển
+                        </span>
+
+                        <strong>
+
+                            {{
+                                number_format(
+                                    (float)
+                                    (
+                                        $order->shipping_fee
+                                        ??
+                                        0
+                                    ),
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            od-summary-row
+                            od-summary-discount
+                        "
+                    >
+
+                        <span>
+                            Giảm giá
+                        </span>
+
+                        <strong>
+
+                            -{{
+                                number_format(
+                                    (float)
+                                    (
+                                        $order->discount
+                                        ??
+                                        0
+                                    ),
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </strong>
+
+                    </div>
+
+
+                    @if($order->voucher_code)
+
+                        <div class="od-summary-row">
+
+                            <span>
+                                Voucher
+                            </span>
+
+                            <strong>
+                                🎟 {{ $order->voucher_code }}
+                            </strong>
+
+                        </div>
+
+                    @endif
+
+
+                    <div class="od-summary-divider">
+                    </div>
+
+
+                    <div class="od-summary-total">
+
+                        <div class="od-summary-total-label">
+                            Tổng thanh toán
+                        </div>
+
+
+                        <div class="od-summary-total-price">
+
+                            {{
+                                number_format(
+                                    (float)
+                                    $order->total_price,
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="paymentStatusBadge"
+                        class="
+                            od-payment-status
+                            {{ $paymentStatus['class'] }}
+                        "
+                    >
+
+                        {{ $paymentStatus['icon'] }}
+
+                        <span id="paymentStatusText">
+                            {{ $paymentStatus['label'] }}
+                        </span>
+
+                    </div>
+
+
+                    <a
+                        href="{{ route('products.index') }}"
+                        class="od-continue"
+                    >
+                        🌿 Tiếp tục mua sắm →
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            {{-- =============================================
+                SHIPPING INFO
+            ============================================== --}}
+            <section class="od-card">
+
+
+                <div class="od-card-head">
+
+                    <div>
+
+                        <h2 class="od-card-title">
+                            📍 Thông tin nhận hàng
+                        </h2>
+
                     </div>
 
                 </div>
 
 
-            {{-- CHƯA THANH TOÁN --}}
-            @else
+                <div class="od-card-body">
 
-                <div class="alert alert-secondary mb-0">
+                    <div class="od-info-list">
 
-                    <strong>
-                        💵 Chưa thanh toán
-                    </strong>
 
-                    @if($order->payment_method === 'cod')
+                        <div class="od-info-item">
 
-                        <div class="small mt-1">
-                            Khách hàng sẽ thanh toán khi nhận hàng.
+                            <div class="od-info-icon">
+                                👤
+                            </div>
+
+
+                            <div>
+
+                                <div class="od-info-label">
+                                    Người nhận
+                                </div>
+
+                                <div class="od-info-value">
+
+                                    {{
+                                        $order->customer_name
+                                        ??
+                                        'Chưa cập nhật'
+                                    }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="od-info-item">
+
+                            <div class="od-info-icon">
+                                ☎
+                            </div>
+
+
+                            <div>
+
+                                <div class="od-info-label">
+                                    Số điện thoại
+                                </div>
+
+                                <div class="od-info-value">
+
+                                    {{
+                                        $order->customer_phone
+                                        ??
+                                        'Chưa cập nhật'
+                                    }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="od-info-item">
+
+                            <div class="od-info-icon">
+                                🏠
+                            </div>
+
+
+                            <div>
+
+                                <div class="od-info-label">
+                                    Địa chỉ giao hàng
+                                </div>
+
+                                <div class="od-info-value">
+
+                                    {{
+                                        $order->shipping_address
+                                        ??
+                                        'Chưa cập nhật'
+                                    }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="od-info-item">
+
+                            <div class="od-info-icon">
+                                🚚
+                            </div>
+
+
+                            <div>
+
+                                <div class="od-info-label">
+                                    Vận chuyển
+                                </div>
+
+                                <div class="od-info-value">
+                                    {{ $shippingMethodLabel }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="od-info-item">
+
+                            <div class="od-info-icon">
+                                💳
+                            </div>
+
+
+                            <div>
+
+                                <div class="od-info-label">
+                                    Thanh toán
+                                </div>
+
+                                <div class="od-info-value">
+                                    {{ $paymentMethodLabel }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    @if($order->notes)
+
+                        <div class="od-notes">
+
+                            <strong>
+                                📝 Ghi chú:
+                            </strong>
+
+                            <br>
+
+                            {{ $order->notes }}
+
                         </div>
 
                     @endif
 
                 </div>
 
-            @endif
-
-        </div>
-
-
-        <hr>
-
-
-        {{-- TỔNG THANH TOÁN --}}
-        <div class="text-muted small">
-            Tổng thanh toán
-        </div>
-
-        <h3 class="text-danger fw-bold mb-0">
-
-            {{ number_format(
-                $order->total_price,
-                0,
-                ',',
-                '.'
-            ) }} đ
-
-        </h3>
-
-    </div>
-
-</div>
-
-
-                        </div>
-
-
-
-                        {{-- ==============================
-                            DANH SÁCH SẢN PHẨM
-                        ============================== --}}
-                        <div>
-
-                            <h5 class="fw-bold mb-3">
-
-                                📦 Sản phẩm trong đơn hàng
-
-                            </h5>
-
-
-                            <div class="table-responsive">
-
-                                <table class="
-                                    table
-                                    table-hover
-                                    product-table
-                                    align-middle
-                                    mb-0">
-
-
-                                    <thead class="table-light">
-
-                                        <tr>
-
-                                            <th>
-                                                Sản phẩm
-                                            </th>
-
-                                            <th>
-                                                Đơn giá
-                                            </th>
-
-                                            <th class="text-center">
-                                                Số lượng
-                                            </th>
-
-                                            <th class="text-end">
-                                                Thành tiền
-                                            </th>
-
-                                            @if($order->status === 'delivered')
-                                                <th class="text-center">
-                                                    Đánh giá
-                                                </th>
-                                            @endif
-
-                                        </tr>
-
-                                    </thead>
-
-
-                                    <tbody>
-
-
-                                        @forelse(
-                                            $order->items
-                                            as $item
-                                        )
-
-                                            <tr>
-
-                                                <td>
-
-                                                    <strong>
-
-                                                        {{ $item->product->name
-                                                            ?? 'Sản phẩm' }}
-
-                                                    </strong>
-
-                                                </td>
-
-
-                                                <td>
-
-                                                    {{ number_format(
-                                                        $item->price,
-                                                        0,
-                                                        ',',
-                                                        '.'
-                                                    ) }} đ
-
-                                                </td>
-
-
-                                                <td class="text-center">
-
-                                                    <span class="
-                                                        badge
-                                                        bg-light
-                                                        text-dark
-                                                        border">
-
-                                                        {{ $item->quantity }}
-
-                                                    </span>
-
-                                                </td>
-
-
-                                                <td class="
-                                                    fw-bold
-                                                    text-danger
-                                                    text-end">
-
-                                                    {{ number_format(
-                                                        $item->price
-                                                        *
-                                                        $item->quantity,
-                                                        0,
-                                                        ',',
-                                                        '.'
-                                                    ) }} đ
-
-                                                </td>
-
-                                                @if($order->status === 'delivered')
-                                                    @php
-                                                        $myReview = \App\Models\Review::where(
-                                                                'user_id',
-                                                                Auth::id()
-                                                            )
-                                                            ->where(
-                                                                'product_id',
-                                                                $item->product_id
-                                                            )
-                                                            ->first();
-
-                                                        $reviewCollapseId =
-                                                            'review-order-item-' . $item->id;
-                                                    @endphp
-
-                                                    <td class="text-center">
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-sm review-action-btn
-                                                                {{ $myReview
-                                                                    ? 'btn-outline-success'
-                                                                    : 'btn-outline-warning'
-                                                                }}"
-                                                            data-bs-toggle="collapse"
-                                                            data-bs-target="#{{ $reviewCollapseId }}"
-                                                            aria-expanded="false"
-                                                        >
-                                                            @if($myReview)
-                                                                ⭐ Đã đánh giá
-                                                            @else
-                                                                ⭐ Đánh giá
-                                                            @endif
-                                                        </button>
-                                                    </td>
-                                                @endif
-
-                                            </tr>
-
-                                            @if($order->status === 'delivered')
-                                                <tr class="border-0">
-                                                    <td
-                                                        colspan="5"
-                                                        class="p-0 border-0"
-                                                    >
-                                                        <div
-                                                            class="collapse"
-                                                            id="{{ $reviewCollapseId }}"
-                                                        >
-                                                            <div class="order-review-box m-3 mt-2">
-
-                                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                                                                    <div>
-                                                                        <h6 class="fw-bold mb-1">
-                                                                            ⭐ {{
-                                                                                $myReview
-                                                                                    ? 'Chỉnh sửa đánh giá'
-                                                                                    : 'Đánh giá sản phẩm'
-                                                                            }}
-                                                                        </h6>
-
-                                                                        <div class="text-muted small">
-                                                                            {{ $item->product->name ?? 'Sản phẩm' }}
-                                                                        </div>
-                                                                    </div>
-
-                                                                    @if($myReview)
-                                                                        <span class="badge bg-success">
-                                                                            Đã đánh giá {{ $myReview->rating }}/5 sao
-                                                                        </span>
-                                                                    @endif
-                                                                </div>
-
-                                                                <form
-                                                                    action="{{ route(
-                                                                        'reviews.store',
-                                                                        $item->product_id
-                                                                    ) }}"
-                                                                    method="POST"
-                                                                >
-                                                                    @csrf
-
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label fw-bold">
-                                                                            Chọn số sao
-                                                                        </label>
-
-                                                                        <div class="order-review-stars">
-                                                                            @for($star = 5; $star >= 1; $star--)
-                                                                                <input
-                                                                                    type="radio"
-                                                                                    id="orderItem{{ $item->id }}Rating{{ $star }}"
-                                                                                    name="rating"
-                                                                                    value="{{ $star }}"
-                                                                                    {{ (int) old(
-                                                                                        'rating',
-                                                                                        $myReview?->rating ?? 0
-                                                                                    ) === $star
-                                                                                        ? 'checked'
-                                                                                        : ''
-                                                                                    }}
-                                                                                    required
-                                                                                >
-
-                                                                                <label
-                                                                                    for="orderItem{{ $item->id }}Rating{{ $star }}"
-                                                                                    title="{{ $star }} sao"
-                                                                                >
-                                                                                    ★
-                                                                                </label>
-                                                                            @endfor
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="mb-3">
-                                                                        <label
-                                                                            for="orderItemComment{{ $item->id }}"
-                                                                            class="form-label fw-bold"
-                                                                        >
-                                                                            Nhận xét
-                                                                        </label>
-
-                                                                        <textarea
-                                                                            id="orderItemComment{{ $item->id }}"
-                                                                            name="comment"
-                                                                            class="form-control"
-                                                                            rows="3"
-                                                                            maxlength="1000"
-                                                                            placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
-                                                                        >{{ old(
-                                                                            'comment',
-                                                                            $myReview?->comment
-                                                                        ) }}</textarea>
-                                                                    </div>
-
-                                                                    <button
-                                                                        type="submit"
-                                                                        class="btn btn-success"
-                                                                    >
-                                                                        @if($myReview)
-                                                                            ⭐ Cập nhật đánh giá
-                                                                        @else
-                                                                            ⭐ Gửi đánh giá
-                                                                        @endif
-                                                                    </button>
-                                                                </form>
-
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endif
-
-
-                                        @empty
-
-
-                                            <tr>
-
-                                                <td colspan="{{ $order->status === 'delivered' ? 5 : 4 }}"
-                                                    class="
-                                                        text-center
-                                                        text-muted
-                                                        py-4">
-
-                                                    Không có sản phẩm
-                                                    trong đơn hàng.
-
-                                                </td>
-
-                                            </tr>
-
-
-                                        @endforelse
-
-
-                                    </tbody>
-
-                                </table>
-
-                            </div>
-
-                        </div>
-
+            </section>
+
+
+            {{-- =============================================
+                SUPPORT
+            ============================================== --}}
+            <section class="od-card">
+
+
+                <div class="od-card-body">
+
+                    <div
+                        style="
+                            color:#473a32;
+                            font-size:11px;
+                            font-weight:950;
+                        "
+                    >
+                        Cần hỗ trợ đơn hàng?
+                    </div>
+
+
+                    <div
+                        style="
+                            margin-top:4px;
+                            color:#786d65;
+                            font-size:9.5px;
+                            line-height:1.55;
+                        "
+                    >
+
+                        Liên hệ shop nếu bạn cần
+                        hỗ trợ về vận chuyển,
+                        thanh toán hoặc sản phẩm.
 
                     </div>
 
 
-
-                    {{-- ==============================
-                        FOOTER
-                    ============================== --}}
-                    <div class="
-                        card-footer
-                        bg-light
-                        border-top
-                        p-3">
-
-
-                        <div class="
-                            d-flex
-                            justify-content-between
-                            align-items-center
-                            flex-wrap
-                            gap-3">
-
-
-                            <small class="text-muted">
-
-                                🔄 Cập nhật gần nhất:
-
-                                <strong>
-
-                                    {{ $order->updated_at
-                                        ->format('d/m/Y H:i') }}
-
-                                </strong>
-
-                            </small>
-
-
-                            <a href="{{ route('products.index') }}"
-                               class="btn btn-primary">
-
-                                🛍️ Tiếp tục mua sắm
-
-                            </a>
-
-
-                        </div>
-
-                    </div>
-
+                    <a
+                        href="tel:0385742505"
+                        style="
+                            min-height:38px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            margin-top:10px;
+                            border:1px solid #dec8a7;
+                            border-radius:8px;
+                            color:#633820;
+                            background:#fff8e8;
+                            font-size:10px;
+                            font-weight:900;
+                        "
+                    >
+                        ☎ 0385 742 505
+                    </a>
 
                 </div>
 
+            </section>
+
+        </aside>
+
     </div>
+
 </div>
 
 
 <script>
-function copyOrderPaymentCode()
-{
-    const input = document.getElementById('orderPaymentCode');
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
 
-    if (!input) {
-        return;
-    }
+        /*
+        |--------------------------------------------------------------------------
+        | COPY PAYMENT CODE
+        |--------------------------------------------------------------------------
+        */
 
-    navigator.clipboard.writeText(input.value).then(function () {
-        alert('Đã sao chép mã thanh toán!');
-    });
-}
+        const copyButton =
+            document.getElementById(
+                'copyPaymentButton'
+            );
 
-(function startPaymentPolling()
-{
-    const card = document.getElementById('autoPaymentCard');
-    const waitingBox = document.getElementById('paymentWaitingBox');
-    const successBox = document.getElementById('paymentSuccessBox');
 
-    if (!card || !waitingBox || !successBox) {
-        return;
-    }
+        const paymentCode =
+            document.getElementById(
+                'orderPaymentCode'
+            );
 
-    const statusUrl = card.dataset.paymentStatusUrl;
 
-    let timer = null;
+        const copyFeedback =
+            document.getElementById(
+                'copyPaymentFeedback'
+            );
 
-    async function checkPayment()
-    {
-        try {
-            const response = await fetch(statusUrl, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                cache: 'no-store'
-            });
 
-            if (!response.ok) {
+        if (
+            copyButton
+            &&
+            paymentCode
+        ) {
+
+            copyButton.addEventListener(
+                'click',
+                async function () {
+
+                    const value =
+                        paymentCode.value;
+
+
+                    try {
+
+                        if (
+                            navigator.clipboard
+                            &&
+                            window.isSecureContext
+                        ) {
+
+                            await navigator
+                                .clipboard
+                                .writeText(
+                                    value
+                                );
+
+                        }
+                        else {
+
+                            paymentCode.focus();
+                            paymentCode.select();
+
+                            document.execCommand(
+                                'copy'
+                            );
+
+                        }
+
+
+                        if (copyFeedback) {
+
+                            copyFeedback.textContent =
+                                '✓ Đã sao chép nội dung chuyển khoản.';
+
+
+                            window.setTimeout(
+                                function () {
+
+                                    copyFeedback.textContent =
+                                        '';
+
+                                },
+                                2500
+                            );
+
+                        }
+
+                    }
+                    catch (error) {
+
+                        if (copyFeedback) {
+
+                            copyFeedback.textContent =
+                                'Không thể tự sao chép. Hãy copy thủ công.';
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+
+/*
+|--------------------------------------------------------------------------
+| AUTO CHECK PAYMENT + COUNTDOWN 5 PHÚT
+|--------------------------------------------------------------------------
+*/
+
+const paymentCard =
+    document.getElementById(
+        'autoPaymentCard'
+    );
+
+
+const waitingBox =
+    document.getElementById(
+        'paymentWaitingBox'
+    );
+
+
+const successBox =
+    document.getElementById(
+        'paymentSuccessBox'
+    );
+
+
+const expiredBox =
+    document.getElementById(
+        'paymentExpiredBox'
+    );
+
+
+const countdownElement =
+    document.getElementById(
+        'paymentCountdownTimer'
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| CHỈ CHẠY KHI ĐƠN ĐANG CHỜ THANH TOÁN
+|--------------------------------------------------------------------------
+*/
+
+if (
+    paymentCard
+    &&
+    waitingBox
+) {
+
+    const statusUrl =
+        paymentCard
+            .dataset
+            .paymentStatusUrl;
+
+
+    const expiresAtRaw =
+        paymentCard
+            .dataset
+            .paymentExpiresAt;
+
+
+    let expiresAt =
+        expiresAtRaw
+            ? new Date(
+                expiresAtRaw
+            ).getTime()
+            : null;
+
+
+    let paymentCheckTimer =
+        null;
+
+
+    let countdownTimer =
+        null;
+
+
+    let checkingPayment =
+        false;
+
+
+    let finished =
+        false;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DỪNG TẤT CẢ TIMER
+    |--------------------------------------------------------------------------
+    */
+
+    const stopTimers =
+        function () {
+
+            if (
+                paymentCheckTimer
+            ) {
+
+                window.clearInterval(
+                    paymentCheckTimer
+                );
+
+
+                paymentCheckTimer =
+                    null;
+            }
+
+
+            if (
+                countdownTimer
+            ) {
+
+                window.clearInterval(
+                    countdownTimer
+                );
+
+
+                countdownTimer =
+                    null;
+            }
+
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE PAYMENT BADGE
+    |--------------------------------------------------------------------------
+    */
+
+    const updatePaymentBadge =
+        function (
+            type,
+            text
+        ) {
+
+            const statusBadge =
+                document.getElementById(
+                    'paymentStatusBadge'
+                );
+
+
+            const statusText =
+                document.getElementById(
+                    'paymentStatusText'
+                );
+
+
+            if (statusBadge) {
+
+                statusBadge
+                    .classList
+                    .remove(
+                        'unpaid',
+                        'waiting',
+                        'paid',
+                        'failed'
+                    );
+
+
+                statusBadge
+                    .classList
+                    .add(
+                        type
+                    );
+
+            }
+
+
+            if (statusText) {
+
+                statusText
+                    .textContent =
+                    text;
+
+            }
+
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | THANH TOÁN THÀNH CÔNG
+    |--------------------------------------------------------------------------
+    */
+
+    const showPaid =
+        function () {
+
+            if (finished) {
                 return;
             }
 
-            const data = await response.json();
 
-            if (data.paid === true) {
-                waitingBox.classList.add('d-none');
-                successBox.classList.remove('d-none');
+            finished =
+                true;
 
-                if (timer) {
-                    clearInterval(timer);
-                }
+
+            waitingBox
+                .classList
+                .add(
+                    'd-none'
+                );
+
+
+            if (expiredBox) {
+
+                expiredBox
+                    .classList
+                    .add(
+                        'd-none'
+                    );
+
             }
-        } catch (error) {
-            console.warn('Không kiểm tra được trạng thái thanh toán:', error);
-        }
-    }
+
+
+            if (successBox) {
+
+                successBox
+                    .classList
+                    .remove(
+                        'd-none'
+                    );
+
+            }
+
+
+            updatePaymentBadge(
+                'paid',
+                'Đã thanh toán'
+            );
+
+
+            stopTimers();
+
+
+            /*
+             * Reload để toàn bộ thông tin
+             * trên trang đồng bộ từ server.
+             */
+
+            window.setTimeout(
+                function () {
+
+                    window.location.reload();
+
+                },
+                1200
+            );
+
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ĐƠN HẾT HẠN
+    |--------------------------------------------------------------------------
+    */
+
+    const showExpired =
+        function () {
+
+            if (finished) {
+                return;
+            }
+
+
+            finished =
+                true;
+
+
+            waitingBox
+                .classList
+                .add(
+                    'd-none'
+                );
+
+
+            if (successBox) {
+
+                successBox
+                    .classList
+                    .add(
+                        'd-none'
+                    );
+
+            }
+
+
+            if (expiredBox) {
+
+                expiredBox
+                    .classList
+                    .remove(
+                        'd-none'
+                    );
+
+            }
+
+
+            if (countdownElement) {
+
+                countdownElement
+                    .textContent =
+                    '00:00';
+
+            }
+
+
+            updatePaymentBadge(
+                'failed',
+                'Hết hạn thanh toán'
+            );
+
+
+            stopTimers();
+
+
+            /*
+             * Reload để status đơn hàng
+             * chuyển thành cancelled.
+             */
+
+            window.setTimeout(
+                function () {
+
+                    window.location.reload();
+
+                },
+                1500
+            );
+
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RENDER ĐỒNG HỒ
+    |--------------------------------------------------------------------------
+    */
+
+    const renderCountdown =
+        function () {
+
+            if (
+                finished
+                ||
+                !countdownElement
+                ||
+                !expiresAt
+            ) {
+                return;
+            }
+
+
+            const now =
+                Date.now();
+
+
+            let remaining =
+                Math.floor(
+                    (
+                        expiresAt
+                        -
+                        now
+                    )
+                    /
+                    1000
+                );
+
+
+            if (
+                remaining <= 0
+            ) {
+
+                remaining =
+                    0;
+
+            }
+
+
+            const minutes =
+                Math.floor(
+                    remaining
+                    /
+                    60
+                );
+
+
+            const seconds =
+                remaining
+                %
+                60;
+
+
+            countdownElement
+                .textContent =
+                String(
+                    minutes
+                )
+                    .padStart(
+                        2,
+                        '0'
+                    )
+                +
+                ':'
+                +
+                String(
+                    seconds
+                )
+                    .padStart(
+                        2,
+                        '0'
+                    );
+
+
+            /*
+             * Còn <= 60 giây
+             * thì nhấp nháy cảnh báo.
+             */
+
+            if (
+                remaining <= 60
+            ) {
+
+                countdownElement
+                    .classList
+                    .add(
+                        'urgent'
+                    );
+
+            }
+            else {
+
+                countdownElement
+                    .classList
+                    .remove(
+                        'urgent'
+                    );
+
+            }
+
+
+            /*
+             * Về 0 thì gọi server ngay.
+             *
+             * Chính server mới là nơi
+             * quyết định hủy đơn.
+             */
+
+            if (
+                remaining === 0
+            ) {
+
+                checkPayment();
+
+            }
+
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | KIỂM TRA TRẠNG THÁI TỪ SERVER
+    |--------------------------------------------------------------------------
+    */
+
+    const checkPayment =
+        async function () {
+
+            if (
+                finished
+                ||
+                checkingPayment
+            ) {
+                return;
+            }
+
+
+            checkingPayment =
+                true;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        statusUrl,
+                        {
+                            method:
+                                'GET',
+
+                            headers: {
+
+                                'Accept':
+                                    'application/json',
+
+                                'X-Requested-With':
+                                    'XMLHttpRequest'
+                            },
+
+                            cache:
+                                'no-store'
+                        }
+                    );
+
+
+                if (
+                    !response.ok
+                ) {
+                    return;
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ĐÃ THANH TOÁN
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    data.paid
+                    ===
+                    true
+                ) {
+
+                    showPaid();
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ĐÃ BỊ HỦY
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    data.cancelled
+                    ===
+                    true
+                ) {
+
+                    showExpired();
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ĐỒNG BỘ THỜI HẠN TỪ SERVER
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    data.payment_expires_at
+                ) {
+
+                    const serverExpiresAt =
+                        new Date(
+                            data
+                                .payment_expires_at
+                        )
+                            .getTime();
+
+
+                    if (
+                        !Number.isNaN(
+                            serverExpiresAt
+                        )
+                    ) {
+
+                        expiresAt =
+                            serverExpiresAt;
+
+                    }
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SERVER BÁO HẾT GIỜ
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    Number(
+                        data.remaining_seconds
+                    )
+                    <=
+                    0
+                ) {
+
+                    /*
+                     * paymentStatus() bên Laravel
+                     * đã xử lý việc hủy đơn.
+                     *
+                     * Gọi lại một lần nữa sau
+                     * một khoảng ngắn để lấy
+                     * trạng thái cancelled.
+                     */
+
+                    window.setTimeout(
+                        function () {
+
+                            if (
+                                !finished
+                            ) {
+
+                                checkPayment();
+
+                            }
+
+                        },
+                        500
+                    );
+
+                }
+
+            }
+            catch (error) {
+
+                console.warn(
+                    'Không kiểm tra được trạng thái thanh toán:',
+                    error
+                );
+
+            }
+            finally {
+
+                checkingPayment =
+                    false;
+
+            }
+
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | KHỞI ĐỘNG
+    |--------------------------------------------------------------------------
+    */
+
+    renderCountdown();
+
 
     checkPayment();
-    timer = setInterval(checkPayment, 3000);
-})();
-</script>
 
+
+    /*
+     * Đồng hồ chạy mỗi giây.
+     */
+
+    countdownTimer =
+        window.setInterval(
+            renderCountdown,
+            1000
+        );
+
+
+    /*
+     * Kiểm tra SePay / Laravel mỗi 3 giây.
+     */
+
+    paymentCheckTimer =
+        window.setInterval(
+            checkPayment,
+            3000
+        );
+
+
+    /*
+     * Rời trang thì dừng timer.
+     */
+
+    window.addEventListener(
+        'beforeunload',
+        stopTimers
+    );
+
+}
+
+    }
+);
+</script>
 
 @endsection

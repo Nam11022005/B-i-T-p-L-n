@@ -692,54 +692,90 @@ if ($request->filled('voucher_code')) {
             }
 
             $order = Order::create([
-                'user_id' => Auth::id(),
 
-                'customer_name' =>
-                    $request->customer_name,
+    'user_id' =>
+        Auth::id(),
 
-                'customer_phone' =>
-                    $request->customer_phone,
+    'customer_name' =>
+        $request->customer_name,
 
-                'shipping_address' =>
-                    $request->shipping_address,
+    'customer_phone' =>
+        $request->customer_phone,
 
-                'notes' =>
-                    $request->notes,
+    'shipping_address' =>
+        $request->shipping_address,
 
-                'subtotal' =>
-                    $subtotal,
+    'notes' =>
+        $request->notes,
 
-                'shipping_fee' =>
-                    $shippingFee,
+    'subtotal' =>
+        $subtotal,
 
-                'discount' =>
-                    $discount,
+    'shipping_fee' =>
+        $shippingFee,
 
-                'total_price' =>
-                    $totalPrice,
+    'discount' =>
+        $discount,
 
-                'status' =>
-                    'pending',
+    'total_price' =>
+        $totalPrice,
 
-                'payment_method' =>
-                    $request->payment_method,
+    'status' =>
+        'pending',
 
-                'payment_status' =>
-                    $request->payment_method === 'bank'
-                        ? 'pending_confirmation'
-                        : 'unpaid',
+    'payment_method' =>
+        $request->payment_method,
 
-                'payment_code' =>
-                    $request->payment_method === 'bank'
-                        ? session('payment_code')
-                        : null,
+    /*
+    |--------------------------------------------------------------------------
+    | TRẠNG THÁI THANH TOÁN
+    |--------------------------------------------------------------------------
+    */
 
-                'shipping_method' =>
-                    $request->shipping_method,
+    'payment_status' =>
+        $request->payment_method === 'bank'
+            ? 'pending_confirmation'
+            : 'unpaid',
 
-                'voucher_code' =>
-                    $voucherCode,
-            ]);
+    /*
+    |--------------------------------------------------------------------------
+    | HẠN THANH TOÁN QR
+    |--------------------------------------------------------------------------
+    |
+    | Chỉ áp dụng chuyển khoản ngân hàng.
+    |
+    | Thời hạn hiện tại: 5 phút.
+    |
+    */
+
+    'payment_expires_at' =>
+        $request->payment_method === 'bank'
+            ? now()->addMinutes(
+                config(
+                    'payment.bank_timeout_minutes',
+                    5
+                )
+            )
+            : null,
+
+    /*
+    |--------------------------------------------------------------------------
+    | MÃ NỘI DUNG CHUYỂN KHOẢN
+    |--------------------------------------------------------------------------
+    */
+
+    'payment_code' =>
+        $request->payment_method === 'bank'
+            ? session('payment_code')
+            : null,
+
+    'shipping_method' =>
+        $request->shipping_method,
+
+    'voucher_code' =>
+        $voucherCode,
+
+]);
             // ==========================================
 // TIMELINE - ĐƠN HÀNG ĐƯỢC TẠO
 // ==========================================
@@ -902,14 +938,30 @@ OrderStatusHistory::create([
             }
 
 
-            if ($order->payment_method === 'bank') {
-                return redirect()
-                    ->route('orders.show', $order->id)
-                    ->with(
-                        'success',
-                        'Đơn hàng đã được tạo. Vui lòng quét QR và chuyển khoản đúng số tiền, đúng nội dung.'
-                    );
-            }
+           if (
+    $order->payment_method
+    ===
+    'bank'
+) {
+
+    return redirect()
+
+        ->route(
+            'orders.show',
+            $order->id
+        )
+
+        ->with(
+            'success',
+            'Đơn hàng đã được tạo. '
+            .
+            'Vui lòng quét mã QR và hoàn tất chuyển khoản trong vòng 5 phút. '
+            .
+            'Nếu quá thời gian mà hệ thống chưa nhận được thanh toán, '
+            .
+            'đơn hàng sẽ tự động bị hủy.'
+        );
+}
 
             return redirect()
                 ->route('orders.index')

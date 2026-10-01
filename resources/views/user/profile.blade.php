@@ -1,677 +1,2708 @@
 @extends('layouts.app')
 
-@section('title', 'Hồ sơ người dùng')
+@section('title', 'Hồ sơ của tôi | Tinh Hoa Tây Bắc')
 
 @section('content')
+
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | AVATAR
+    |--------------------------------------------------------------------------
+    */
+
+    $avatarExists =
+        $user->avatar
+        &&
+        \Illuminate\Support\Facades\Storage::disk('public')
+            ->exists($user->avatar);
+
+
+    $avatarUrl =
+        $avatarExists
+        ? asset('storage/' . $user->avatar)
+        : null;
+
+
+    $userInitial =
+        mb_strtoupper(
+            mb_substr(
+                trim($user->name),
+                0,
+                1
+            )
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE
+    |--------------------------------------------------------------------------
+    */
+
+    $roleLabel =
+        match ($user->role) {
+            'admin' => 'Quản trị viên',
+            'customer' => 'Khách hàng',
+            'user' => 'Khách hàng',
+            default => ucfirst($user->role),
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ORDER STATS
+    |--------------------------------------------------------------------------
+    */
+
+    $profileOrders =
+        $user
+            ->orders()
+            ->select([
+                'id',
+                'status',
+            ])
+            ->get();
+
+
+    $profileTotalOrders =
+        $profileOrders->count();
+
+
+    $profileProcessingOrders =
+        $profileOrders
+            ->whereIn(
+                'status',
+                [
+                    'pending',
+                    'confirmed',
+                    'shipped',
+                ]
+            )
+            ->count();
+
+
+    $profileDeliveredOrders =
+        $profileOrders
+            ->where(
+                'status',
+                'delivered'
+            )
+            ->count();
+
+
+    $emailVerified =
+        !is_null(
+            $user->email_verified_at
+        );
+@endphp
+
+
 <style>
-    .profile-page {
-        max-width: 1180px;
-        margin: 0 auto;
+    /* =========================================================
+       CUSTOMER PROFILE
+       TINH HOA TAY BAC
+    ========================================================= */
+
+    .customer-profile {
+        --pf-green: #35562f;
+        --pf-green-dark: #274522;
+
+        --pf-brown: #633820;
+        --pf-brown-dark: #3d2316;
+
+        --pf-red: #b43e2e;
+        --pf-red-dark: #8d3025;
+
+        --pf-gold: #e5ad42;
+        --pf-gold-soft: #fff0c9;
+
+        --pf-text: #302923;
+        --pf-muted: #776d66;
+
+        --pf-border: #e7dfd5;
+
+        --pf-shadow:
+            0 8px 28px
+            rgba(54, 40, 29, .07);
+
+        --pf-shadow-lg:
+            0 18px 48px
+            rgba(54, 40, 29, .12);
+
+        color:
+            var(--pf-text);
     }
 
-    .profile-card {
-        border: 1px solid var(--tb-border, #ead8bf);
-        border-radius: 20px;
-        background: #fff;
-        box-shadow: 0 10px 28px rgba(95, 52, 29, .08);
-        overflow: hidden;
+
+    .customer-profile *,
+    .customer-profile *::before,
+    .customer-profile *::after {
+        box-sizing: border-box;
     }
 
-    .profile-title {
-        color: var(--tb-brown-dark, #2c1810);
-    }
 
-    .profile-avatar {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 4px solid var(--tb-green, #48633b);
-        background: #edf7ed;
-    }
-
-    .profile-avatar-placeholder {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        border: 4px solid var(--tb-green, #48633b);
-        background: #edf7ed;
-        color: var(--tb-green, #48633b);
-        font-size: 3rem;
-        font-weight: 800;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-    }
-
-    .profile-section-title {
-        font-weight: 800;
-        color: var(--tb-brown, #5f341d);
-        margin-bottom: 18px;
-    }
-
-    .profile-label {
-        font-weight: 700;
-        color: #59483d;
-        margin-bottom: 7px;
-    }
-
-    .profile-input {
-        border: 1px solid var(--tb-border, #ead8bf);
-        border-radius: 12px;
-        min-height: 46px;
-    }
-
-    .profile-input:focus {
-        border-color: var(--tb-orange, #d97706);
-        box-shadow: 0 0 0 .2rem rgba(217, 119, 6, .12);
-    }
-
-    .profile-btn {
-        border: 0;
-        border-radius: 12px;
-        font-weight: 700;
-        padding: 10px 18px;
-    }
-
-    .profile-btn-primary {
-        background: linear-gradient(90deg, #5f341d, #48633b);
-        color: #fff;
-    }
-
-    .profile-btn-primary:hover {
-        color: #fff;
-        opacity: .92;
-    }
-
-    .profile-info-box {
-        background: var(--tb-cream, #fffaf0);
-        border: 1px solid var(--tb-border, #ead8bf);
-        border-radius: 14px;
-        padding: 14px 16px;
+    .customer-profile a {
+        text-decoration: none;
     }
 
 
     /* =========================================================
-       PROFILE PREMIUM UI
-       CHỈ NÂNG GIAO DIỆN - KHÔNG ĐỔI ROUTE / FORM / LOGIC
+       BREADCRUMB
     ========================================================= */
 
-    .profile-page {
+    .pf-breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        gap: 7px;
+
+        margin-bottom: 14px;
+
+        color: #958b84;
+
+        font-size: 11px;
+    }
+
+
+    .pf-breadcrumb a {
+        color: #665349;
+
+        font-weight: 800;
+    }
+
+
+    .pf-breadcrumb a:hover {
+        color:
+            var(--pf-red);
+    }
+
+
+    /* =========================================================
+       HERO
+    ========================================================= */
+
+    .pf-hero {
         position: relative;
+
         isolation: isolate;
-        padding: 34px 10px 76px;
-    }
 
-    .profile-page::before {
-        content: "";
-        position: absolute;
-        z-index: -2;
-        top: -30px;
-        left: 50%;
-        width: min(100vw, 1650px);
-        height: 700px;
-        transform: translateX(-50%);
-        pointer-events: none;
-        background:
-            radial-gradient(circle at 7% 8%, rgba(242,193,92,.18), transparent 24%),
-            radial-gradient(circle at 94% 12%, rgba(72,99,59,.13), transparent 28%),
-            linear-gradient(180deg,rgba(255,250,240,.98),rgba(255,255,255,0));
-    }
-
-    .profile-page::after {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        top: 150px;
-        right: -45px;
-        width: 210px;
-        height: 210px;
-        opacity: .10;
-        pointer-events: none;
-        border-radius: 50%;
-        background:
-            repeating-radial-gradient(
-                circle at center,
-                rgba(95,52,29,.34) 0 1px,
-                transparent 1px 13px
-            );
-    }
-
-    .profile-hero {
-        position: relative;
         overflow: hidden;
-        min-height: 170px;
+
+        min-height: 190px;
+
         display: flex;
         align-items: center;
         justify-content: space-between;
+
         gap: 28px;
-        padding: 32px 35px;
-        border: 1px solid rgba(255,255,255,.10);
-        border-radius: 28px;
+
+        margin-bottom: 18px;
+
+        padding:
+            31px 34px;
+
+        border-radius: 20px;
+
         color: #fff;
+
         background:
-            radial-gradient(circle at 88% 14%, rgba(242,193,92,.22), transparent 29%),
-            radial-gradient(circle at 12% 120%, rgba(168,59,45,.28), transparent 35%),
-            linear-gradient(135deg,#2c1810 0%,#5f341d 53%,#48633b 100%);
+            radial-gradient(
+                circle at 87% 15%,
+                rgba(229,173,66,.28),
+                transparent 28%
+            ),
+            linear-gradient(
+                125deg,
+                #284525 0%,
+                #41633a 48%,
+                #663820 100%
+            );
+
         box-shadow:
-            0 23px 58px rgba(44,24,16,.18),
-            inset 0 1px 0 rgba(255,255,255,.07);
+            var(--pf-shadow-lg);
     }
 
-    .profile-hero::before {
+
+    .pf-hero::before {
         content: "";
+
         position: absolute;
-        right: -28px;
-        bottom: -56px;
-        width: 315px;
-        height: 180px;
-        opacity: .10;
-        clip-path: polygon(0 100%,18% 56%,36% 73%,53% 25%,70% 58%,86% 34%,100% 66%,100% 100%);
-        background: linear-gradient(135deg,#fff,#f2c15c);
-        pointer-events: none;
+
+        z-index: -2;
+
+        inset: 0;
+
+        opacity: .06;
+
+        background-image:
+            repeating-linear-gradient(
+                135deg,
+                #fff 0,
+                #fff 1px,
+                transparent 1px,
+                transparent 24px
+            );
     }
 
-    .profile-hero-copy,
-    .profile-role-pill {
+
+    .pf-hero::after {
+        content: "";
+
+        position: absolute;
+
+        z-index: -1;
+
+        right: -30px;
+        bottom: -60px;
+
+        width: 335px;
+        height: 190px;
+
+        opacity: .11;
+
+        background: #fff;
+
+        clip-path:
+            polygon(
+                0 100%,
+                20% 54%,
+                38% 72%,
+                58% 23%,
+                77% 61%,
+                100% 13%,
+                100% 100%
+            );
+    }
+
+
+    .pf-hero-copy {
         position: relative;
+
         z-index: 2;
+
+        max-width: 720px;
     }
 
-    .profile-kicker {
+
+    .pf-kicker {
         display: inline-flex;
         align-items: center;
-        padding: 6px 11px;
-        margin-bottom: 9px;
-        border: 1px solid rgba(242,193,92,.30);
+
+        gap: 6px;
+
+        padding:
+            6px 10px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.16);
+
         border-radius: 999px;
-        color: #f6d98c;
-        background: rgba(255,255,255,.055);
-        font-size: 12px;
+
+        color: #ffda8b;
+
+        background:
+            rgba(255,255,255,.06);
+
+        font-size: 10.5px;
+
         font-weight: 900;
-        letter-spacing: .09em;
+
+        letter-spacing: .08em;
+
+        text-transform: uppercase;
     }
 
-    .profile-hero .profile-title {
+
+    .pf-title {
+        margin:
+            10px 0 0;
+
         color: #fff;
-        font-size: clamp(30px,3vw,42px);
-        letter-spacing: -.7px;
-        text-shadow: 0 2px 14px rgba(0,0,0,.16);
+
+        font-size:
+            clamp(
+                30px,
+                3vw,
+                42px
+            );
+
+        line-height: 1.08;
+
+        font-weight: 950;
+
+        letter-spacing: -.045em;
     }
 
-    .profile-hero p {
-        color: rgba(255,255,255,.76);
+
+    .pf-description {
+        max-width: 650px;
+
+        margin-top: 8px;
+
+        color:
+            rgba(255,255,255,.74);
+
+        font-size: 13px;
+
         line-height: 1.65;
     }
 
-    .profile-role-pill {
-        display: inline-flex;
-        align-items: center;
-        padding: 9px 15px;
-        border: 1px solid rgba(255,255,255,.20);
+
+    .pf-hero-badge {
+        position: relative;
+
+        z-index: 2;
+
+        flex: 0 0 auto;
+
+        padding:
+            10px 14px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.2);
+
         border-radius: 999px;
+
         color: #fff;
-        background: rgba(255,255,255,.08);
-        font-size: 13px;
+
+        background:
+            rgba(255,255,255,.08);
+
+        backdrop-filter:
+            blur(8px);
+
+        font-size: 11px;
+
         font-weight: 900;
-        white-space: nowrap;
-        backdrop-filter: blur(10px);
     }
 
-    .profile-page .profile-card {
-        position: relative;
-        border-radius: 24px;
-        border-color: #e5d0b3;
+
+    /* =========================================================
+       ALERT
+    ========================================================= */
+
+    .pf-alert {
+        margin-bottom: 15px;
+
+        padding:
+            12px 14px;
+
+        border-radius: 11px;
+
+        font-size: 11px;
+
+        line-height: 1.55;
+    }
+
+
+    .pf-alert.success {
+        border:
+            1px solid #bcd4b6;
+
+        color:
+            var(--pf-green-dark);
+
         background:
-            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
-        box-shadow:
-            0 18px 46px rgba(95,52,29,.085),
-            inset 0 1px 0 rgba(255,255,255,.94);
-        transition:
-            transform .20s ease,
-            box-shadow .20s ease,
-            border-color .20s ease;
+            #edf7ea;
     }
 
-    .profile-page .profile-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 9%;
-        right: 9%;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,transparent,#f2c15c,#d97706,#48633b,transparent);
-        opacity: .55;
-    }
 
-    .profile-page .profile-card:hover {
-        border-color: #dec092;
-        box-shadow: 0 22px 52px rgba(95,52,29,.11);
-    }
+    .pf-alert.error {
+        border:
+            1px solid #e8beb7;
 
-    .profile-page .profile-section-title {
-        position: relative;
-        padding-bottom: 13px;
-        color: #3a281f;
-        letter-spacing: -.2px;
-    }
+        color: #913b32;
 
-    .profile-page .profile-section-title::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 70px;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,#d97706,#48633b);
-    }
-
-    .profile-page .profile-avatar,
-    .profile-page .profile-avatar-placeholder {
-        width: 164px;
-        height: 164px;
-        border: 6px solid #fff;
-        outline: 3px solid rgba(72,99,59,.82);
-        box-shadow:
-            0 16px 34px rgba(95,52,29,.14),
-            0 0 0 7px rgba(242,193,92,.10);
-    }
-
-    .profile-page .profile-avatar {
-        margin: 0 auto;
-        display: block;
-    }
-
-    .profile-page .profile-avatar-placeholder {
         background:
-            radial-gradient(circle at 35% 25%,rgba(255,255,255,.8),transparent 30%),
-            linear-gradient(135deg,#edf7ed,#dcebd7);
-        color: #48633b;
+            #fff0ee;
     }
 
-    .profile-page .profile-label {
-        color: #5a4030;
-        font-size: 13px;
-        letter-spacing: .01em;
+
+    .pf-alert ul {
+        margin:
+            6px 0 0;
+
+        padding-left: 18px;
     }
 
-    .profile-page .profile-input {
-        min-height: 48px;
-        border-radius: 13px;
-        border-color: #dfcbae;
-        background: #fffdf9;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.92);
+
+    /* =========================================================
+       QUICK STATS
+    ========================================================= */
+
+    .pf-stats {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(0, 1fr)
+            );
+
+        gap: 11px;
+
+        margin-bottom: 18px;
     }
 
-    .profile-page .profile-input:focus {
-        background: #fff;
-        border-color: #d2a35e;
-        box-shadow: 0 0 0 .2rem rgba(217,119,6,.09);
-    }
 
-    .profile-page input[type="file"].profile-input {
-        padding-top: 10px;
-    }
+    .pf-stat {
+        min-height: 96px;
 
-    .profile-page .profile-info-box {
-        min-height: 48px;
         display: flex;
         align-items: center;
-        border-radius: 13px;
-        border-color: #e5d1b5;
-        background:
-            linear-gradient(135deg,#fffaf0,#fff5e5);
+
+        gap: 13px;
+
+        padding: 14px;
+
+        border:
+            1px solid
+            var(--pf-border);
+
+        border-radius: 14px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--pf-shadow);
     }
 
-    .profile-page .profile-btn {
-        min-height: 45px;
+
+    .pf-stat-icon {
+        width: 46px;
+        height: 46px;
+
+        flex: 0 0 46px;
+
+        display: grid;
+        place-items: center;
+
         border-radius: 12px;
-        font-weight: 800;
+
+        background:
+            var(--pf-gold-soft);
+
+        font-size: 20px;
+    }
+
+
+    .pf-stat:nth-child(2)
+    .pf-stat-icon {
+        background:
+            #e8f1ff;
+    }
+
+
+    .pf-stat:nth-child(3)
+    .pf-stat-icon {
+        background:
+            #e9f5e6;
+    }
+
+
+    .pf-stat-label {
+        color:
+            var(--pf-muted);
+
+        font-size: 10px;
+
+        font-weight: 750;
+    }
+
+
+    .pf-stat-number {
+        margin-top: 2px;
+
+        color:
+            var(--pf-brown-dark);
+
+        font-size: 24px;
+
+        line-height: 1;
+
+        font-weight: 950;
+    }
+
+
+    /* =========================================================
+       LAYOUT
+    ========================================================= */
+
+    .pf-layout {
+        display: grid;
+
+        grid-template-columns:
+            320px
+            minmax(0, 1fr);
+
+        gap: 18px;
+
+        align-items: start;
+    }
+
+
+    .pf-sidebar {
+        display: grid;
+
+        gap: 13px;
+    }
+
+
+    .pf-content {
+        min-width: 0;
+
+        display: grid;
+
+        gap: 15px;
+    }
+
+
+    /* =========================================================
+       CARD
+    ========================================================= */
+
+    .pf-card {
+        overflow: hidden;
+
+        border:
+            1px solid
+            var(--pf-border);
+
+        border-radius: 16px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--pf-shadow);
+    }
+
+
+    .pf-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 12px;
+
+        padding:
+            15px 17px;
+
+        border-bottom:
+            1px solid
+            var(--pf-border);
+
+        background:
+            linear-gradient(
+                180deg,
+                #fff,
+                #fffcf7
+            );
+    }
+
+
+    .pf-card-title {
+        margin: 0;
+
+        color: #453930;
+
+        font-size: 14px;
+
+        font-weight: 950;
+    }
+
+
+    .pf-card-subtitle {
+        margin-top: 2px;
+
+        color:
+            var(--pf-muted);
+
+        font-size: 10px;
+    }
+
+
+    .pf-card-body {
+        padding: 17px;
+    }
+
+
+    /* =========================================================
+       PROFILE SIDEBAR
+    ========================================================= */
+
+    .pf-user-card {
+        text-align: center;
+    }
+
+
+    .pf-avatar-wrap {
+        position: relative;
+
+        width: 154px;
+        height: 154px;
+
+        margin:
+            2px auto 15px;
+    }
+
+
+    .pf-avatar,
+    .pf-avatar-placeholder {
+        width: 154px;
+        height: 154px;
+
+        display: block;
+
+        border:
+            5px solid #fff;
+
+        outline:
+            3px solid
+            rgba(53,86,47,.76);
+
+        border-radius: 50%;
+
+        box-shadow:
+            0 13px 30px
+            rgba(54,40,29,.14);
+
+        background:
+            linear-gradient(
+                135deg,
+                #edf6e9,
+                #fff2d4
+            );
+
+        object-fit: cover;
+    }
+
+
+    .pf-avatar-placeholder {
+        display: grid;
+        place-items: center;
+
+        color:
+            var(--pf-green);
+
+        font-size: 52px;
+
+        font-weight: 950;
+    }
+
+
+    .pf-avatar-camera {
+        position: absolute;
+
+        right: 5px;
+        bottom: 5px;
+
+        width: 38px;
+        height: 38px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            4px solid #fff;
+
+        border-radius: 50%;
+
+        color: #fff;
+
+        background:
+            var(--pf-red);
+
+        font-size: 15px;
+    }
+
+
+    .pf-user-name {
+        color:
+            var(--pf-brown-dark);
+
+        font-size: 19px;
+
+        line-height: 1.25;
+
+        font-weight: 950;
+    }
+
+
+    .pf-user-email {
+        overflow-wrap: anywhere;
+
+        margin-top: 4px;
+
+        color:
+            var(--pf-muted);
+
+        font-size: 11px;
+    }
+
+
+    .pf-user-badges {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+
+        gap: 5px;
+
+        margin-top: 10px;
+    }
+
+
+    .pf-user-badge {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 4px;
+
+        padding:
+            5px 8px;
+
+        border-radius: 999px;
+
+        color:
+            var(--pf-green-dark);
+
+        background:
+            #eaf5e7;
+
+        font-size: 8.5px;
+
+        font-weight: 900;
+    }
+
+
+    .pf-user-badge.verify {
+        color: #6d5317;
+
+        background:
+            #fff2c9;
+    }
+
+
+    .pf-user-badge.verify.ok {
+        color:
+            var(--pf-green-dark);
+
+        background:
+            #eaf5e7;
+    }
+
+
+    /* =========================================================
+       AVATAR FORM
+    ========================================================= */
+
+    .pf-avatar-form {
+        margin-top: 18px;
+
+        padding-top: 15px;
+
+        border-top:
+            1px solid #eee6dd;
+
+        text-align: left;
+    }
+
+
+    .pf-label {
+        display: block;
+
+        margin-bottom: 6px;
+
+        color: #51443b;
+
+        font-size: 11px;
+
+        font-weight: 900;
+    }
+
+
+    .pf-file-input {
+        width: 100%;
+
+        padding:
+            9px;
+
+        border:
+            1px solid #ddd1c4;
+
+        border-radius: 9px;
+
+        color: #5c5047;
+
+        background: #fff;
+
+        font-size: 10px;
+    }
+
+
+    .pf-file-note {
+        margin-top: 5px;
+
+        color: #92877f;
+
+        font-size: 9px;
+
+        line-height: 1.45;
+    }
+
+
+    .pf-avatar-actions {
+        display: grid;
+
+        gap: 7px;
+
+        margin-top: 10px;
+    }
+
+
+    /* =========================================================
+       BUTTONS
+    ========================================================= */
+
+    .pf-primary-btn,
+    .pf-outline-btn,
+    .pf-danger-btn {
+        min-height: 41px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 5px;
+
+        padding:
+            0 12px;
+
+        border-radius: 9px;
+
+        font-size: 10px;
+
+        font-weight: 900;
+
         transition:
             transform .17s ease,
             box-shadow .17s ease,
-            filter .17s ease;
+            background .17s ease;
     }
 
-    .profile-page .profile-btn:hover {
-        transform: translateY(-1px);
+
+    .pf-primary-btn {
+        border: 0;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--pf-red),
+                var(--pf-red-dark)
+            );
     }
 
-    .profile-page .profile-btn-primary {
-        background: linear-gradient(135deg,#5f341d,#48633b);
-        box-shadow: 0 8px 18px rgba(72,99,59,.15);
+
+    .pf-primary-btn:hover {
+        color: #fff;
+
+        transform:
+            translateY(-1px);
+
+        box-shadow:
+            0 8px 17px
+            rgba(180,62,46,.2);
     }
 
-    .profile-page .profile-btn-primary:hover {
-        opacity: 1;
-        box-shadow: 0 11px 23px rgba(72,99,59,.21);
+
+    .pf-outline-btn {
+        border:
+            1px solid #d9c8b5;
+
+        color:
+            var(--pf-brown);
+
+        background: #fff;
     }
 
-    .profile-page .alert {
-        border-radius: 15px;
-        box-shadow: 0 8px 22px rgba(95,52,29,.06);
+
+    .pf-outline-btn:hover {
+        color: #fff;
+
+        border-color:
+            var(--pf-brown);
+
+        background:
+            var(--pf-brown);
     }
+
+
+    .pf-danger-btn {
+        width: 100%;
+
+        border:
+            1px solid #dfb9b2;
+
+        color:
+            var(--pf-red);
+
+        background:
+            #fff7f5;
+    }
+
+
+    .pf-danger-btn:hover {
+        color: #fff;
+
+        border-color:
+            var(--pf-red);
+
+        background:
+            var(--pf-red);
+    }
+
+
+    /* =========================================================
+       QUICK LINKS
+    ========================================================= */
+
+    .pf-links {
+        display: grid;
+
+        gap: 7px;
+    }
+
+
+    .pf-link {
+        min-height: 50px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 10px;
+
+        padding:
+            9px 11px;
+
+        border:
+            1px solid #e9e1d8;
+
+        border-radius: 10px;
+
+        color:
+            #54473e;
+
+        background:
+            #fbfaf8;
+
+        transition:
+            .17s ease;
+    }
+
+
+    .pf-link:hover {
+        color:
+            var(--pf-red);
+
+        border-color:
+            #dec1a2;
+
+        background:
+            #fff9f0;
+
+        transform:
+            translateX(2px);
+    }
+
+
+    .pf-link-left {
+        display: flex;
+        align-items: center;
+
+        gap: 9px;
+    }
+
+
+    .pf-link-icon {
+        width: 32px;
+        height: 32px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 8px;
+
+        background:
+            #fff0cf;
+
+        font-size: 14px;
+    }
+
+
+    .pf-link-title {
+        font-size: 10.5px;
+
+        font-weight: 900;
+    }
+
+
+    .pf-link-subtitle {
+        margin-top: 1px;
+
+        color:
+            var(--pf-muted);
+
+        font-size: 8.5px;
+    }
+
+
+    .pf-link-arrow {
+        color: #a29388;
+
+        font-size: 15px;
+    }
+
+
+    /* =========================================================
+       FORM
+    ========================================================= */
+
+    .pf-form-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 13px;
+    }
+
+
+    .pf-field.full {
+        grid-column:
+            1 / -1;
+    }
+
+
+    .pf-input-wrap {
+        position: relative;
+    }
+
+
+    .pf-input-icon {
+        position: absolute;
+
+        z-index: 2;
+
+        top: 50%;
+        left: 12px;
+
+        transform:
+            translateY(-50%);
+
+        pointer-events: none;
+
+        font-size: 14px;
+    }
+
+
+    .pf-input {
+        width: 100%;
+        height: 45px;
+
+        padding:
+            0 39px;
+
+        border:
+            1px solid #ddd2c6;
+
+        border-radius: 10px;
+
+        outline: 0;
+
+        color:
+            var(--pf-text);
+
+        background: #fff;
+
+        font-size: 12px;
+
+        transition:
+            border-color .17s ease,
+            box-shadow .17s ease;
+    }
+
+
+    .pf-input:focus {
+        border-color:
+            var(--pf-gold);
+
+        box-shadow:
+            0 0 0 3px
+            rgba(229,173,66,.11);
+    }
+
+
+    .pf-input[disabled] {
+        color: #756b64;
+
+        background:
+            #f7f5f2;
+
+        cursor: not-allowed;
+    }
+
+
+    .pf-field-note {
+        margin-top: 5px;
+
+        color:
+            #938881;
+
+        font-size: 9px;
+
+        line-height: 1.45;
+    }
+
+
+    /* =========================================================
+       INFO BOX
+    ========================================================= */
+
+    .pf-info-box {
+        min-height: 45px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 10px;
+
+        padding:
+            9px 11px;
+
+        border:
+            1px solid #e9e0d6;
+
+        border-radius: 10px;
+
+        background:
+            #fbfaf8;
+    }
+
+
+    .pf-info-label {
+        color:
+            var(--pf-muted);
+
+        font-size: 10px;
+    }
+
+
+    .pf-info-value {
+        color:
+            var(--pf-brown-dark);
+
+        font-size: 10.5px;
+
+        font-weight: 900;
+
+        text-align: right;
+    }
+
+
+    .pf-active {
+        color:
+            var(--pf-green);
+    }
+
+
+    /* =========================================================
+       PASSWORD
+    ========================================================= */
+
+    .pf-password-note {
+        display: flex;
+        align-items: flex-start;
+
+        gap: 8px;
+
+        margin-bottom: 14px;
+
+        padding:
+            10px 11px;
+
+        border:
+            1px solid #e9d5a7;
+
+        border-radius: 9px;
+
+        color: #69543d;
+
+        background:
+            #fff9e7;
+
+        font-size: 9.5px;
+
+        line-height: 1.55;
+    }
+
+
+    .pf-password-toggle {
+        position: absolute;
+
+        z-index: 3;
+
+        top: 50%;
+        right: 7px;
+
+        transform:
+            translateY(-50%);
+
+        width: 31px;
+        height: 31px;
+
+        display: grid;
+        place-items: center;
+
+        border: 0;
+
+        border-radius: 7px;
+
+        color: #796c63;
+
+        background: transparent;
+
+        cursor: pointer;
+
+        font-size: 13px;
+    }
+
+
+    .pf-password-toggle:hover {
+        background:
+            #f4eee8;
+    }
+
+
+    /* =========================================================
+       SECURITY INFO
+    ========================================================= */
+
+    .pf-security-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(0, 1fr)
+            );
+
+        gap: 8px;
+
+        margin-top: 15px;
+    }
+
+
+    .pf-security-item {
+        padding:
+            10px;
+
+        border:
+            1px solid #eee5db;
+
+        border-radius: 9px;
+
+        color: #685950;
+
+        background:
+            #fdfbf8;
+
+        font-size: 9px;
+
+        line-height: 1.5;
+    }
+
+
+    .pf-security-item strong {
+        display: block;
+
+        margin-bottom: 2px;
+
+        color:
+            #493d35;
+
+        font-size: 9.5px;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
 
     @media (max-width: 991.98px) {
-        .profile-page {
-            padding-top: 23px;
+
+        .pf-layout {
+            grid-template-columns: 1fr;
         }
 
-        .profile-page::after {
-            display: none;
+
+        .pf-sidebar {
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(0, 1fr);
+
+            align-items: start;
         }
+
     }
+
 
     @media (max-width: 767.98px) {
-        .profile-hero {
+
+        .pf-hero {
             align-items: flex-start;
+
             flex-direction: column;
-            padding: 25px 22px;
-            border-radius: 22px;
+
+            padding:
+                24px 21px;
         }
 
-        .profile-page .profile-card {
-            border-radius: 20px;
+
+        .pf-stats {
+            grid-template-columns: 1fr;
         }
+
+
+        .pf-sidebar {
+            grid-template-columns: 1fr;
+        }
+
+
+        .pf-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+
+        .pf-field.full {
+            grid-column: auto;
+        }
+
+
+        .pf-security-grid {
+            grid-template-columns: 1fr;
+        }
+
     }
 
-    @media (prefers-reduced-motion: reduce) {
-        .profile-page *,
-        .profile-page *::before,
-        .profile-page *::after {
-            transition: none !important;
-            animation: none !important;
-        }
-    }
 
+    @media (max-width: 575.98px) {
+
+        .pf-card-body {
+            padding: 14px;
+        }
+
+
+        .pf-avatar-wrap,
+        .pf-avatar,
+        .pf-avatar-placeholder {
+            width: 135px;
+            height: 135px;
+        }
+
+
+        .pf-avatar-placeholder {
+            font-size: 44px;
+        }
+
+    }
 </style>
 
-<div class="profile-page">
-    <section class="profile-hero mb-4">
-        <div class="profile-hero-copy">
-            <div class="profile-kicker">🌿 TINH HOA TÂY BẮC</div>
 
-            <h2 class="fw-bold profile-title mb-2">
-                👤 Hồ sơ cá nhân
-            </h2>
+<div class="customer-profile">
 
-            <p class="mb-0">
-                Quản lý thông tin, ảnh đại diện và bảo mật tài khoản của bạn.
-            </p>
+
+    {{-- =====================================================
+        BREADCRUMB
+    ====================================================== --}}
+    <div class="pf-breadcrumb">
+
+        <a href="{{ url('/') }}">
+            Trang chủ
+        </a>
+
+        <span>›</span>
+
+        <span>
+            Hồ sơ của tôi
+        </span>
+
+    </div>
+
+
+    {{-- =====================================================
+        HERO
+    ====================================================== --}}
+    <section class="pf-hero">
+
+        <div class="pf-hero-copy">
+
+            <div class="pf-kicker">
+                👤 Tài khoản khách hàng
+            </div>
+
+
+            <h1 class="pf-title">
+                Hồ sơ của tôi
+            </h1>
+
+
+            <div class="pf-description">
+
+                Quản lý thông tin cá nhân,
+                ảnh đại diện,
+                bảo mật tài khoản
+                và truy cập nhanh
+                các chức năng mua sắm của bạn.
+
+            </div>
+
         </div>
 
-        <span class="profile-role-pill">
-            ● {{ ucfirst($user->role) }}
-        </span>
+
+        <div class="pf-hero-badge">
+
+            🌿 {{ $roleLabel }}
+
+        </div>
+
     </section>
 
+
+    {{-- =====================================================
+        FLASH MESSAGE
+    ====================================================== --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show auto-dismiss-alert" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+        <div class="pf-alert success">
+
+            ✓ {{ session('success') }}
+
         </div>
+
     @endif
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     @if($errors->any())
-        <div class="alert alert-danger">
-            <div class="fw-bold mb-1">Vui lòng kiểm tra lại:</div>
-            <ul class="mb-0">
+
+        <div class="pf-alert error">
+
+            <strong>
+                ⚠ Vui lòng kiểm tra lại:
+            </strong>
+
+
+            <ul>
+
                 @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
+
+                    <li>
+                        {{ $error }}
+                    </li>
+
                 @endforeach
+
             </ul>
+
         </div>
+
     @endif
 
-    <div class="row g-4">
-        {{-- ẢNH ĐẠI DIỆN --}}
-        <div class="col-lg-4">
-            <div class="profile-card h-100">
-                <div class="card-body p-4 text-center">
-                    <h5 class="profile-section-title">
-                        🖼️ Ảnh đại diện
-                    </h5>
 
-                    @if($user->avatar)
-                        <img
-                            src="{{ asset('storage/' . $user->avatar) }}"
-                            alt="Ảnh đại diện {{ $user->name }}"
-                            class="profile-avatar"
-                        >
-                    @else
-                        <div class="profile-avatar-placeholder">
-                            {{ mb_strtoupper(mb_substr(trim($user->name), 0, 1)) }}
+    {{-- =====================================================
+        STATS
+    ====================================================== --}}
+    <div class="pf-stats">
+
+
+        <div class="pf-stat">
+
+            <div class="pf-stat-icon">
+                📋
+            </div>
+
+
+            <div>
+
+                <div class="pf-stat-label">
+                    Tổng đơn hàng
+                </div>
+
+                <div class="pf-stat-number">
+                    {{ number_format($profileTotalOrders) }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="pf-stat">
+
+            <div class="pf-stat-icon">
+                🚚
+            </div>
+
+
+            <div>
+
+                <div class="pf-stat-label">
+                    Đơn đang xử lý
+                </div>
+
+                <div class="pf-stat-number">
+                    {{ number_format($profileProcessingOrders) }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="pf-stat">
+
+            <div class="pf-stat-icon">
+                ✅
+            </div>
+
+
+            <div>
+
+                <div class="pf-stat-label">
+                    Đơn đã giao
+                </div>
+
+                <div class="pf-stat-number">
+                    {{ number_format($profileDeliveredOrders) }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- =====================================================
+        MAIN LAYOUT
+    ====================================================== --}}
+    <div class="pf-layout">
+
+
+        {{-- =================================================
+            LEFT
+        ================================================== --}}
+        <aside class="pf-sidebar">
+
+
+            {{-- =============================================
+                AVATAR
+            ============================================== --}}
+            <section class="pf-card">
+
+                <div class="pf-card-body pf-user-card">
+
+
+                    <div class="pf-avatar-wrap">
+
+
+                        @if($avatarUrl)
+
+                            <img
+                                src="{{ $avatarUrl }}"
+                                alt="Ảnh đại diện {{ $user->name }}"
+                                class="pf-avatar"
+                                id="avatarPreview"
+                            >
+
+                        @else
+
+                            <div
+                                class="pf-avatar-placeholder"
+                                id="avatarPlaceholder"
+                            >
+                                {{ $userInitial }}
+                            </div>
+
+
+                            <img
+                                src=""
+                                alt="Xem trước ảnh đại diện"
+                                class="pf-avatar"
+                                id="avatarPreview"
+                                style="display:none;"
+                            >
+
+                        @endif
+
+
+                        <div class="pf-avatar-camera">
+                            📷
                         </div>
-                    @endif
 
-                    <div class="mt-4">
-                        <div class="fw-bold fs-5">{{ $user->name }}</div>
-                        <div class="text-muted small">{{ $user->email }}</div>
                     </div>
 
+
+                    <div class="pf-user-name">
+                        {{ $user->name }}
+                    </div>
+
+
+                    <div class="pf-user-email">
+                        {{ $user->email }}
+                    </div>
+
+
+                    <div class="pf-user-badges">
+
+                        <span class="pf-user-badge">
+                            👤 {{ $roleLabel }}
+                        </span>
+
+
+                        <span
+                            class="
+                                pf-user-badge
+                                verify
+                                {{ $emailVerified ? 'ok' : '' }}
+                            "
+                        >
+
+                            @if($emailVerified)
+
+                                ✓ Email đã xác thực
+
+                            @else
+
+                                ⚠ Email chưa xác thực
+
+                            @endif
+
+                        </span>
+
+                    </div>
+
+
+                    {{-- =========================================
+                        UPDATE AVATAR
+                    ========================================== --}}
                     <form
                         action="{{ route('profile.avatar.update') }}"
                         method="POST"
                         enctype="multipart/form-data"
-                        class="mt-4 text-start"
+                        class="pf-avatar-form"
                     >
+
                         @csrf
 
-                        <label class="profile-label">
-                            Chọn ảnh mới
+
+                        <label
+                            for="profileAvatarInput"
+                            class="pf-label"
+                        >
+                            Chọn ảnh đại diện mới
                         </label>
+
 
                         <input
                             type="file"
+                            id="profileAvatarInput"
                             name="avatar"
-                            class="form-control profile-input"
+                            class="pf-file-input"
                             accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                             required
                         >
 
-                        <div class="form-text">
-                            JPG, PNG hoặc WEBP. Tối đa 2MB.
+
+                        <div class="pf-file-note">
+                            JPG, JPEG, PNG hoặc WEBP · Tối đa 2MB.
                         </div>
 
-                        <button
-                            type="submit"
-                            class="btn profile-btn profile-btn-primary w-100 mt-3"
-                        >
-                            📷 Cập nhật ảnh
-                        </button>
-                    </form>
 
-                    @if($user->avatar)
-                        <form
-                            action="{{ route('profile.avatar.delete') }}"
-                            method="POST"
-                            class="mt-2"
-                            onsubmit="return confirm('Bạn có chắc muốn xóa ảnh đại diện?')"
-                        >
-                            @csrf
-                            @method('DELETE')
+                        <div class="pf-avatar-actions">
 
                             <button
                                 type="submit"
-                                class="btn btn-outline-danger profile-btn w-100"
+                                class="pf-primary-btn"
                             >
-                                🗑️ Xóa ảnh đại diện
+                                📷 Cập nhật ảnh
                             </button>
-                        </form>
-                    @endif
-                </div>
-            </div>
-        </div>
 
-        <div class="col-lg-8">
-            {{-- THÔNG TIN CÁ NHÂN --}}
-            <div class="profile-card mb-4">
-                <div class="card-body p-4">
-                    <h5 class="profile-section-title">
-                        👤 Thông tin cá nhân
-                    </h5>
+                        </div>
+
+                    </form>
+
+
+                    @if($user->avatar)
+
+                        <form
+                            action="{{ route('profile.avatar.delete') }}"
+                            method="POST"
+                            style="margin-top:7px;"
+                            onsubmit="
+                                return confirm(
+                                    'Bạn có chắc muốn xóa ảnh đại diện hiện tại?'
+                                );
+                            "
+                        >
+
+                            @csrf
+                            @method('DELETE')
+
+
+                            <button
+                                type="submit"
+                                class="pf-danger-btn"
+                            >
+                                🗑 Xóa ảnh đại diện
+                            </button>
+
+                        </form>
+
+                    @endif
+
+                </div>
+
+            </section>
+
+
+            {{-- =============================================
+                QUICK LINKS
+            ============================================== --}}
+            <section class="pf-card">
+
+                <div class="pf-card-head">
+
+                    <div>
+
+                        <h2 class="pf-card-title">
+                            Truy cập nhanh
+                        </h2>
+
+                        <div class="pf-card-subtitle">
+                            Các chức năng tài khoản.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="pf-card-body">
+
+                    <div class="pf-links">
+
+
+                        <a
+                            href="{{ route('dashboard') }}"
+                            class="pf-link"
+                        >
+
+                            <span class="pf-link-left">
+
+                                <span class="pf-link-icon">
+                                    📊
+                                </span>
+
+                                <span>
+
+                                    <span class="pf-link-title">
+                                        Tổng quan
+                                    </span>
+
+                                    <span class="pf-link-subtitle">
+                                        Hoạt động tài khoản
+                                    </span>
+
+                                </span>
+
+                            </span>
+
+                            <span class="pf-link-arrow">
+                                ›
+                            </span>
+
+                        </a>
+
+
+                        <a
+                            href="{{ route('orders.index') }}"
+                            class="pf-link"
+                        >
+
+                            <span class="pf-link-left">
+
+                                <span class="pf-link-icon">
+                                    📦
+                                </span>
+
+                                <span>
+
+                                    <span class="pf-link-title">
+                                        Đơn hàng của tôi
+                                    </span>
+
+                                    <span class="pf-link-subtitle">
+                                        Theo dõi đơn đã đặt
+                                    </span>
+
+                                </span>
+
+                            </span>
+
+                            <span class="pf-link-arrow">
+                                ›
+                            </span>
+
+                        </a>
+
+
+                        <a
+                            href="{{ route('addresses.index') }}"
+                            class="pf-link"
+                        >
+
+                            <span class="pf-link-left">
+
+                                <span class="pf-link-icon">
+                                    📍
+                                </span>
+
+                                <span>
+
+                                    <span class="pf-link-title">
+                                        Địa chỉ giao hàng
+                                    </span>
+
+                                    <span class="pf-link-subtitle">
+                                        Quản lý địa chỉ nhận hàng
+                                    </span>
+
+                                </span>
+
+                            </span>
+
+                            <span class="pf-link-arrow">
+                                ›
+                            </span>
+
+                        </a>
+
+
+                        <a
+                            href="{{ route('products.index') }}"
+                            class="pf-link"
+                        >
+
+                            <span class="pf-link-left">
+
+                                <span class="pf-link-icon">
+                                    🧺
+                                </span>
+
+                                <span>
+
+                                    <span class="pf-link-title">
+                                        Tiếp tục mua sắm
+                                    </span>
+
+                                    <span class="pf-link-subtitle">
+                                        Khám phá đặc sản Tây Bắc
+                                    </span>
+
+                                </span>
+
+                            </span>
+
+                            <span class="pf-link-arrow">
+                                ›
+                            </span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </aside>
+
+
+        {{-- =================================================
+            RIGHT
+        ================================================== --}}
+        <div class="pf-content">
+
+
+            {{-- =============================================
+                PERSONAL INFO
+            ============================================== --}}
+            <section class="pf-card">
+
+                <div class="pf-card-head">
+
+                    <div>
+
+                        <h2 class="pf-card-title">
+                            👤 Thông tin cá nhân
+                        </h2>
+
+                        <div class="pf-card-subtitle">
+                            Thông tin sử dụng trên tài khoản của bạn.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="pf-card-body">
+
 
                     <form
                         action="{{ route('profile.update') }}"
                         method="POST"
                     >
+
                         @csrf
                         @method('PATCH')
 
-                        <div class="row g-3">
-                            <div class="col-md-7">
-                                <label class="profile-label">
+
+                        <div class="pf-form-grid">
+
+
+                            {{-- NAME --}}
+                            <div class="pf-field full">
+
+                                <label
+                                    for="profileName"
+                                    class="pf-label"
+                                >
                                     Họ và tên
                                 </label>
 
-                                <input
-                                    type="text"
-                                    name="name"
-                                    class="form-control profile-input"
-                                    value="{{ old('name', $user->name) }}"
-                                    maxlength="255"
-                                    required
-                                >
-                            </div>
 
-                            <div class="col-md-5">
-                                <label class="profile-label">
-                                    Vai trò
-                                </label>
+                                <div class="pf-input-wrap">
 
-                                <div class="profile-info-box">
-                                    <span class="fw-bold text-success">
-                                        {{ ucfirst($user->role) }}
+                                    <span class="pf-input-icon">
+                                        👤
                                     </span>
+
+
+                                    <input
+                                        type="text"
+                                        id="profileName"
+                                        name="name"
+                                        value="{{ old('name', $user->name) }}"
+                                        class="pf-input"
+                                        maxlength="255"
+                                        autocomplete="name"
+                                        required
+                                    >
+
                                 </div>
+
                             </div>
 
-                            <div class="col-md-12">
-                                <label class="profile-label">
-                                    Email
+
+                            {{-- EMAIL --}}
+                            <div class="pf-field full">
+
+                                <label class="pf-label">
+                                    Email đăng nhập
                                 </label>
 
-                                <input
-                                    type="email"
-                                    class="form-control profile-input"
-                                    value="{{ $user->email }}"
-                                    disabled
-                                >
 
-                                <div class="form-text">
-                                    Email đăng nhập được giữ nguyên để không ảnh hưởng xác thực OTP.
+                                <div class="pf-input-wrap">
+
+                                    <span class="pf-input-icon">
+                                        ✉
+                                    </span>
+
+
+                                    <input
+                                        type="email"
+                                        value="{{ $user->email }}"
+                                        class="pf-input"
+                                        disabled
+                                    >
+
                                 </div>
+
+
+                                <div class="pf-field-note">
+
+                                    Email hiện được giữ nguyên
+                                    để không ảnh hưởng tới
+                                    đăng nhập và xác thực OTP.
+
+                                </div>
+
                             </div>
 
-                            <div class="col-md-12">
-                                <div class="profile-info-box d-flex justify-content-between align-items-center">
-                                    <span>Trạng thái tài khoản</span>
 
-                                    <span class="fw-bold text-success">
+                            {{-- ROLE --}}
+                            <div class="pf-field">
+
+                                <label class="pf-label">
+                                    Loại tài khoản
+                                </label>
+
+
+                                <div class="pf-info-box">
+
+                                    <span class="pf-info-label">
+                                        Vai trò
+                                    </span>
+
+                                    <span class="pf-info-value">
+                                        {{ $roleLabel }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ACCOUNT STATUS --}}
+                            <div class="pf-field">
+
+                                <label class="pf-label">
+                                    Trạng thái
+                                </label>
+
+
+                                <div class="pf-info-box">
+
+                                    <span class="pf-info-label">
+                                        Tài khoản
+                                    </span>
+
+                                    <span
+                                        class="
+                                            pf-info-value
+                                            pf-active
+                                        "
+                                    >
                                         ● Đang hoạt động
                                     </span>
+
                                 </div>
+
                             </div>
 
-                            <div class="col-12">
+
+                            {{-- EMAIL STATUS --}}
+                            <div class="pf-field">
+
+                                <label class="pf-label">
+                                    Xác thực email
+                                </label>
+
+
+                                <div class="pf-info-box">
+
+                                    <span class="pf-info-label">
+                                        Email
+                                    </span>
+
+
+                                    <span
+                                        class="
+                                            pf-info-value
+                                            {{
+                                                $emailVerified
+                                                ? 'pf-active'
+                                                : ''
+                                            }}
+                                        "
+                                    >
+
+                                        {{
+                                            $emailVerified
+                                            ? '✓ Đã xác thực'
+                                            : '⚠ Chưa xác thực'
+                                        }}
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- MEMBER SINCE --}}
+                            <div class="pf-field">
+
+                                <label class="pf-label">
+                                    Thành viên từ
+                                </label>
+
+
+                                <div class="pf-info-box">
+
+                                    <span class="pf-info-label">
+                                        Ngày đăng ký
+                                    </span>
+
+                                    <span class="pf-info-value">
+
+                                        {{
+                                            $user
+                                                ->created_at
+                                                ->format(
+                                                    'd/m/Y'
+                                                )
+                                        }}
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- BUTTON --}}
+                            <div class="pf-field full">
+
                                 <button
                                     type="submit"
-                                    class="btn profile-btn profile-btn-primary"
+                                    class="pf-primary-btn"
                                 >
-                                    💾 Cập nhật thông tin
+                                    💾 Lưu thay đổi
                                 </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
 
-            {{-- ĐỔI MẬT KHẨU --}}
-            <div class="profile-card">
-                <div class="card-body p-4">
-                    <h5 class="profile-section-title">
-                        🔐 Đổi mật khẩu
-                    </h5>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+
+            {{-- =============================================
+                PASSWORD
+            ============================================== --}}
+            <section class="pf-card">
+
+                <div class="pf-card-head">
+
+                    <div>
+
+                        <h2 class="pf-card-title">
+                            🔐 Đổi mật khẩu
+                        </h2>
+
+                        <div class="pf-card-subtitle">
+                            Cập nhật mật khẩu đăng nhập tài khoản.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="pf-card-body">
+
+
+                    <div class="pf-password-note">
+
+                        <span>
+                            🛡
+                        </span>
+
+                        <span>
+
+                            Mật khẩu mới phải có
+                            ít nhất <strong>8 ký tự</strong>
+                            và phải khác mật khẩu hiện tại.
+                            Không chia sẻ mật khẩu
+                            hoặc mã OTP cho người khác.
+
+                        </span>
+
+                    </div>
+
 
                     <form
                         action="{{ route('profile.password.update') }}"
                         method="POST"
+                        id="profilePasswordForm"
                     >
+
                         @csrf
                         @method('PATCH')
 
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="profile-label">
+
+                        <div class="pf-form-grid">
+
+
+                            {{-- CURRENT PASSWORD --}}
+                            <div class="pf-field full">
+
+                                <label
+                                    for="currentPassword"
+                                    class="pf-label"
+                                >
                                     Mật khẩu hiện tại
                                 </label>
 
-                                <input
-                                    type="password"
-                                    name="current_password"
-                                    class="form-control profile-input"
-                                    autocomplete="current-password"
-                                    required
-                                >
+
+                                <div class="pf-input-wrap">
+
+                                    <span class="pf-input-icon">
+                                        🔑
+                                    </span>
+
+
+                                    <input
+                                        type="password"
+                                        id="currentPassword"
+                                        name="current_password"
+                                        class="pf-input"
+                                        autocomplete="current-password"
+                                        required
+                                    >
+
+
+                                    <button
+                                        type="button"
+                                        class="pf-password-toggle"
+                                        data-password-toggle="currentPassword"
+                                        aria-label="Hiện mật khẩu"
+                                    >
+                                        👁
+                                    </button>
+
+                                </div>
+
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="profile-label">
+
+                            {{-- NEW PASSWORD --}}
+                            <div class="pf-field">
+
+                                <label
+                                    for="newPassword"
+                                    class="pf-label"
+                                >
                                     Mật khẩu mới
                                 </label>
 
-                                <input
-                                    type="password"
-                                    name="password"
-                                    class="form-control profile-input"
-                                    minlength="8"
-                                    autocomplete="new-password"
-                                    required
-                                >
+
+                                <div class="pf-input-wrap">
+
+                                    <span class="pf-input-icon">
+                                        🔒
+                                    </span>
+
+
+                                    <input
+                                        type="password"
+                                        id="newPassword"
+                                        name="password"
+                                        class="pf-input"
+                                        minlength="8"
+                                        autocomplete="new-password"
+                                        required
+                                    >
+
+
+                                    <button
+                                        type="button"
+                                        class="pf-password-toggle"
+                                        data-password-toggle="newPassword"
+                                        aria-label="Hiện mật khẩu"
+                                    >
+                                        👁
+                                    </button>
+
+                                </div>
+
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="profile-label">
+
+                            {{-- CONFIRM PASSWORD --}}
+                            <div class="pf-field">
+
+                                <label
+                                    for="newPasswordConfirmation"
+                                    class="pf-label"
+                                >
                                     Xác nhận mật khẩu mới
                                 </label>
 
-                                <input
-                                    type="password"
-                                    name="password_confirmation"
-                                    class="form-control profile-input"
-                                    minlength="8"
-                                    autocomplete="new-password"
-                                    required
-                                >
+
+                                <div class="pf-input-wrap">
+
+                                    <span class="pf-input-icon">
+                                        🔐
+                                    </span>
+
+
+                                    <input
+                                        type="password"
+                                        id="newPasswordConfirmation"
+                                        name="password_confirmation"
+                                        class="pf-input"
+                                        minlength="8"
+                                        autocomplete="new-password"
+                                        required
+                                    >
+
+
+                                    <button
+                                        type="button"
+                                        class="pf-password-toggle"
+                                        data-password-toggle="newPasswordConfirmation"
+                                        aria-label="Hiện mật khẩu"
+                                    >
+                                        👁
+                                    </button>
+
+                                </div>
+
                             </div>
 
-                            <div class="col-12">
-                                <div class="form-text mb-3">
-                                    Mật khẩu mới phải có ít nhất 8 ký tự và khác mật khẩu hiện tại.
-                                </div>
+
+                            <div class="pf-field full">
 
                                 <button
                                     type="submit"
-                                    class="btn profile-btn profile-btn-primary"
+                                    class="pf-primary-btn"
                                 >
-                                    🔒 Đổi mật khẩu
+                                    🔒 Cập nhật mật khẩu
                                 </button>
+
                             </div>
+
                         </div>
+
                     </form>
+
+
+                    <div class="pf-security-grid">
+
+                        <div class="pf-security-item">
+
+                            <strong>
+                                🔐 Mật khẩu
+                            </strong>
+
+                            Tối thiểu 8 ký tự.
+
+                        </div>
+
+
+                        <div class="pf-security-item">
+
+                            <strong>
+                                ✉ Email
+                            </strong>
+
+                            Được sử dụng cho đăng nhập
+                            và xác thực OTP.
+
+                        </div>
+
+
+                        <div class="pf-security-item">
+
+                            <strong>
+                                🛡 Bảo mật
+                            </strong>
+
+                            Không chia sẻ mật khẩu
+                            hoặc OTP.
+
+                        </div>
+
+                    </div>
+
                 </div>
-            </div>
+
+            </section>
+
         </div>
+
     </div>
+
 </div>
+
+
+<script>
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | AVATAR PREVIEW
+        |--------------------------------------------------------------------------
+        */
+
+        const avatarInput =
+            document.getElementById(
+                'profileAvatarInput'
+            );
+
+
+        const avatarPreview =
+            document.getElementById(
+                'avatarPreview'
+            );
+
+
+        const avatarPlaceholder =
+            document.getElementById(
+                'avatarPlaceholder'
+            );
+
+
+        if (
+            avatarInput
+            &&
+            avatarPreview
+        ) {
+
+            avatarInput.addEventListener(
+                'change',
+                function () {
+
+                    const file =
+                        avatarInput.files
+                        &&
+                        avatarInput.files[0];
+
+
+                    if (!file) {
+                        return;
+                    }
+
+
+                    if (
+                        !file.type.startsWith(
+                            'image/'
+                        )
+                    ) {
+
+                        avatarInput.value =
+                            '';
+
+                        window.alert(
+                            'Vui lòng chọn một tệp hình ảnh.'
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        file.size
+                        >
+                        2
+                        *
+                        1024
+                        *
+                        1024
+                    ) {
+
+                        avatarInput.value =
+                            '';
+
+                        window.alert(
+                            'Ảnh đại diện không được vượt quá 2MB.'
+                        );
+
+                        return;
+
+                    }
+
+
+                    const reader =
+                        new FileReader();
+
+
+                    reader.onload =
+                        function (event) {
+
+                            avatarPreview.src =
+                                event.target.result;
+
+
+                            avatarPreview.style.display =
+                                'block';
+
+
+                            if (avatarPlaceholder) {
+
+                                avatarPlaceholder.style.display =
+                                    'none';
+
+                            }
+
+                        };
+
+
+                    reader.readAsDataURL(
+                        file
+                    );
+
+                }
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PASSWORD VISIBILITY
+        |--------------------------------------------------------------------------
+        */
+
+        document
+            .querySelectorAll(
+                '[data-password-toggle]'
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        'click',
+                        function () {
+
+                            const targetId =
+                                button.dataset
+                                    .passwordToggle;
+
+
+                            const input =
+                                document.getElementById(
+                                    targetId
+                                );
+
+
+                            if (!input) {
+                                return;
+                            }
+
+
+                            const showing =
+                                input.type
+                                ===
+                                'text';
+
+
+                            input.type =
+                                showing
+                                ? 'password'
+                                : 'text';
+
+
+                            button.textContent =
+                                showing
+                                ? '👁'
+                                : '🙈';
+
+
+                            button.setAttribute(
+                                'aria-label',
+                                showing
+                                ? 'Hiện mật khẩu'
+                                : 'Ẩn mật khẩu'
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PASSWORD CONFIRMATION
+        |--------------------------------------------------------------------------
+        */
+
+        const passwordForm =
+            document.getElementById(
+                'profilePasswordForm'
+            );
+
+
+        const newPassword =
+            document.getElementById(
+                'newPassword'
+            );
+
+
+        const confirmation =
+            document.getElementById(
+                'newPasswordConfirmation'
+            );
+
+
+        if (
+            passwordForm
+            &&
+            newPassword
+            &&
+            confirmation
+        ) {
+
+            passwordForm.addEventListener(
+                'submit',
+                function (event) {
+
+                    if (
+                        newPassword.value
+                        !==
+                        confirmation.value
+                    ) {
+
+                        event.preventDefault();
+
+                        window.alert(
+                            'Xác nhận mật khẩu mới không khớp.'
+                        );
+
+                        confirmation.focus();
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+);
+</script>
+
 @endsection

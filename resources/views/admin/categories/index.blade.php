@@ -589,65 +589,7 @@
 
                             @foreach($categories as $category)
 
-                                @php
 
-                                    $name =
-                                        mb_strtolower(
-                                            $category->name
-                                        );
-
-                                    $icon = '⚡';
-
-                                    if (
-                                        str_contains(
-                                            $name,
-                                            'laptop'
-                                        )
-                                    ) {
-                                        $icon = '💻';
-                                    }
-                                    elseif (
-                                        str_contains(
-                                            $name,
-                                            'điện thoại'
-                                        )
-                                    ) {
-                                        $icon = '📱';
-                                    }
-                                    elseif (
-                                        str_contains(
-                                            $name,
-                                            'tai nghe'
-                                        )
-                                    ) {
-                                        $icon = '🎧';
-                                    }
-                                    elseif (
-                                        str_contains(
-                                            $name,
-                                            'sạc'
-                                        )
-                                    ) {
-                                        $icon = '🔌';
-                                    }
-                                    elseif (
-                                        str_contains(
-                                            $name,
-                                            'chuột'
-                                        )
-                                    ) {
-                                        $icon = '🖱️';
-                                    }
-                                    elseif (
-                                        str_contains(
-                                            $name,
-                                            'bàn phím'
-                                        )
-                                    ) {
-                                        $icon = '⌨️';
-                                    }
-
-                                @endphp
 
 
                                 <tr>
@@ -675,7 +617,7 @@
                                         <div class="category-name">
 
                                             <div class="category-icon">
-                                                {{ $icon }}
+                                                {{ $category->icon }}
                                             </div>
 
 

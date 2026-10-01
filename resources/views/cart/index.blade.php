@@ -4,935 +4,2551 @@
 
 @section('content')
 
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | DỮ LIỆU GIỎ HÀNG
+    |--------------------------------------------------------------------------
+    */
+
+    $cartIds = array_keys($cart);
+
+    $cartProducts = empty($cartIds)
+        ? collect()
+        : \App\Models\Product::query()
+            ->whereIn('id', $cartIds)
+            ->get()
+            ->keyBy('id');
+
+
+    $cartTotal = 0;
+
+    $cartQuantityTotal = 0;
+
+
+    foreach ($cart as $cartId => $cartDetails) {
+        $itemPrice =
+            (float) ($cartDetails['price'] ?? 0);
+
+        $itemQuantity =
+            (float) ($cartDetails['quantity'] ?? 0);
+
+        $cartTotal +=
+            $itemPrice * $itemQuantity;
+
+        $cartQuantityTotal +=
+            $itemQuantity;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT SỐ LƯỢNG
+    |--------------------------------------------------------------------------
+    */
+
+    $formatQuantity = function ($value) {
+        return rtrim(
+            rtrim(
+                number_format(
+                    (float) $value,
+                    2,
+                    '.',
+                    ''
+                ),
+                '0'
+            ),
+            '.'
+        );
+    };
+@endphp
+
+
 <style>
-    .cart-page-title {
-        font-weight: 800;
-        color: #2f241e;
+    /* =========================================================
+       ECOMMERCE CART - TINH HOA TAY BAC
+    ========================================================= */
+
+    .tb-cart {
+        --cart-green: #35562f;
+        --cart-green-dark: #274522;
+
+        --cart-brown: #633820;
+        --cart-brown-dark: #3d2316;
+
+        --cart-red: #b43e2e;
+        --cart-red-dark: #8c2f24;
+
+        --cart-gold: #e4ac42;
+        --cart-gold-light: #fff0c8;
+
+        --cart-border: #e8dfd4;
+
+        --cart-text: #302923;
+        --cart-muted: #766d66;
+
+        --cart-shadow:
+            0 8px 28px
+            rgba(55, 39, 27, .07);
+
+        --cart-shadow-hover:
+            0 17px 38px
+            rgba(55, 39, 27, .12);
+
+        color: var(--cart-text);
     }
 
-    .cart-card,
-    .summary-card,
-    .continue-card {
-        border: 1px solid #ead8bf;
-        border-radius: 18px;
-        overflow: hidden;
-        box-shadow: 0 8px 24px rgba(95,52,29,.06);
+
+    .tb-cart *,
+    .tb-cart *::before,
+    .tb-cart *::after {
+        box-sizing: border-box;
     }
 
-    .cart-table th {
-        white-space: nowrap;
-        background: #f8efe2;
-        color: #5f341d;
-        font-weight: 700;
-    }
 
-    .cart-table td {
-        vertical-align: middle;
-    }
-
-    .product-name {
-        font-weight: 700;
-        color: #2f241e;
-    }
-
-    .money {
-        font-weight: 800;
-        color: #a83b2d;
-    }
-
-    .summary-total {
-        font-size: 30px;
-        font-weight: 900;
-        color: #a83b2d;
-    }
-
-    .checkout-btn {
-        border: 0;
-        border-radius: 12px;
-        font-weight: 700;
-        padding-top: 13px;
-        padding-bottom: 13px;
-        background: linear-gradient(135deg,#48633b,#2f4b2b);
-    }
-
-    .checkout-btn:hover {
-        background: linear-gradient(135deg,#3e5634,#253d22);
-    }
-
-    .continue-btn {
-        border-radius: 10px;
-    }
-
-    .unit-pill {
-        display: inline-block;
-        padding: 4px 9px;
-        border-radius: 999px;
-        color: #5f341d;
-        background: #fffaf0;
-        border: 1px solid #ead8bf;
-        font-size: 12px;
-        font-weight: 700;
+    .tb-cart a {
+        text-decoration: none;
     }
 
 
     /* =========================================================
-       CART PREMIUM UI 2026
-       CHỈ NÂNG GIAO DIỆN - KHÔNG ĐỔI ROUTE / FORM / LOGIC BLADE
+       BREADCRUMB
     ========================================================= */
 
-    .cart-premium-page {
+    .tb-cart-breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        gap: 7px;
+
+        margin-bottom: 14px;
+
+        color: #958a82;
+
+        font-size: 10px;
+    }
+
+
+    .tb-cart-breadcrumb a {
+        color: #665349;
+
+        font-weight: 800;
+    }
+
+
+    .tb-cart-breadcrumb a:hover {
+        color: var(--cart-red);
+    }
+
+
+    /* =========================================================
+       PAGE HEADER
+    ========================================================= */
+
+    .tb-cart-heading {
         position: relative;
-        isolation: isolate;
-        padding-top: 34px !important;
-        padding-bottom: 70px !important;
+
+        overflow: hidden;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 24px;
+
+        margin-bottom: 20px;
+
+        padding:
+            23px 27px;
+
+        border:
+            1px solid #e2d4c2;
+
+        border-radius: 18px;
+
+        background:
+            radial-gradient(
+                circle at 88% 15%,
+                rgba(228,172,66,.17),
+                transparent 28%
+            ),
+            linear-gradient(
+                120deg,
+                #fffdf8,
+                #fff7ea 58%,
+                #f0f5ed
+            );
+
+        box-shadow:
+            var(--cart-shadow);
     }
 
-    /* Nền trang kiểu Tây Bắc nhẹ, không dùng ảnh ngoài */
-    .cart-premium-page::before {
-        content: "";
-        position: absolute;
-        z-index: -2;
-        top: -30px;
-        left: 50%;
-        width: min(100vw, 1680px);
-        height: 650px;
-        transform: translateX(-50%);
-        pointer-events: none;
-        background:
-            radial-gradient(circle at 8% 10%, rgba(242,193,92,.18), transparent 24%),
-            radial-gradient(circle at 92% 13%, rgba(72,99,59,.13), transparent 28%),
-            linear-gradient(180deg, rgba(255,250,240,.98), rgba(255,255,255,0));
-    }
 
-    .cart-premium-page::after {
+    .tb-cart-heading::after {
         content: "";
+
         position: absolute;
-        z-index: -1;
-        top: 90px;
-        right: -46px;
-        width: 220px;
-        height: 220px;
-        opacity: .13;
-        pointer-events: none;
-        border-radius: 50%;
+
+        right: -30px;
+        bottom: -55px;
+
+        width: 260px;
+        height: 150px;
+
+        opacity: .075;
+
         background:
-            repeating-radial-gradient(
-                circle at center,
-                rgba(95,52,29,.30) 0 1px,
-                transparent 1px 13px
+            var(--cart-green);
+
+        clip-path:
+            polygon(
+                0 100%,
+                21% 50%,
+                38% 71%,
+                57% 24%,
+                76% 61%,
+                100% 13%,
+                100% 100%
             );
     }
 
-    /* Tiêu đề */
-    .cart-premium-page .cart-page-title {
+
+    .tb-cart-heading-copy {
         position: relative;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: clamp(30px, 3vw, 42px);
-        letter-spacing: -.7px;
-        color: #2f241e;
-        text-shadow: 0 1px 0 #fff;
+
+        z-index: 2;
     }
 
-    .cart-premium-page .cart-page-title::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -9px;
-        width: 92px;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,#d97706,#a83b2d,#48633b);
-    }
 
-    /* Card tổng */
-    .cart-premium-page .cart-card,
-    .cart-premium-page .summary-card,
-    .cart-premium-page .continue-card {
-        border-radius: 24px;
-        border-color: #e6d0b3;
-        background:
-            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
-        box-shadow:
-            0 18px 46px rgba(95,52,29,.085),
-            inset 0 1px 0 rgba(255,255,255,.92);
-    }
+    .tb-cart-eyebrow {
+        margin-bottom: 5px;
 
-    /* Bảng giỏ hàng */
-    .cart-premium-page .cart-card {
-        position: relative;
-        overflow: hidden;
-    }
+        color: var(--cart-red);
 
-    .cart-premium-page .cart-card::before {
-        content: "";
-        position: absolute;
-        z-index: 3;
-        top: 0;
-        left: 4%;
-        right: 4%;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            #f2c15c 24%,
-            #d97706 52%,
-            #48633b 78%,
-            transparent
-        );
-        opacity: .8;
-    }
+        font-size: 9px;
 
-    .cart-premium-page .cart-table {
-        --bs-table-bg: transparent;
-    }
+        font-weight: 950;
 
-    .cart-premium-page .cart-table thead th {
-        padding-top: 17px;
-        padding-bottom: 17px;
-        border-bottom: 1px solid #e6d0b3;
-        background:
-            linear-gradient(180deg,#fff7e8,#f8efe2);
-        color: #5f341d;
-        font-size: 13px;
-        letter-spacing: .02em;
+        letter-spacing: .1em;
+
         text-transform: uppercase;
     }
 
-    .cart-premium-page .cart-table tbody tr {
-        transition:
-            background-color .18s ease,
-            transform .18s ease;
+
+    .tb-cart-title {
+        margin: 0;
+
+        color: var(--cart-text);
+
+        font-size:
+            clamp(27px, 3vw, 38px);
+
+        line-height: 1.1;
+
+        font-weight: 950;
+
+        letter-spacing: -.045em;
     }
 
-    .cart-premium-page .cart-table tbody tr:hover {
-        --bs-table-hover-bg: #fffaf2;
+
+    .tb-cart-description {
+        margin-top: 7px;
+
+        color: var(--cart-muted);
+
+        font-size: 11px;
+
+        line-height: 1.6;
     }
 
-    .cart-premium-page .cart-table tbody td {
-        padding-top: 19px;
-        padding-bottom: 19px;
-        border-color: #f0e4d5;
-    }
 
-    .cart-premium-page .product-name {
-        font-size: 16px;
-        line-height: 1.4;
-        color: #34251d;
-    }
+    .tb-cart-heading-stat {
+        position: relative;
 
-    .cart-premium-page .unit-pill {
-        padding: 5px 10px;
-        background: linear-gradient(180deg,#fffaf0,#fff4df);
-        border-color: #e9cfaa;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
+        z-index: 2;
 
-    .cart-premium-page .badge.bg-secondary {
-        border-radius: 999px;
-        padding: 7px 10px;
-        background: #f3eee8 !important;
-        color: #5f341d !important;
-        border: 1px solid #e5d4bd;
-        font-weight: 800;
-    }
+        min-width: 140px;
 
-    .cart-premium-page .money {
-        font-size: 17px;
-        letter-spacing: -.2px;
-    }
+        padding:
+            12px 15px;
 
-    /* Số lượng */
-    .cart-premium-page .input-group {
-        border-radius: 11px;
-        box-shadow: 0 5px 14px rgba(95,52,29,.055);
-    }
+        border:
+            1px solid #e5ca96;
 
-    .cart-premium-page .input-group .form-control {
-        border-color: #dec7a8;
-        font-weight: 800;
+        border-radius: 13px;
+
+        background:
+            rgba(255,255,255,.86);
+
         text-align: center;
     }
 
-    .cart-premium-page .input-group-text {
-        border-color: #dec7a8;
-        background: #fff7e8;
-        color: #5f341d;
-        font-weight: 800;
+
+    .tb-cart-heading-stat strong {
+        display: block;
+
+        color: var(--cart-brown-dark);
+
+        font-size: 21px;
+
+        font-weight: 950;
     }
 
-    .cart-premium-page .btn-primary.btn-sm {
-        border: 0;
-        border-radius: 9px;
-        background: linear-gradient(135deg,#5f341d,#48633b);
-        font-weight: 800;
-        box-shadow: 0 5px 12px rgba(95,52,29,.11);
+
+    .tb-cart-heading-stat span {
+        color: var(--cart-muted);
+
+        font-size: 9px;
     }
 
-    .cart-premium-page .btn-outline-danger.btn-sm {
-        border-radius: 9px;
-        font-weight: 800;
+
+    /* =========================================================
+       LAYOUT
+    ========================================================= */
+
+    .tb-cart-layout {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            355px;
+
+        gap: 20px;
+
+        align-items: start;
     }
 
-    /* Card tiếp tục mua */
-    .cart-premium-page .continue-card {
-        position: relative;
-        overflow: hidden;
-        background:
-            radial-gradient(circle at 88% 18%, rgba(242,193,92,.20), transparent 28%),
-            linear-gradient(145deg,#fffdf9,#fff7e9);
+
+    .tb-cart-main {
+        min-width: 0;
     }
 
-    .cart-premium-page .continue-card::after {
-        content: "🌿";
-        position: absolute;
-        right: 24px;
-        bottom: -10px;
-        font-size: 96px;
-        opacity: .06;
-        transform: rotate(-15deg);
-        pointer-events: none;
-    }
 
-    .cart-premium-page .continue-card .card-body {
-        position: relative;
-        z-index: 1;
-    }
+    /* =========================================================
+       CART TOP
+    ========================================================= */
 
-    .cart-premium-page .continue-btn {
-        min-height: 43px;
-        padding-inline: 18px;
-        border-radius: 999px;
-        border-color: #cdb18b;
-        color: #5f341d;
-        font-weight: 800;
-        background: rgba(255,255,255,.78);
-    }
-
-    .cart-premium-page .continue-btn:hover {
-        background: #5f341d;
-        border-color: #5f341d;
-        color: #fff;
-    }
-
-    /* Tổng đơn hàng */
-    .cart-premium-page .summary-card {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .cart-premium-page .summary-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 150px;
-        height: 150px;
-        border-radius: 0 0 0 100%;
-        background: linear-gradient(
-            135deg,
-            rgba(242,193,92,.13),
-            rgba(72,99,59,.05)
-        );
-        pointer-events: none;
-    }
-
-    .cart-premium-page .summary-card h5 {
-        color: #3a291f;
-        font-size: 20px;
-    }
-
-    .cart-premium-page .summary-card hr {
-        border-color: #e7d5bc;
-        opacity: 1;
-    }
-
-    .cart-premium-page .summary-total {
-        font-size: clamp(28px,3vw,38px);
-        letter-spacing: -.7px;
-        text-shadow: 0 1px 0 #fff;
-    }
-
-    .cart-premium-page .checkout-btn {
-        position: relative;
-        overflow: hidden;
+    .tb-cart-list-head {
         min-height: 54px;
-        border-radius: 14px;
-        letter-spacing: .15px;
-        box-shadow: 0 10px 24px rgba(72,99,59,.20);
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 15px;
+
+        margin-bottom: 11px;
+
+        padding:
+            10px 14px;
+
+        border:
+            1px solid var(--cart-border);
+
+        border-radius: 13px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--cart-shadow);
+    }
+
+
+    .tb-cart-list-head strong {
+        color: #473a32;
+
+        font-size: 12px;
+
+        font-weight: 950;
+    }
+
+
+    .tb-cart-continue {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 5px;
+
+        color: var(--cart-green);
+
+        font-size: 10px;
+
+        font-weight: 900;
+    }
+
+
+    .tb-cart-continue:hover {
+        color: var(--cart-red);
+    }
+
+
+    /* =========================================================
+       ITEM CARD
+    ========================================================= */
+
+    .tb-cart-items {
+        display: grid;
+
+        gap: 11px;
+    }
+
+
+    .tb-cart-item {
+        position: relative;
+
+        overflow: hidden;
+
+        display: grid;
+
+        grid-template-columns:
+            125px
+            minmax(0, 1fr);
+
+        gap: 15px;
+
+        padding: 14px;
+
+        border:
+            1px solid var(--cart-border);
+
+        border-radius: 15px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--cart-shadow);
+
         transition:
             transform .18s ease,
             box-shadow .18s ease,
-            filter .18s ease;
+            border-color .18s ease;
     }
 
-    .cart-premium-page .checkout-btn::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -120%;
-        width: 65%;
-        height: 100%;
-        transform: skewX(-20deg);
-        background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255,255,255,.18),
-            transparent
-        );
-        transition: left .45s ease;
+
+    .tb-cart-item:hover {
+        border-color: #dcc5a7;
+
+        transform:
+            translateY(-2px);
+
+        box-shadow:
+            var(--cart-shadow-hover);
     }
 
-    .cart-premium-page .checkout-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 30px rgba(72,99,59,.25);
-    }
 
-    .cart-premium-page .checkout-btn:hover::after {
-        left: 145%;
-    }
+    /* =========================================================
+       ITEM IMAGE
+    ========================================================= */
 
-    /* Empty cart */
-    .cart-premium-page .card.border-0.shadow-sm {
+    .tb-cart-media {
         position: relative;
+
+        width: 125px;
+        height: 125px;
+
         overflow: hidden;
-        border: 1px dashed #dcc19a !important;
-        border-radius: 26px !important;
+
+        border:
+            1px solid #ece3d9;
+
+        border-radius: 12px;
+
         background:
-            radial-gradient(circle at 50% 0%, rgba(242,193,92,.14), transparent 30%),
-            linear-gradient(180deg,#fffdf9,#fff9ee);
-        box-shadow: 0 18px 42px rgba(95,52,29,.07) !important;
+            linear-gradient(
+                145deg,
+                #fbfaf7,
+                #fff5e5
+            );
     }
 
-    .cart-premium-page .card.border-0.shadow-sm::after {
-        content: "🌿";
+
+    .tb-cart-media a {
+        width: 100%;
+        height: 100%;
+
+        display: block;
+    }
+
+
+    .tb-cart-media img {
+        width: 100%;
+        height: 100%;
+
+        padding: 7px;
+
+        object-fit: contain;
+
+        transition:
+            transform .2s ease;
+    }
+
+
+    .tb-cart-item:hover
+    .tb-cart-media img {
+        transform:
+            scale(1.045);
+    }
+
+
+    .tb-cart-no-image {
+        width: 100%;
+        height: 100%;
+
+        display: grid;
+        place-items: center;
+
+        color: #97887c;
+
+        font-size: 36px;
+    }
+
+
+    .tb-cart-sale {
         position: absolute;
-        right: 10%;
-        bottom: -35px;
-        font-size: 130px;
-        opacity: .045;
-        transform: rotate(-18deg);
+
+        z-index: 3;
+
+        top: 6px;
+        left: 6px;
+
+        padding:
+            4px 6px;
+
+        border-radius: 6px;
+
+        color: #fff;
+
+        background:
+            var(--cart-red);
+
+        font-size: 8px;
+
+        font-weight: 950;
     }
 
-    .cart-premium-page .card.border-0.shadow-sm .card-body {
-        position: relative;
-        z-index: 1;
+
+    /* =========================================================
+       ITEM INFORMATION
+    ========================================================= */
+
+    .tb-cart-content {
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
     }
 
-    .cart-premium-page .card.border-0.shadow-sm .btn-primary {
+
+    .tb-cart-item-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 15px;
+    }
+
+
+    .tb-cart-product-info {
+        min-width: 0;
+    }
+
+
+    .tb-cart-category {
+        display: inline-flex;
+
+        margin-bottom: 5px;
+
+        padding:
+            4px 7px;
+
+        border:
+            1px solid #ead7bc;
+
+        border-radius: 999px;
+
+        color: #705038;
+
+        background: #fff8e8;
+
+        font-size: 8px;
+
+        font-weight: 850;
+    }
+
+
+    .tb-cart-product-name {
+        display: block;
+
+        overflow: hidden;
+
+        color: #302923;
+
+        font-size: 14px;
+
+        line-height: 1.4;
+
+        font-weight: 950;
+
+        white-space: nowrap;
+
+        text-overflow: ellipsis;
+    }
+
+
+    .tb-cart-product-name:hover {
+        color: var(--cart-red);
+    }
+
+
+    .tb-cart-unit {
+        margin-top: 4px;
+
+        color: #8d8178;
+
+        font-size: 9px;
+    }
+
+
+    .tb-cart-remove {
+        flex: 0 0 auto;
+
         border: 0;
-        border-radius: 13px;
-        background: linear-gradient(135deg,#a83b2d,#5f341d);
-        font-weight: 800;
-        box-shadow: 0 9px 20px rgba(168,59,45,.16);
+
+        color: #a34a40;
+
+        background: transparent;
+
+        font-size: 9px;
+
+        font-weight: 850;
+
+        cursor: pointer;
     }
 
-    /* Alerts */
-    .cart-premium-page .alert {
-        border-radius: 15px;
-        border-width: 1px;
-        box-shadow: 0 8px 22px rgba(95,52,29,.06) !important;
+
+    .tb-cart-remove:hover {
+        color: #d02e24;
     }
+
+
+    /* =========================================================
+       PRICE ROW
+    ========================================================= */
+
+    .tb-cart-price-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        gap: 12px;
+
+        margin-top: auto;
+
+        padding-top: 11px;
+    }
+
+
+    .tb-cart-unit-price-label {
+        margin-bottom: 2px;
+
+        color: #978b83;
+
+        font-size: 8px;
+    }
+
+
+    .tb-cart-unit-price {
+        color: #6a5141;
+
+        font-size: 12px;
+
+        font-weight: 850;
+    }
+
+
+    .tb-cart-current-price {
+        color: var(--cart-red);
+
+        font-size: 16px;
+
+        font-weight: 950;
+    }
+
+
+    .tb-cart-old-price {
+        margin-left: 5px;
+
+        color: #aaa09a;
+
+        font-size: 9px;
+
+        text-decoration:
+            line-through;
+    }
+
+
+    /* =========================================================
+       QUANTITY
+    ========================================================= */
+
+    .tb-cart-controls {
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
+    }
+
+
+    .tb-cart-qty-form {
+        display: flex;
+        align-items: center;
+
+        gap: 7px;
+    }
+
+
+    .tb-cart-qty-control {
+        display: flex;
+
+        overflow: hidden;
+
+        height: 38px;
+
+        border:
+            1px solid #ddd0c0;
+
+        border-radius: 9px;
+
+        background: #fff;
+    }
+
+
+    .tb-cart-qty-button {
+        width: 34px;
+
+        flex: 0 0 34px;
+
+        border: 0;
+
+        color: var(--cart-brown);
+
+        background: #faf5ee;
+
+        font-size: 16px;
+
+        font-weight: 900;
+
+        cursor: pointer;
+    }
+
+
+    .tb-cart-qty-button:hover {
+        color: #fff;
+
+        background:
+            var(--cart-brown);
+    }
+
+
+    .tb-cart-qty-input {
+        width: 68px;
+
+        border: 0;
+
+        border-left:
+            1px solid #e6dbcf;
+
+        border-right:
+            1px solid #e6dbcf;
+
+        outline: 0;
+
+        color: #41362e;
+
+        background: #fff;
+
+        text-align: center;
+
+        font-size: 10px;
+
+        font-weight: 900;
+
+        -moz-appearance:
+            textfield;
+    }
+
+
+    .tb-cart-qty-input::-webkit-inner-spin-button,
+    .tb-cart-qty-input::-webkit-outer-spin-button {
+        margin: 0;
+
+        -webkit-appearance: none;
+    }
+
+
+    .tb-cart-update {
+        height: 38px;
+
+        padding:
+            0 10px;
+
+        border:
+            1px solid #c4d0bd;
+
+        border-radius: 9px;
+
+        color:
+            var(--cart-green-dark);
+
+        background:
+            #f1f7ee;
+
+        font-size: 8px;
+
+        font-weight: 900;
+
+        cursor: pointer;
+    }
+
+
+    .tb-cart-update:hover {
+        color: #fff;
+
+        border-color:
+            var(--cart-green);
+
+        background:
+            var(--cart-green);
+    }
+
+
+    .tb-cart-step {
+        margin-top: 4px;
+
+        color: #978b82;
+
+        font-size: 8px;
+    }
+
+
+    /* =========================================================
+       SUBTOTAL
+    ========================================================= */
+
+    .tb-cart-subtotal {
+        min-width: 130px;
+
+        text-align: right;
+    }
+
+
+    .tb-cart-subtotal-label {
+        color: #93877f;
+
+        font-size: 8px;
+    }
+
+
+    .tb-cart-subtotal-price {
+        margin-top: 2px;
+
+        color: var(--cart-red);
+
+        font-size: 17px;
+
+        font-weight: 950;
+
+        letter-spacing: -.02em;
+    }
+
+
+    /* =========================================================
+       SUMMARY
+    ========================================================= */
+
+    .tb-cart-summary {
+        position: sticky;
+
+        top: 177px;
+
+        overflow: hidden;
+
+        border:
+            1px solid var(--cart-border);
+
+        border-radius: 16px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--cart-shadow);
+    }
+
+
+    .tb-cart-summary-head {
+        padding:
+            16px 17px;
+
+        border-bottom:
+            1px solid var(--cart-border);
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--cart-brown-dark),
+                var(--cart-brown)
+            );
+    }
+
+
+    .tb-cart-summary-head strong {
+        display: block;
+
+        font-size: 14px;
+
+        font-weight: 950;
+    }
+
+
+    .tb-cart-summary-head span {
+        display: block;
+
+        margin-top: 2px;
+
+        color:
+            rgba(255,255,255,.67);
+
+        font-size: 9px;
+    }
+
+
+    .tb-cart-summary-body {
+        padding: 17px;
+    }
+
+
+    .tb-cart-summary-line {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 14px;
+
+        margin-bottom: 13px;
+
+        color: #756a62;
+
+        font-size: 10px;
+    }
+
+
+    .tb-cart-summary-line strong {
+        color: #453a32;
+
+        font-size: 11px;
+    }
+
+
+    .tb-cart-summary-note {
+        color: #988d84;
+
+        font-size: 9px;
+
+        text-align: right;
+    }
+
+
+    .tb-cart-summary-divider {
+        height: 1px;
+
+        margin:
+            16px 0;
+
+        background:
+            #ebe2d8;
+    }
+
+
+    .tb-cart-summary-total {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        gap: 12px;
+    }
+
+
+    .tb-cart-total-title {
+        color: #43372f;
+
+        font-size: 13px;
+
+        font-weight: 950;
+    }
+
+
+    .tb-cart-total-note {
+        margin-top: 2px;
+
+        color: #958981;
+
+        font-size: 8px;
+    }
+
+
+    .tb-cart-total-price {
+        color: var(--cart-red);
+
+        font-size: 23px;
+
+        line-height: 1;
+
+        font-weight: 950;
+
+        letter-spacing: -.035em;
+
+        text-align: right;
+    }
+
+
+    /* =========================================================
+       CHECKOUT BUTTON
+    ========================================================= */
+
+    .tb-cart-checkout {
+        min-height: 49px;
+
+        width: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 7px;
+
+        margin-top: 18px;
+
+        border-radius: 11px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--cart-red),
+                var(--cart-red-dark)
+            );
+
+        box-shadow:
+            0 9px 21px
+            rgba(180,62,46,.2);
+
+        font-size: 11px;
+
+        font-weight: 950;
+
+        transition:
+            transform .17s ease,
+            box-shadow .17s ease;
+    }
+
+
+    .tb-cart-checkout:hover {
+        color: #fff;
+
+        transform:
+            translateY(-2px);
+
+        box-shadow:
+            0 13px 27px
+            rgba(180,62,46,.27);
+    }
+
+
+    /* =========================================================
+       SAFE BUY
+    ========================================================= */
+
+    .tb-cart-security {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 7px;
+
+        margin-top: 12px;
+    }
+
+
+    .tb-cart-security-item {
+        min-height: 54px;
+
+        padding:
+            9px;
+
+        border:
+            1px solid #eee4da;
+
+        border-radius: 9px;
+
+        color: #6a594d;
+
+        background: #fdfbf8;
+
+        font-size: 8px;
+
+        line-height: 1.45;
+    }
+
+
+    .tb-cart-security-item strong {
+        display: block;
+
+        margin-bottom: 2px;
+
+        color: #4e4037;
+
+        font-size: 9px;
+    }
+
+
+    /* =========================================================
+       CUSTOMER HELP
+    ========================================================= */
+
+    .tb-cart-help {
+        margin-top: 12px;
+
+        padding:
+            12px;
+
+        border:
+            1px solid #ecd9af;
+
+        border-radius: 10px;
+
+        background:
+            #fff9e9;
+
+        color: #67513a;
+
+        font-size: 9px;
+
+        line-height: 1.55;
+    }
+
+
+    .tb-cart-help a {
+        color: var(--cart-red);
+
+        font-weight: 900;
+    }
+
+
+    /* =========================================================
+       EMPTY CART
+    ========================================================= */
+
+    .tb-cart-empty {
+        min-height: 470px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding:
+            50px 20px;
+
+        overflow: hidden;
+
+        border:
+            1px dashed #ddc7aa;
+
+        border-radius: 20px;
+
+        background:
+            radial-gradient(
+                circle at 50% 0%,
+                rgba(228,172,66,.16),
+                transparent 32%
+            ),
+            linear-gradient(
+                180deg,
+                #fffdf9,
+                #fff9ef
+            );
+
+        box-shadow:
+            var(--cart-shadow);
+
+        text-align: center;
+    }
+
+
+    .tb-cart-empty-icon {
+        width: 94px;
+        height: 94px;
+
+        display: grid;
+        place-items: center;
+
+        margin:
+            0 auto 15px;
+
+        border:
+            1px solid #e3c895;
+
+        border-radius: 50%;
+
+        background:
+            #fff0ca;
+
+        font-size: 41px;
+    }
+
+
+    .tb-cart-empty h2 {
+        margin: 0;
+
+        color: var(--cart-text);
+
+        font-size: 24px;
+
+        font-weight: 950;
+    }
+
+
+    .tb-cart-empty p {
+        max-width: 420px;
+
+        margin:
+            8px auto 20px;
+
+        color: var(--cart-muted);
+
+        font-size: 11px;
+
+        line-height: 1.6;
+    }
+
+
+    .tb-cart-empty-btn {
+        min-height: 45px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding:
+            0 18px;
+
+        border-radius: 10px;
+
+        color: #fff;
+
+        background:
+            var(--cart-green);
+
+        font-size: 10px;
+
+        font-weight: 950;
+    }
+
+
+    .tb-cart-empty-btn:hover {
+        color: #fff;
+
+        background:
+            var(--cart-green-dark);
+    }
+
+
+    /* =========================================================
+       MOBILE ITEM SUMMARY
+    ========================================================= */
+
+    .tb-cart-mobile-summary {
+        display: none;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 1199.98px) {
+
+        .tb-cart-layout {
+            grid-template-columns:
+                minmax(0, 1fr)
+                315px;
+        }
+
+
+        .tb-cart-subtotal {
+            min-width: 110px;
+        }
+
+    }
+
 
     @media (max-width: 991.98px) {
-        .cart-premium-page {
-            padding-top: 24px !important;
+
+        .tb-cart-layout {
+            grid-template-columns: 1fr;
         }
 
-        .cart-premium-page .cart-card,
-        .cart-premium-page .summary-card,
-        .cart-premium-page .continue-card {
-            border-radius: 20px;
+
+        .tb-cart-summary {
+            position: static;
         }
+
     }
 
+
     @media (max-width: 767.98px) {
-        .cart-premium-page::after {
-            display: none;
+
+        .tb-cart-heading {
+            align-items: flex-start;
+
+            flex-direction: column;
+
+            gap: 13px;
+
+            padding:
+                20px;
         }
 
-        .cart-premium-page .cart-table thead {
-            display: none;
+
+        .tb-cart-heading-stat {
+            min-width: 115px;
+
+            text-align: left;
         }
 
-        .cart-premium-page .cart-table,
-        .cart-premium-page .cart-table tbody,
-        .cart-premium-page .cart-table tr,
-        .cart-premium-page .cart-table td {
-            display: block;
+
+        .tb-cart-item {
+            grid-template-columns:
+                105px
+                minmax(0, 1fr);
+        }
+
+
+        .tb-cart-media {
+            width: 105px;
+            height: 105px;
+        }
+
+
+        .tb-cart-price-row {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+
+        .tb-cart-subtotal {
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            text-align: left;
+        }
+
+    }
+
+
+    @media (max-width: 575.98px) {
+
+        .tb-cart-list-head {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+
+        .tb-cart-item {
+            grid-template-columns:
+                88px
+                minmax(0, 1fr);
+
+            gap: 10px;
+
+            padding: 10px;
+        }
+
+
+        .tb-cart-media {
+            width: 88px;
+            height: 88px;
+        }
+
+
+        .tb-cart-product-name {
+            font-size: 12px;
+        }
+
+
+        .tb-cart-item-top {
+            gap: 5px;
+        }
+
+
+        .tb-cart-price-row {
+            grid-column:
+                1 / -1;
+        }
+
+
+        .tb-cart-controls {
+            width: 100%;
+
+            align-items: stretch;
+
+            flex-direction: column;
+        }
+
+
+        .tb-cart-qty-form {
             width: 100%;
         }
 
-        .cart-premium-page .cart-table tbody tr {
-            padding: 14px 16px;
-            border-bottom: 1px solid #ead8bf;
+
+        .tb-cart-qty-control {
+            flex: 1;
         }
 
-        .cart-premium-page .cart-table tbody tr:last-child {
-            border-bottom: 0;
+
+        .tb-cart-qty-input {
+            flex: 1;
+
+            width: auto;
         }
 
-        .cart-premium-page .cart-table tbody td {
-            padding: 8px 0 !important;
-            border: 0;
-            text-align: left !important;
+
+        .tb-cart-update {
+            flex: 0 0 auto;
         }
 
-        .cart-premium-page .cart-table tbody td:last-child {
-            padding-top: 12px !important;
+
+        .tb-cart-security {
+            grid-template-columns: 1fr;
         }
 
-        .cart-premium-page .input-group {
-            max-width: 155px;
+
+        .tb-cart-total-price {
+            font-size: 20px;
         }
+
     }
 
-    @media (max-width: 575.98px) {
-        .cart-premium-page .cart-page-title {
-            font-size: 29px;
-        }
-
-        .cart-premium-page .summary-card .card-body,
-        .cart-premium-page .continue-card .card-body {
-            padding: 22px !important;
-        }
-
-        .cart-premium-page .summary-total {
-            font-size: 28px;
-        }
-    }
 
     @media (prefers-reduced-motion: reduce) {
-        .cart-premium-page *,
-        .cart-premium-page *::before,
-        .cart-premium-page *::after {
-            transition: none !important;
-            animation: none !important;
-        }
-    }
 
+        .tb-cart *,
+        .tb-cart *::before,
+        .tb-cart *::after {
+            transition: none !important;
+        }
+
+    }
 </style>
 
-<div class="cart-premium-page container py-4">
 
-    <div class="row justify-content-center">
+<div class="tb-cart">
 
-        <div class="col-xl-11 col-lg-12">
 
-            <div class="mb-4">
-                <h2 class="cart-page-title mb-1">
-                    🛒 Giỏ hàng của bạn
-                </h2>
+    {{-- =====================================================
+        BREADCRUMB
+    ====================================================== --}}
+    <div class="tb-cart-breadcrumb">
 
-                <p class="text-muted mb-0">
-                    Kiểm tra số lượng hoặc khối lượng
-                    trước khi tiến hành đặt hàng
-                </p>
+        <a href="{{ url('/') }}">
+            Trang chủ
+        </a>
+
+        <span>›</span>
+
+        <a href="{{ route('products.index') }}">
+            Sản phẩm
+        </a>
+
+        <span>›</span>
+
+        <span>
+            Giỏ hàng
+        </span>
+
+    </div>
+
+
+    {{-- =====================================================
+        HEADER
+    ====================================================== --}}
+    <section class="tb-cart-heading">
+
+        <div class="tb-cart-heading-copy">
+
+            <div class="tb-cart-eyebrow">
+                🛒 Giỏ hàng của bạn
             </div>
 
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show shadow-sm">
-                    ✅ {{ session('success') }}
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert">
-                    </button>
-                </div>
-            @endif
+            <h1 class="tb-cart-title">
+                Kiểm tra sản phẩm trước khi đặt hàng
+            </h1>
 
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show shadow-sm">
-                    ❌ {{ session('error') }}
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert">
-                    </button>
-                </div>
-            @endif
+            <div class="tb-cart-description">
 
-            @if($errors->any())
-                <div class="alert alert-danger shadow-sm">
-                    <strong>❌ Có lỗi xảy ra:</strong>
+                Điều chỉnh số lượng,
+                kiểm tra giá bán
+                và sản phẩm trước khi chuyển sang bước thanh toán.
 
-                    <ul class="mb-0 mt-2">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            </div>
 
-            @if(count($cart) > 0)
+        </div>
 
-                @php
-                    $total = 0;
-                @endphp
 
-                <div class="card cart-card mb-4">
+        @if(count($cart) > 0)
 
-                    <div class="card-body p-0">
+            <div class="tb-cart-heading-stat">
 
-                        <div class="table-responsive">
+                <strong>
+                    {{ count($cart) }}
+                </strong>
 
-                            <table class="table table-hover cart-table align-middle mb-0">
+                <span>
+                    loại sản phẩm trong giỏ
+                </span>
 
-                                <thead>
-                                    <tr>
-                                        <th class="ps-4">
-                                            Tên sản phẩm
-                                        </th>
+            </div>
 
-                                        <th>
-                                            Danh mục
-                                        </th>
+        @endif
 
-                                        <th>
-                                            Đơn giá
-                                        </th>
+    </section>
 
-                                        <th style="width: 245px;">
-                                            Số lượng / Khối lượng
-                                        </th>
 
-                                        <th>
-                                            Thành tiền
-                                        </th>
+    {{-- =====================================================
+        CART HAS ITEMS
+    ====================================================== --}}
+    @if(count($cart) > 0)
 
-                                        <th class="text-center pe-4">
-                                            Hành động
-                                        </th>
-                                    </tr>
-                                </thead>
+        <div class="tb-cart-layout">
 
-                                <tbody>
 
-                                    @foreach($cart as $id => $details)
+            {{-- =================================================
+                CART ITEMS
+            ================================================== --}}
+            <div class="tb-cart-main">
 
-                                        @php
-                                            $price = (float) $details['price'];
-                                            $quantity = (float) $details['quantity'];
-                                            $unit = $details['unit'] ?? 'sản phẩm';
-                                            $minQty = (float) ($details['min_quantity'] ?? 1);
-                                            $stepQty = (float) ($details['quantity_step'] ?? 1);
 
-                                            $subtotal =
-                                                $price * $quantity;
+                <div class="tb-cart-list-head">
 
-                                            $total += $subtotal;
+                    <strong>
+                        Sản phẩm đã chọn
+                    </strong>
 
-                                            $displayQty =
-                                                rtrim(
-                                                    rtrim(
-                                                        number_format(
-                                                            $quantity,
-                                                            2,
-                                                            '.',
-                                                            ''
-                                                        ),
-                                                        '0'
-                                                    ),
-                                                    '.'
-                                                );
-                                        @endphp
 
-                                        <tr>
-
-                                            <td class="ps-4">
-                                                <div class="product-name">
-                                                    {{ $details['name'] }}
-                                                </div>
-
-                                                <span class="unit-pill mt-1">
-                                                    Bán theo {{ $unit }}
-                                                </span>
-                                            </td>
-
-                                            <td>
-                                                <span class="badge bg-secondary">
-                                                    {{ $details['category'] ?? 'Chưa phân loại' }}
-                                                </span>
-                                            </td>
-
-                                            <td>
-                                                <div class="fw-bold">
-                                                    {{
-                                                        number_format(
-                                                            $price,
-                                                            0,
-                                                            ',',
-                                                            '.'
-                                                        )
-                                                    }} đ
-                                                </div>
-
-                                                <small class="text-muted">
-                                                    / {{ $unit }}
-                                                </small>
-                                            </td>
-
-                                            <td>
-
-                                                <form
-                                                    action="{{ route(
-                                                        'cart.update',
-                                                        ['id' => $id]
-                                                    ) }}"
-                                                    method="POST"
-                                                    class="d-flex align-items-center flex-wrap gap-2"
-                                                >
-                                                    @csrf
-                                                    @method('PATCH')
-
-                                                    <div class="input-group input-group-sm"
-                                                         style="width:145px;">
-
-                                                        <input
-                                                            type="number"
-                                                            name="quantity"
-                                                            value="{{ $displayQty }}"
-                                                            min="{{ $minQty }}"
-                                                            step="{{ $stepQty }}"
-                                                            required
-                                                            class="form-control"
-                                                        >
-
-                                                        <span class="input-group-text">
-                                                            {{ $unit }}
-                                                        </span>
-
-                                                    </div>
-
-                                                    <button
-                                                        type="submit"
-                                                        class="btn btn-primary btn-sm"
-                                                    >
-                                                        Cập nhật
-                                                    </button>
-                                                </form>
-
-                                                <small class="text-muted d-block mt-1">
-                                                    Bước tăng:
-                                                    {{ $stepQty }}
-                                                    {{ $unit }}
-                                                </small>
-                                            </td>
-
-                                            <td class="money">
-                                                {{
-                                                    number_format(
-                                                        $subtotal,
-                                                        0,
-                                                        ',',
-                                                        '.'
-                                                    )
-                                                }} đ
-                                            </td>
-
-                                            <td class="text-center pe-4">
-
-                                                <form
-                                                    action="{{ route(
-                                                        'cart.destroy',
-                                                        ['product' => $id]
-                                                    ) }}"
-                                                    method="POST"
-                                                    class="d-inline"
-                                                >
-                                                    @csrf
-                                                    @method('DELETE')
-
-                                                    <button
-                                                        type="submit"
-                                                        class="btn btn-outline-danger btn-sm"
-                                                        onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')"
-                                                    >
-                                                        🗑 Xóa
-                                                    </button>
-                                                </form>
-
-                                            </td>
-
-                                        </tr>
-
-                                    @endforeach
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
+                    <a
+                        href="{{ route('products.index') }}"
+                        class="tb-cart-continue"
+                    >
+                        ← Tiếp tục mua sắm
+                    </a>
 
                 </div>
 
-                <div class="row g-4 align-items-stretch">
 
-                    <div class="col-lg-5">
+                <div class="tb-cart-items">
 
-                        <div class="card continue-card h-100">
 
-                            <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    @foreach($cart as $id => $details)
 
-                                <div style="font-size:40px;" class="mb-2">
-                                    🌿
-                                </div>
+                        @php
+                            $price =
+                                (float) (
+                                    $details['price']
+                                    ??
+                                    0
+                                );
 
-                                <h5 class="fw-bold mb-2">
-                                    Muốn mua thêm đặc sản?
-                                </h5>
 
-                                <p class="text-muted mb-4">
-                                    Bạn có thể tiếp tục mua sắm trước
-                                    khi tiến hành đặt hàng.
-                                </p>
+                            $quantity =
+                                (float) (
+                                    $details['quantity']
+                                    ??
+                                    0
+                                );
 
-                                <div>
-                                    <a
-                                        href="{{ route('products.index') }}"
-                                        class="btn btn-outline-secondary continue-btn"
-                                    >
-                                        ← Tiếp tục mua sắm
-                                    </a>
-                                </div>
 
-                            </div>
+                            $unit =
+                                $details['unit']
+                                ??
+                                'sản phẩm';
 
-                        </div>
 
-                    </div>
+                            $minQty =
+                                (float) (
+                                    $details['min_quantity']
+                                    ??
+                                    1
+                                );
 
-                    <div class="col-lg-7">
 
-                        <div class="card summary-card h-100">
+                            $stepQty =
+                                (float) (
+                                    $details['quantity_step']
+                                    ??
+                                    1
+                                );
 
-                            <div class="card-body p-4">
 
-                                <h5 class="fw-bold mb-4">
-                                    🧾 Tổng đơn hàng
-                                </h5>
+                            $subtotal =
+                                $price
+                                *
+                                $quantity;
 
-                                <div class="d-flex justify-content-between mb-3">
-                                    <span class="text-muted">
-                                        Tổng tiền sản phẩm
+
+                            $displayQty =
+                                $formatQuantity(
+                                    $quantity
+                                );
+
+
+                            $displayMinQty =
+                                $formatQuantity(
+                                    $minQty
+                                );
+
+
+                            $displayStepQty =
+                                $formatQuantity(
+                                    $stepQty
+                                );
+
+
+                            $product =
+                                $cartProducts->get(
+                                    (int) $id
+                                );
+
+
+                            $productUrl =
+                                $product
+
+                                ? route(
+                                    'products.show',
+                                    $product
+                                )
+
+                                : route(
+                                    'products.index'
+                                );
+
+
+                            $productImage =
+                                null;
+
+
+                            if (
+                                $product
+                                &&
+                                $product->image
+                            ) {
+
+                                $productImage =
+                                    str_starts_with(
+                                        $product->image,
+                                        'http'
+                                    )
+
+                                    ? $product->image
+
+                                    : asset(
+                                        'storage/'
+                                        .
+                                        ltrim(
+                                            $product->image,
+                                            '/'
+                                        )
+                                    );
+
+                            }
+                        @endphp
+
+
+                        <article class="tb-cart-item">
+
+
+                            {{-- =========================================
+                                IMAGE
+                            ========================================== --}}
+                            <div class="tb-cart-media">
+
+
+                                @if(
+                                    $product
+                                    &&
+                                    $product->isOnSale()
+                                )
+
+                                    <span class="tb-cart-sale">
+
+                                        -{{
+                                            $product
+                                                ->getDiscountPercent()
+                                        }}%
+
                                     </span>
 
-                                    <strong>
-                                        {{
-                                            number_format(
-                                                $total,
-                                                0,
-                                                ',',
-                                                '.'
-                                            )
-                                        }} đ
-                                    </strong>
-                                </div>
+                                @endif
 
-                                <div class="d-flex justify-content-between mb-3">
-                                    <span class="text-muted">
-                                        Phí vận chuyển
-                                    </span>
 
-                                    <span class="text-muted">
-                                        Chọn ở bước thanh toán
-                                    </span>
-                                </div>
+                                <a href="{{ $productUrl }}">
 
-                                <div class="d-flex justify-content-between mb-3">
-                                    <span class="text-muted">
-                                        Voucher
-                                    </span>
+                                    @if($productImage)
 
-                                    <span class="text-muted">
-                                        Áp dụng ở bước thanh toán
-                                    </span>
-                                </div>
+                                        <img
+                                            src="{{ $productImage }}"
+                                            alt="{{
+                                                $details['name']
+                                                ??
+                                                'Sản phẩm'
+                                            }}"
+                                            loading="lazy"
+                                            onerror="
+                                                this.style.display='none';
+                                                this.nextElementSibling.style.display='grid';
+                                            "
+                                        >
 
-                                <hr>
 
-                                <div class="d-flex justify-content-between align-items-end mb-4">
-
-                                    <div>
-                                        <div class="fw-bold fs-5">
-                                            Tạm tính
+                                        <div
+                                            class="tb-cart-no-image"
+                                            style="display:none;"
+                                        >
+                                            🧺
                                         </div>
 
-                                        <small class="text-muted">
-                                            Chưa bao gồm phí vận chuyển
-                                            và giảm giá
-                                        </small>
-                                    </div>
+                                    @else
 
-                                    <div class="summary-total">
-                                        {{
-                                            number_format(
-                                                $total,
-                                                0,
-                                                ',',
-                                                '.'
-                                            )
-                                        }} đ
-                                    </div>
+                                        <div class="tb-cart-no-image">
+                                            🧺
+                                        </div>
 
-                                </div>
+                                    @endif
 
-                                <a
-                                    href="{{ route('checkout') }}"
-                                    class="btn btn-success btn-lg w-100 checkout-btn"
-                                >
-                                    🛒 Tiến hành đặt hàng
                                 </a>
 
                             </div>
 
+
+                            {{-- =========================================
+                                CONTENT
+                            ========================================== --}}
+                            <div class="tb-cart-content">
+
+
+                                <div class="tb-cart-item-top">
+
+
+                                    <div class="tb-cart-product-info">
+
+
+                                        <span class="tb-cart-category">
+
+                                            {{
+                                                $details['category']
+                                                ??
+                                                'Đặc sản Tây Bắc'
+                                            }}
+
+                                        </span>
+
+
+                                        <a
+                                            href="{{ $productUrl }}"
+                                            class="tb-cart-product-name"
+                                        >
+                                            {{
+                                                $details['name']
+                                                ??
+                                                'Sản phẩm'
+                                            }}
+                                        </a>
+
+
+                                        <div class="tb-cart-unit">
+
+                                            Bán theo
+                                            <strong>
+                                                {{ $unit }}
+                                            </strong>
+
+                                            · Tối thiểu
+
+                                            <strong>
+                                                {{ $displayMinQty }}
+                                                {{ $unit }}
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {{-- DELETE --}}
+                                    <form
+                                        action="{{
+                                            route(
+                                                'cart.destroy',
+                                                [
+                                                    'product'
+                                                    =>
+                                                    $id
+                                                ]
+                                            )
+                                        }}"
+                                        method="POST"
+                                        onsubmit="
+                                            return confirm(
+                                                'Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?'
+                                            );
+                                        "
+                                    >
+
+                                        @csrf
+                                        @method('DELETE')
+
+
+                                        <button
+                                            type="submit"
+                                            class="tb-cart-remove"
+                                            title="Xóa khỏi giỏ"
+                                        >
+                                            🗑 Xóa
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+
+                                {{-- =====================================
+                                    PRICE / QUANTITY / SUBTOTAL
+                                ====================================== --}}
+                                <div class="tb-cart-price-row">
+
+
+                                    {{-- PRICE --}}
+                                    <div>
+
+                                        <div class="tb-cart-unit-price-label">
+                                            Đơn giá
+                                        </div>
+
+
+                                        <div>
+
+                                            <span class="tb-cart-current-price">
+
+                                                {{
+                                                    number_format(
+                                                        $price,
+                                                        0,
+                                                        ',',
+                                                        '.'
+                                                    )
+                                                }}đ
+
+                                            </span>
+
+
+                                            <span class="tb-cart-unit-price">
+                                                / {{ $unit }}
+                                            </span>
+
+
+                                            @if(
+                                                $product
+                                                &&
+                                                $product->isOnSale()
+                                            )
+
+                                                <span class="tb-cart-old-price">
+
+                                                    {{
+                                                        number_format(
+                                                            (float)
+                                                            $product->price,
+                                                            0,
+                                                            ',',
+                                                            '.'
+                                                        )
+                                                    }}đ
+
+                                                </span>
+
+                                            @endif
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {{-- QUANTITY --}}
+                                    <div class="tb-cart-controls">
+
+                                        <div>
+
+                                            <form
+                                                action="{{
+                                                    route(
+                                                        'cart.update',
+                                                        [
+                                                            'id'
+                                                            =>
+                                                            $id
+                                                        ]
+                                                    )
+                                                }}"
+                                                method="POST"
+                                                class="tb-cart-qty-form"
+                                                data-cart-quantity-form
+                                            >
+
+                                                @csrf
+                                                @method('PATCH')
+
+
+                                                <div class="tb-cart-qty-control">
+
+                                                    <button
+                                                        type="button"
+                                                        class="tb-cart-qty-button"
+                                                        data-cart-minus
+                                                        aria-label="Giảm số lượng"
+                                                    >
+                                                        −
+                                                    </button>
+
+
+                                                    <input
+                                                        type="number"
+                                                        name="quantity"
+                                                        value="{{ $displayQty }}"
+                                                        min="{{ $displayMinQty }}"
+                                                        step="{{ $displayStepQty }}"
+                                                        @if($product)
+                                                            max="{{ $product->quantity }}"
+                                                        @endif
+                                                        class="tb-cart-qty-input"
+                                                        data-cart-qty
+                                                        required
+                                                    >
+
+
+                                                    <button
+                                                        type="button"
+                                                        class="tb-cart-qty-button"
+                                                        data-cart-plus
+                                                        aria-label="Tăng số lượng"
+                                                    >
+                                                        +
+                                                    </button>
+
+                                                </div>
+
+
+                                                <button
+                                                    type="submit"
+                                                    class="tb-cart-update"
+                                                >
+                                                    Cập nhật
+                                                </button>
+
+                                            </form>
+
+
+                                            <div class="tb-cart-step">
+
+                                                Bước tăng:
+                                                {{ $displayStepQty }}
+                                                {{ $unit }}
+
+                                                @if($product)
+
+                                                    · Còn
+                                                    {{
+                                                        $formatQuantity(
+                                                            $product->quantity
+                                                        )
+                                                    }}
+                                                    {{ $unit }}
+
+                                                @endif
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {{-- SUBTOTAL --}}
+                                    <div class="tb-cart-subtotal">
+
+                                        <div class="tb-cart-subtotal-label">
+                                            Thành tiền
+                                        </div>
+
+
+                                        <div class="tb-cart-subtotal-price">
+
+                                            {{
+                                                number_format(
+                                                    $subtotal,
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                            }}đ
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    @endforeach
+
+                </div>
+
+            </div>
+
+
+            {{-- =================================================
+                ORDER SUMMARY
+            ================================================== --}}
+            <aside class="tb-cart-summary">
+
+                <div class="tb-cart-summary-head">
+
+                    <strong>
+                        🧾 Tóm tắt đơn hàng
+                    </strong>
+
+                    <span>
+                        Kiểm tra trước khi thanh toán
+                    </span>
+
+                </div>
+
+
+                <div class="tb-cart-summary-body">
+
+
+                    <div class="tb-cart-summary-line">
+
+                        <span>
+                            Sản phẩm
+                        </span>
+
+                        <strong>
+                            {{ count($cart) }}
+                            loại
+                        </strong>
+
+                    </div>
+
+
+                    <div class="tb-cart-summary-line">
+
+                        <span>
+                            Tổng tiền sản phẩm
+                        </span>
+
+                        <strong>
+
+                            {{
+                                number_format(
+                                    $cartTotal,
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="tb-cart-summary-line">
+
+                        <span>
+                            Phí vận chuyển
+                        </span>
+
+                        <span class="tb-cart-summary-note">
+                            Chọn ở bước thanh toán
+                        </span>
+
+                    </div>
+
+
+                    <div class="tb-cart-summary-line">
+
+                        <span>
+                            Voucher
+                        </span>
+
+                        <span class="tb-cart-summary-note">
+                            Áp dụng ở bước thanh toán
+                        </span>
+
+                    </div>
+
+
+                    <div class="tb-cart-summary-divider">
+                    </div>
+
+
+                    <div class="tb-cart-summary-total">
+
+                        <div>
+
+                            <div class="tb-cart-total-title">
+                                Tạm tính
+                            </div>
+
+                            <div class="tb-cart-total-note">
+                                Chưa gồm vận chuyển &amp; ưu đãi
+                            </div>
+
+                        </div>
+
+
+                        <div class="tb-cart-total-price">
+
+                            {{
+                                number_format(
+                                    $cartTotal,
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
                         </div>
 
                     </div>
 
-                </div>
 
-            @else
+                    <a
+                        href="{{ route('checkout') }}"
+                        class="tb-cart-checkout"
+                    >
+                        Tiến hành thanh toán
+                        →
+                    </a>
 
-                <div class="card border-0 shadow-sm">
 
-                    <div class="card-body text-center py-5">
+                    {{-- TRUST --}}
+                    <div class="tb-cart-security">
 
-                        <div style="font-size:65px;" class="mb-3">
-                            🛒
+                        <div class="tb-cart-security-item">
+
+                            <strong>
+                                🔒 Đặt hàng an toàn
+                            </strong>
+
+                            Thông tin đơn hàng
+                            được bảo vệ.
+
                         </div>
 
-                        <h4 class="fw-bold">
-                            Giỏ hàng đang trống
-                        </h4>
 
-                        <p class="text-muted">
-                            Bạn chưa thêm sản phẩm nào vào giỏ hàng.
-                        </p>
+                        <div class="tb-cart-security-item">
 
-                        <a
-                            href="{{ route('products.index') }}"
-                            class="btn btn-primary btn-lg"
-                        >
-                            🌿 Mua sắm ngay
+                            <strong>
+                                💳 Thanh toán
+                            </strong>
+
+                            COD hoặc
+                            chuyển khoản ngân hàng.
+
+                        </div>
+
+
+                        <div class="tb-cart-security-item">
+
+                            <strong>
+                                🚚 Vận chuyển
+                            </strong>
+
+                            Lựa chọn phương thức
+                            ở bước tiếp theo.
+
+                        </div>
+
+
+                        <div class="tb-cart-security-item">
+
+                            <strong>
+                                📦 Theo dõi đơn
+                            </strong>
+
+                            Kiểm tra trạng thái
+                            sau khi đặt hàng.
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="tb-cart-help">
+
+                        <strong>
+                            Cần hỗ trợ?
+                        </strong>
+
+                        Liên hệ
+
+                        <a href="tel:0385742505">
+                            0385 742 505
                         </a>
 
+                        hoặc Zalo để được hỗ trợ đặt hàng.
+
                     </div>
 
                 </div>
 
-            @endif
+            </aside>
 
         </div>
 
-    </div>
+
+    {{-- =====================================================
+        EMPTY CART
+    ====================================================== --}}
+    @else
+
+        <div class="tb-cart-empty">
+
+            <div>
+
+                <div class="tb-cart-empty-icon">
+                    🛒
+                </div>
+
+
+                <h2>
+                    Giỏ hàng của bạn đang trống
+                </h2>
+
+
+                <p>
+
+                    Bạn chưa chọn sản phẩm nào.
+                    Hãy khám phá những đặc sản Tây Bắc
+                    và thêm món bạn yêu thích vào giỏ hàng.
+
+                </p>
+
+
+                <a
+                    href="{{ route('products.index') }}"
+                    class="tb-cart-empty-btn"
+                >
+                    🌿 Khám phá sản phẩm →
+                </a>
+
+            </div>
+
+        </div>
+
+    @endif
 
 </div>
+
+
+<script>
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | QUANTITY BUTTONS
+        |--------------------------------------------------------------------------
+        */
+
+        document
+            .querySelectorAll(
+                '[data-cart-quantity-form]'
+            )
+            .forEach(
+                function (form) {
+
+                    const input =
+                        form.querySelector(
+                            '[data-cart-qty]'
+                        );
+
+
+                    const minus =
+                        form.querySelector(
+                            '[data-cart-minus]'
+                        );
+
+
+                    const plus =
+                        form.querySelector(
+                            '[data-cart-plus]'
+                        );
+
+
+                    if (
+                        !input
+                        ||
+                        !minus
+                        ||
+                        !plus
+                    ) {
+                        return;
+                    }
+
+
+                    const min =
+                        Number(
+                            input.min
+                            ||
+                            0.01
+                        );
+
+
+                    const step =
+                        Number(
+                            input.step
+                            ||
+                            1
+                        );
+
+
+                    const max =
+                        input.max !== ''
+                        ? Number(
+                            input.max
+                        )
+                        : Infinity;
+
+
+                    const precision =
+                        function () {
+
+                            const stringStep =
+                                String(step);
+
+
+                            if (
+                                !stringStep.includes(
+                                    '.'
+                                )
+                            ) {
+                                return 0;
+                            }
+
+
+                            return stringStep
+                                .split('.')[1]
+                                .length;
+
+                        };
+
+
+                    const decimals =
+                        Math.min(
+                            4,
+                            precision()
+                        );
+
+
+                    const normalize =
+                        function (value) {
+
+                            let result =
+                                Number(value);
+
+
+                            if (
+                                !Number.isFinite(
+                                    result
+                                )
+                            ) {
+                                result = min;
+                            }
+
+
+                            result =
+                                Math.max(
+                                    min,
+                                    Math.min(
+                                        max,
+                                        result
+                                    )
+                                );
+
+
+                            const steps =
+                                Math.round(
+                                    (
+                                        result
+                                        -
+                                        min
+                                    )
+                                    /
+                                    step
+                                );
+
+
+                            result =
+                                min
+                                +
+                                (
+                                    steps
+                                    *
+                                    step
+                                );
+
+
+                            result =
+                                Math.max(
+                                    min,
+                                    Math.min(
+                                        max,
+                                        result
+                                    )
+                                );
+
+
+                            return Number(
+                                result.toFixed(
+                                    Math.max(
+                                        decimals,
+                                        2
+                                    )
+                                )
+                            );
+
+                        };
+
+
+                    const render =
+                        function (value) {
+
+                            const normalized =
+                                normalize(
+                                    value
+                                );
+
+
+                            input.value =
+                                String(
+                                    normalized
+                                );
+
+
+                            minus.disabled =
+                                normalized
+                                <=
+                                min;
+
+
+                            plus.disabled =
+                                normalized
+                                +
+                                step
+                                >
+                                max
+                                +
+                                0.00001;
+
+                        };
+
+
+                    minus.addEventListener(
+                        'click',
+                        function () {
+
+                            render(
+                                Number(
+                                    input.value
+                                    ||
+                                    min
+                                )
+                                -
+                                step
+                            );
+
+                        }
+                    );
+
+
+                    plus.addEventListener(
+                        'click',
+                        function () {
+
+                            render(
+                                Number(
+                                    input.value
+                                    ||
+                                    min
+                                )
+                                +
+                                step
+                            );
+
+                        }
+                    );
+
+
+                    input.addEventListener(
+                        'change',
+                        function () {
+
+                            render(
+                                input.value
+                            );
+
+                        }
+                    );
+
+
+                    render(
+                        input.value
+                    );
+
+                }
+            );
+
+    }
+);
+</script>
 
 @endsection

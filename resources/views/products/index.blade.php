@@ -4,1170 +4,3239 @@
 
 @section('content')
 
-<style>
-    .products-hero {
-        padding: 34px;
-        border-radius: 24px;
-        color: #fff;
-        background: linear-gradient(
-            135deg,
-            #2c1810 0%,
-            #5f341d 55%,
-            #48633b 100%
+@php
+    $selectedCategory = request('category_id')
+        ? $categories->firstWhere('id', (int) request('category_id'))
+        : null;
+
+    $activeFilterCount = collect([
+        request('search'),
+        request('category_id'),
+        request('min_price'),
+        request('max_price'),
+        request('stock'),
+    ])->filter(function ($value) {
+        return $value !== null && $value !== '';
+    })->count();
+
+    $formatQuantity = function ($value) {
+        return rtrim(
+            rtrim(
+                number_format(
+                    (float) $value,
+                    2,
+                    '.',
+                    ''
+                ),
+                '0'
+            ),
+            '.'
         );
-        box-shadow: 0 15px 40px rgba(95,52,29,.16);
+    };
+@endphp
+
+
+<style>
+    /* =========================================================
+       PRODUCT CATALOG - TINH HOA TAY BAC
+    ========================================================= */
+
+    .catalog-page {
+        --cat-green: #35562f;
+        --cat-green-dark: #274522;
+
+        --cat-brown: #633820;
+        --cat-brown-dark: #3d2316;
+
+        --cat-red: #b43e2e;
+        --cat-red-dark: #8d2f24;
+
+        --cat-gold: #e6ad42;
+
+        --cat-bg: #f7f7f5;
+        --cat-card: #ffffff;
+
+        --cat-border: #e7e0d7;
+
+        --cat-text: #302923;
+        --cat-muted: #766d66;
+
+        --cat-shadow:
+            0 7px 24px
+            rgba(54, 40, 29, .065);
+
+        --cat-shadow-hover:
+            0 18px 40px
+            rgba(54, 40, 29, .13);
+
+        color: var(--cat-text);
     }
 
-    .filter-card,
-    .product-card {
-        border: 1px solid #ead8bf;
-        border-radius: 18px;
-        background: #fff;
-        box-shadow: 0 10px 28px rgba(95,52,29,.07);
+
+    .catalog-page * {
+        box-sizing: border-box;
     }
 
-    .filter-card {
-        padding: 22px;
+
+    .catalog-page a {
+        text-decoration: none;
     }
 
-    .filter-label {
-        font-size: 13px;
-        font-weight: 700;
-        color: #5f341d;
-        margin-bottom: 6px;
-    }
 
-    .form-control,
-    .form-select {
-        min-height: 44px;
-        border-radius: 10px;
-        border-color: #e5d4bd;
-    }
+    /* =========================================================
+       BREADCRUMB
+    ========================================================= */
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #a83b2d;
-        box-shadow: 0 0 0 3px rgba(168,59,45,.08);
-    }
-
-    .product-card {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        transition: .2s ease;
-    }
-
-    .product-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 16px 35px rgba(95,52,29,.12);
-    }
-
-    .product-image-wrap {
-        height: 220px;
-        position: relative;
-        background: linear-gradient(180deg,#fffaf0,#f8efe2);
-    }
-
-    .product-image {
-        width: 100%;
-        height: 100%;
-        padding: 16px;
-        object-fit: contain;
-    }
-
-    .product-fallback {
-        width: 100%;
-        height: 100%;
+    .catalog-breadcrumb {
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-size: 64px;
+        flex-wrap: wrap;
+
+        gap: 7px;
+
+        margin-bottom: 14px;
+
+        color: #978c84;
+
+        font-size: 10px;
     }
 
-    .stock-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        z-index: 2;
-    }
 
-    .category-badge {
-        background: #f8efe2;
-        color: #5f341d;
-        border: 1px solid #ead8bf;
-    }
+    .catalog-breadcrumb a {
+        color: #665348;
 
-    .price {
-        color: #a83b2d;
-        font-size: 22px;
         font-weight: 800;
     }
 
-    /* Căn các card và cụm nút thẳng hàng */
-    .product-card > .p-4 {
-        flex: 1 1 auto;
+
+    .catalog-breadcrumb a:hover {
+        color: var(--cat-red);
     }
 
-    .product-title {
-        min-height: 48px;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
+
+    /* =========================================================
+       CATALOG HEADER
+    ========================================================= */
+
+    .catalog-heading {
+        position: relative;
+
         overflow: hidden;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 30px;
+
+        margin-bottom: 20px;
+
+        padding:
+            25px 29px;
+
+        border:
+            1px solid #e1d3c2;
+
+        border-radius: 18px;
+
+        background:
+            radial-gradient(
+                circle at 88% 15%,
+                rgba(230, 173, 66, .17),
+                transparent 27%
+            ),
+            linear-gradient(
+                120deg,
+                #fffdf9,
+                #fff8ec 58%,
+                #f2f6ef
+            );
+
+        box-shadow:
+            var(--cat-shadow);
     }
 
-    .product-description {
+
+    .catalog-heading::after {
+        content: "";
+
+        position: absolute;
+
+        right: -30px;
+        bottom: -50px;
+
+        width: 250px;
+        height: 140px;
+
+        opacity: .08;
+
+        background:
+            var(--cat-green);
+
+        clip-path:
+            polygon(
+                0 100%,
+                22% 48%,
+                39% 70%,
+                58% 22%,
+                77% 62%,
+                100% 15%,
+                100% 100%
+            );
+    }
+
+
+    .catalog-heading-copy {
+        position: relative;
+
+        z-index: 2;
+    }
+
+
+    .catalog-eyebrow {
+        margin-bottom: 5px;
+
+        color: var(--cat-red);
+
+        font-size: 9px;
+
+        font-weight: 950;
+
+        letter-spacing: .1em;
+
+        text-transform: uppercase;
+    }
+
+
+    .catalog-title {
+        margin: 0;
+
+        color: var(--cat-text);
+
+        font-size:
+            clamp(26px, 3vw, 37px);
+
+        line-height: 1.12;
+
+        font-weight: 950;
+
+        letter-spacing: -.045em;
+    }
+
+
+    .catalog-description {
+        max-width: 690px;
+
+        margin-top: 7px;
+
+        color: var(--cat-muted);
+
+        font-size: 11px;
+
+        line-height: 1.6;
+    }
+
+
+    .catalog-heading-stat {
+        position: relative;
+
+        z-index: 2;
+
+        flex: 0 0 auto;
+
+        min-width: 145px;
+
+        padding:
+            13px 17px;
+
+        border:
+            1px solid #e5c995;
+
+        border-radius: 13px;
+
+        background:
+            rgba(255,255,255,.84);
+
+        text-align: center;
+    }
+
+
+    .catalog-heading-stat strong {
+        display: block;
+
+        color: var(--cat-brown-dark);
+
+        font-size: 22px;
+
+        font-weight: 950;
+    }
+
+
+    .catalog-heading-stat span {
+        display: block;
+
+        margin-top: 1px;
+
+        color: var(--cat-muted);
+
+        font-size: 9px;
+    }
+
+
+    /* =========================================================
+       PAGE LAYOUT
+    ========================================================= */
+
+    .catalog-layout {
+        display: grid;
+
+        grid-template-columns:
+            255px
+            minmax(0, 1fr);
+
+        gap: 20px;
+
+        align-items: start;
+    }
+
+
+    /* =========================================================
+       FILTER SIDEBAR
+    ========================================================= */
+
+    .catalog-filter {
+        position: sticky;
+
+        top: 177px;
+
+        overflow: hidden;
+
+        border:
+            1px solid var(--cat-border);
+
+        border-radius: 16px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--cat-shadow);
+    }
+
+
+    .catalog-filter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 10px;
+
+        padding:
+            15px 16px;
+
+        border-bottom:
+            1px solid var(--cat-border);
+
+        background:
+            linear-gradient(
+                135deg,
+                #334f2d,
+                #45673c
+            );
+
+        color: #fff;
+    }
+
+
+    .catalog-filter-header strong {
+        font-size: 12px;
+
+        font-weight: 950;
+    }
+
+
+    .catalog-filter-count {
+        min-width: 22px;
+        height: 22px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 999px;
+
+        color: #4d301a;
+
+        background: #f3ce79;
+
+        font-size: 9px;
+
+        font-weight: 950;
+    }
+
+
+    .catalog-filter-body {
+        padding: 16px;
+    }
+
+
+    .filter-group {
+        padding-bottom: 16px;
+
+        margin-bottom: 16px;
+
+        border-bottom:
+            1px solid #eee8e0;
+    }
+
+
+    .filter-group:last-child {
+        margin-bottom: 0;
+
+        padding-bottom: 0;
+
+        border-bottom: 0;
+    }
+
+
+    .filter-heading {
+        display: block;
+
+        margin-bottom: 8px;
+
+        color: #514239;
+
+        font-size: 10px;
+
+        font-weight: 950;
+    }
+
+
+    .catalog-input,
+    .catalog-select {
+        width: 100%;
+
+        min-height: 42px;
+
+        padding:
+            0 11px;
+
+        border:
+            1px solid #ddd3c7;
+
+        border-radius: 9px;
+
+        outline: 0;
+
+        color: var(--cat-text);
+
+        background: #fff;
+
+        font-size: 10px;
+
+        transition:
+            border-color .17s ease,
+            box-shadow .17s ease;
+    }
+
+
+    .catalog-input:focus,
+    .catalog-select:focus {
+        border-color:
+            var(--cat-gold);
+
+        box-shadow:
+            0 0 0 3px
+            rgba(230,173,66,.11);
+    }
+
+
+    .filter-price-grid {
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 7px;
+    }
+
+
+    .stock-options {
+        display: grid;
+
+        gap: 7px;
+    }
+
+
+    .stock-option {
+        position: relative;
+    }
+
+
+    .stock-option input {
+        position: absolute;
+
+        opacity: 0;
+        pointer-events: none;
+    }
+
+
+    .stock-option label {
+        min-height: 39px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
+
+        padding:
+            7px 9px;
+
+        border:
+            1px solid #e5ddd3;
+
+        border-radius: 9px;
+
+        color: #5c5048;
+
+        background: #fff;
+
+        font-size: 10px;
+
+        font-weight: 750;
+
+        cursor: pointer;
+    }
+
+
+    .stock-option input:checked + label {
+        color:
+            var(--cat-green-dark);
+
+        border-color:
+            #b9cbae;
+
+        background:
+            #f0f6ed;
+    }
+
+
+    .stock-dot {
+        width: 7px;
+        height: 7px;
+
+        border-radius: 50%;
+
+        background: #a5a09c;
+    }
+
+
+    .stock-dot.in {
+        background: #5f8b51;
+    }
+
+
+    .stock-dot.out {
+        background: #bd5144;
+    }
+
+
+    .filter-submit {
+        width: 100%;
+        min-height: 43px;
+
+        border: 0;
+
+        border-radius: 10px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--cat-red),
+                var(--cat-red-dark)
+            );
+
+        font-size: 10px;
+
+        font-weight: 950;
+
+        transition:
+            transform .17s ease,
+            box-shadow .17s ease;
+    }
+
+
+    .filter-submit:hover {
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 8px 18px
+            rgba(180,62,46,.2);
+    }
+
+
+    .filter-reset {
+        min-height: 39px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-top: 7px;
+
+        border:
+            1px solid #ddd4ca;
+
+        border-radius: 10px;
+
+        color: #67584e;
+
+        background: #fff;
+
+        font-size: 9px;
+
+        font-weight: 850;
+    }
+
+
+    .filter-reset:hover {
+        color: var(--cat-red);
+
+        border-color: #e1bcb4;
+
+        background: #fff8f5;
+    }
+
+
+    /* =========================================================
+       FILTER MOBILE BUTTON
+    ========================================================= */
+
+    .catalog-filter-toggle {
+        display: none;
+
+        min-height: 41px;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 7px;
+
+        padding:
+            0 13px;
+
+        border:
+            1px solid #ddd3c7;
+
+        border-radius: 10px;
+
+        color:
+            var(--cat-brown-dark);
+
+        background: #fff;
+
+        font-size: 10px;
+
+        font-weight: 900;
+    }
+
+
+    /* =========================================================
+       PRODUCT AREA TOPBAR
+    ========================================================= */
+
+    .catalog-content {
+        min-width: 0;
+    }
+
+
+    .catalog-toolbar {
         min-height: 60px;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 3;
-        overflow: hidden;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 14px;
+
+        margin-bottom: 13px;
+
+        padding:
+            10px 13px;
+
+        border:
+            1px solid var(--cat-border);
+
+        border-radius: 13px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--cat-shadow);
     }
 
-    .product-bottom {
-        margin-top: auto;
+
+    .catalog-result {
+        min-width: 0;
     }
 
-    .btn-tb {
-        border: none;
-        color: #fff;
-        background: linear-gradient(135deg,#a83b2d,#5f341d);
+
+    .catalog-result-title {
+        color: #453a33;
+
+        font-size: 12px;
+
+        font-weight: 900;
     }
 
-    .btn-tb:hover {
-        color: #fff;
-        background: linear-gradient(135deg,#8b3025,#3b2114);
+
+    .catalog-result-sub {
+        margin-top: 2px;
+
+        color: #887d75;
+
+        font-size: 9px;
     }
 
-    .btn-outline-tb {
-        color: #5f341d;
-        border-color: #5f341d;
+
+    .catalog-toolbar-actions {
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
     }
 
-    .btn-outline-tb:hover {
-        color: #fff;
-        background: #5f341d;
-        border-color: #5f341d;
+
+    .catalog-sort-form {
+        display: flex;
+        align-items: center;
+
+        gap: 7px;
     }
 
-    .result-count {
-        color: #48633b;
-        font-weight: 700;
+
+    .catalog-sort-label {
+        color: #7d726a;
+
+        font-size: 9px;
+
+        font-weight: 800;
+
+        white-space: nowrap;
     }
 
-    .sold-count {
+
+    .catalog-sort {
+        min-height: 39px;
+
+        min-width: 155px;
+
+        padding:
+            0 30px 0 10px;
+
+        border:
+            1px solid #ddd4ca;
+
+        border-radius: 9px;
+
+        outline: 0;
+
+        color:
+            #51453d;
+
+        background: #fff;
+
+        font-size: 10px;
+
+        font-weight: 750;
+    }
+
+
+    .catalog-admin-add {
+        min-height: 39px;
+
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        color: #8a5a3c;
-        font-size: 13px;
+        justify-content: center;
+
+        padding:
+            0 11px;
+
+        border-radius: 9px;
+
+        color: #fff;
+
+        background:
+            var(--cat-green);
+
+        font-size: 9px;
+
+        font-weight: 900;
+    }
+
+
+    .catalog-admin-add:hover {
+        color: #fff;
+
+        background:
+            var(--cat-green-dark);
+    }
+
+
+    /* =========================================================
+       ACTIVE FILTERS
+    ========================================================= */
+
+    .catalog-active-filters {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 6px;
+
+        margin-bottom: 13px;
+    }
+
+
+    .filter-chip {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 4px;
+
+        min-height: 28px;
+
+        padding:
+            0 9px;
+
+        border:
+            1px solid #e7d8c3;
+
+        border-radius: 999px;
+
+        color: #64452f;
+
+        background: #fff7e8;
+
+        font-size: 9px;
+
         font-weight: 800;
     }
 
 
     /* =========================================================
-       PREMIUM PRODUCT LIST UI - GIAO DIỆN ONLY
-       Không thay route / form / Blade logic.
+       PRODUCT GRID
     ========================================================= */
 
-    .products-page {
+    .catalog-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                4,
+                minmax(0, 1fr)
+            );
+
+        gap: 13px;
+    }
+
+
+    .catalog-product {
         position: relative;
-        isolation: isolate;
-        padding-top: 34px !important;
-        padding-bottom: 70px !important;
-    }
 
-    /* Nền trang nhẹ, có hơi hướng núi rừng */
-    .products-page::before {
-        content: "";
-        position: absolute;
-        z-index: -2;
-        top: -30px;
-        left: 50%;
-        width: min(100vw,1680px);
-        height: 690px;
-        transform: translateX(-50%);
-        pointer-events: none;
-        background:
-            radial-gradient(circle at 7% 10%, rgba(242,193,92,.18), transparent 24%),
-            radial-gradient(circle at 94% 14%, rgba(72,99,59,.13), transparent 28%),
-            linear-gradient(180deg,rgba(255,250,240,.98),rgba(255,255,255,0));
-    }
-
-    .products-page::after {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        top: 110px;
-        left: -44px;
-        width: 190px;
-        height: 190px;
-        pointer-events: none;
-        opacity: .14;
-        border-radius: 50%;
-        background:
-            repeating-radial-gradient(circle at center, rgba(95,52,29,.28) 0 1px, transparent 1px 12px);
-    }
-
-    /* HERO */
-    .products-page .products-hero {
-        position: relative;
         overflow: hidden;
-        padding: 42px 44px;
-        border-radius: 30px;
-        border: 1px solid rgba(255,255,255,.09);
+
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        border:
+            1px solid var(--cat-border);
+
+        border-radius: 14px;
+
+        background: #fff;
+
         box-shadow:
-            0 24px 60px rgba(44,24,16,.18),
-            inset 0 1px 0 rgba(255,255,255,.06);
-        background:
-            radial-gradient(circle at 88% 22%, rgba(242,193,92,.23), transparent 26%),
-            radial-gradient(circle at 18% 110%, rgba(168,59,45,.28), transparent 31%),
-            linear-gradient(135deg,#2c1810 0%,#5f341d 50%,#48633b 100%);
-    }
+            var(--cat-shadow);
 
-    .products-page .products-hero::before {
-        content: "";
-        position: absolute;
-        right: -65px;
-        bottom: -84px;
-        width: 310px;
-        height: 210px;
-        opacity: .12;
-        pointer-events: none;
-        clip-path: polygon(0 100%,24% 47%,40% 70%,58% 26%,75% 59%,100% 14%,100% 100%);
-        background: linear-gradient(135deg,#fff,#f2c15c);
-    }
-
-    .products-page .products-hero::after {
-        content: "🌿";
-        position: absolute;
-        right: 34px;
-        top: 18px;
-        font-size: 76px;
-        opacity: .07;
-        transform: rotate(-12deg);
-        pointer-events: none;
-    }
-
-    .products-page .products-hero h1 {
-        font-size: clamp(32px,4vw,48px);
-        letter-spacing: -.7px;
-        text-shadow: 0 2px 16px rgba(0,0,0,.14);
-    }
-
-    .products-page .products-hero .badge {
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,.16);
-        box-shadow: 0 8px 18px rgba(0,0,0,.10);
-    }
-
-    /* FILTER */
-    .products-page .filter-card {
-        position: relative;
-        border-radius: 24px;
-        padding: 26px;
-        border-color: #e7d2b6;
-        background:
-            radial-gradient(circle at 96% 8%, rgba(242,193,92,.09), transparent 22%),
-            rgba(255,255,255,.98);
-        box-shadow:
-            0 18px 46px rgba(95,52,29,.085),
-            inset 0 1px 0 rgba(255,255,255,.95);
-    }
-
-    .products-page .filter-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 26px;
-        right: 26px;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,#d97706,#f2c15c,#48633b);
-        opacity: .65;
-    }
-
-    .products-page .filter-label {
-        letter-spacing: .15px;
-        color: #684329;
-    }
-
-    .products-page .filter-card .form-control,
-    .products-page .filter-card .form-select {
-        min-height: 47px;
-        border-radius: 13px;
-        border-color: #e4d3bc;
-        background-color: #fffdf9;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .products-page .filter-card .form-control:focus,
-    .products-page .filter-card .form-select:focus {
-        background-color: #fff;
-        border-color: #d6ad72;
-        box-shadow: 0 0 0 .2rem rgba(217,119,6,.10);
-    }
-
-    .products-page .filter-card .btn {
-        min-height: 45px;
-        border-radius: 12px;
-        font-weight: 800;
-    }
-
-    /* KẾT QUẢ */
-    .products-page h4.fw-bold {
-        color: #35251d;
-        letter-spacing: -.25px;
-    }
-
-    .products-page .result-count {
-        display: inline-flex;
-        align-items: center;
-        margin-top: 2px;
-        padding: 6px 11px;
-        border-radius: 999px;
-        background: #eef5ea;
-        border: 1px solid #d8e6d1;
-        color: #48633b;
-        font-size: 13px;
-    }
-
-    /* CARD SẢN PHẨM */
-    .products-page .product-card {
-        position: relative;
-        border-radius: 22px;
-        border-color: #eadbc7;
-        background:
-            linear-gradient(180deg,#fff 0%,#fffdfa 100%);
-        box-shadow:
-            0 9px 27px rgba(95,52,29,.065),
-            inset 0 1px 0 rgba(255,255,255,.9);
         transition:
-            transform .25s ease,
-            box-shadow .25s ease,
-            border-color .25s ease;
+            transform .2s ease,
+            border-color .2s ease,
+            box-shadow .2s ease;
     }
 
-    .products-page .product-card::before {
-        content: "";
-        position: absolute;
+
+    .catalog-product:hover {
         z-index: 3;
-        top: 0;
-        left: 18%;
-        right: 18%;
-        height: 2px;
-        border-radius: 999px;
-        background: linear-gradient(90deg,transparent,#f2c15c,transparent);
-        opacity: 0;
-        transition: opacity .22s ease;
+
+        border-color: #dcc5a7;
+
+        transform:
+            translateY(-5px);
+
+        box-shadow:
+            var(--cat-shadow-hover);
     }
 
-    .products-page .product-card:hover {
-        transform: translateY(-8px);
-        border-color: #dfc294;
-        box-shadow: 0 22px 48px rgba(95,52,29,.14);
-    }
 
-    .products-page .product-card:hover::before {
-        opacity: 1;
-    }
+    /* =========================================================
+       PRODUCT IMAGE
+    ========================================================= */
 
-    .products-page .product-image-wrap {
-        height: 238px;
+    .catalog-product-media {
+        position: relative;
+
+        height: 205px;
+
         overflow: hidden;
-        border-bottom: 1px solid #f0e2d1;
+
+        border-bottom:
+            1px solid #eee7df;
+
         background:
-            radial-gradient(circle at 82% 18%, rgba(242,193,92,.18), transparent 26%),
-            linear-gradient(160deg,#fffdf8,#fff7eb);
+            linear-gradient(
+                155deg,
+                #fbfaf8,
+                #fff7ea
+            );
     }
 
-    .products-page .product-image {
-        padding: 14px;
-        transition: transform .35s ease, filter .35s ease;
-        filter: drop-shadow(0 8px 12px rgba(95,52,29,.08));
+
+    .catalog-product-image-link {
+        width: 100%;
+        height: 100%;
+
+        display: block;
     }
 
-    .products-page .product-card:hover .product-image {
-        transform: scale(1.055);
-        filter: drop-shadow(0 12px 18px rgba(95,52,29,.12));
+
+    .catalog-product-image {
+        width: 100%;
+        height: 100%;
+
+        padding: 9px;
+
+        object-fit: contain;
+
+        transition:
+            transform .28s ease;
     }
 
-    .products-page .stock-badge {
-        top: 13px;
-        right: 13px;
-        border-radius: 999px;
-        padding: 7px 10px;
-        box-shadow: 0 5px 12px rgba(0,0,0,.10);
+
+    .catalog-product:hover
+    .catalog-product-image {
+        transform:
+            scale(1.055);
     }
 
-    .products-page .category-badge {
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: linear-gradient(180deg,#fff9ed,#fff4df);
-        border-color: #ead1ad;
-        color: #694326;
-    }
 
-    .products-page .product-title {
-        color: #33241c;
-        line-height: 1.35;
-        transition: color .18s ease;
-    }
+    .catalog-product-fallback {
+        width: 100%;
+        height: 100%;
 
-    .products-page .product-card:hover .product-title {
-        color: #7a3828;
-    }
-
-    .products-page .product-description {
-        line-height: 1.65;
-        color: #71665f !important;
-    }
-
-    .products-page .price {
-        font-size: 23px;
-        letter-spacing: -.4px;
-    }
-
-    .products-page .sold-count {
-        width: fit-content;
-        padding: 5px 9px;
-        border-radius: 999px;
-        background: #fff5e8;
-        border: 1px solid #f1d7b2;
-    }
-
-    /* Buttons trong card */
-    .products-page .product-card .btn {
-        min-height: 42px;
-        border-radius: 11px;
-        font-weight: 800;
-        transition: transform .17s ease, box-shadow .17s ease, filter .17s ease;
-    }
-
-    .products-page .product-card .btn:hover {
-        transform: translateY(-1px);
-    }
-
-    .products-page .btn-tb {
-        box-shadow: 0 7px 16px rgba(168,59,45,.15);
-    }
-
-    .products-page .btn-tb:hover {
-        box-shadow: 0 10px 20px rgba(168,59,45,.22);
-    }
-
-    /* EMPTY STATE */
-    .products-page .card.border-0.text-center {
-        border-radius: 26px !important;
-        border: 1px dashed #ddc39e !important;
-        background:
-            radial-gradient(circle at 50% 0%, rgba(242,193,92,.12), transparent 30%),
-            #fffdf9;
-        box-shadow: 0 14px 34px rgba(95,52,29,.06);
-    }
-
-    /* MODAL */
-    .products-page .modal-content {
-        border: 1px solid #ead8bf !important;
-        box-shadow: 0 24px 65px rgba(44,24,16,.22);
-    }
-
-    .products-page .modal-header {
-        background: linear-gradient(135deg,#fffaf0,#f8efe2);
-        border-bottom-color: #ead8bf;
-    }
-
-    .products-page .modal-footer {
-        border-top-color: #ead8bf;
-    }
-
-    /* PAGINATION */
-    .products-page .pagination {
-        gap: 6px;
-    }
-
-    .products-page .page-link {
-        min-width: 41px;
-        min-height: 41px;
         display: grid;
         place-items: center;
-        border-radius: 11px !important;
-        border-color: #e5d1b6;
-        color: #5f341d;
-        box-shadow: 0 4px 10px rgba(95,52,29,.04);
+
+        color: #998a7d;
+
+        font-size: 45px;
     }
 
-    .products-page .page-item.active .page-link {
-        background: linear-gradient(135deg,#5f341d,#48633b);
-        border-color: transparent;
+
+    /* =========================================================
+       BADGES
+    ========================================================= */
+
+    .catalog-sale-badge {
+        position: absolute;
+
+        z-index: 4;
+
+        top: 9px;
+        left: 9px;
+
+        min-width: 41px;
+
+        padding:
+            5px 7px;
+
+        border-radius: 6px;
+
         color: #fff;
+
+        background:
+            var(--cat-red);
+
+        box-shadow:
+            0 5px 12px
+            rgba(180,62,46,.18);
+
+        font-size: 9px;
+
+        font-weight: 950;
     }
+
+
+    .catalog-featured-badge {
+        position: absolute;
+
+        z-index: 4;
+
+        top: 9px;
+        right: 9px;
+
+        padding:
+            5px 7px;
+
+        border-radius: 999px;
+
+        color: #503419;
+
+        background: #f4cf7a;
+
+        box-shadow:
+            0 4px 10px
+            rgba(99,56,32,.1);
+
+        font-size: 8px;
+
+        font-weight: 950;
+    }
+
+
+    .catalog-image-count {
+        position: absolute;
+
+        z-index: 4;
+
+        right: 9px;
+        bottom: 9px;
+
+        padding:
+            4px 6px;
+
+        border-radius: 7px;
+
+        color: #fff;
+
+        background:
+            rgba(49,39,31,.69);
+
+        font-size: 8px;
+
+        font-weight: 850;
+    }
+
+
+    /* =========================================================
+       PRODUCT BODY
+    ========================================================= */
+
+    .catalog-product-body {
+        flex: 1;
+
+        display: flex;
+        flex-direction: column;
+
+        padding: 12px;
+    }
+
+
+    .catalog-product-category {
+        overflow: hidden;
+
+        margin-bottom: 5px;
+
+        color: #93877e;
+
+        font-size: 8px;
+
+        font-weight: 700;
+
+        white-space: nowrap;
+
+        text-overflow: ellipsis;
+    }
+
+
+    .catalog-product-name {
+        min-height: 39px;
+
+        color: #342d28;
+
+        font-size: 12px;
+
+        line-height: 1.45;
+
+        font-weight: 900;
+
+        display: -webkit-box;
+
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+
+        overflow: hidden;
+    }
+
+
+    .catalog-product-name:hover {
+        color:
+            var(--cat-red);
+    }
+
+
+    .catalog-product-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 5px;
+
+        min-height: 25px;
+
+        margin-top: 5px;
+    }
+
+
+    .catalog-sold {
+        color: #887c73;
+
+        font-size: 8px;
+
+        font-weight: 700;
+    }
+
+
+    .catalog-stock {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 4px;
+
+        color: #527748;
+
+        font-size: 8px;
+
+        font-weight: 850;
+    }
+
+
+    .catalog-stock::before {
+        content: "";
+
+        width: 5px;
+        height: 5px;
+
+        border-radius: 50%;
+
+        background: #609153;
+    }
+
+
+    .catalog-stock.out {
+        color: #ab4b40;
+    }
+
+
+    .catalog-stock.out::before {
+        background: #c45145;
+    }
+
+
+    /* =========================================================
+       PRICE
+    ========================================================= */
+
+    .catalog-price-area {
+        margin-top: auto;
+
+        padding-top: 8px;
+    }
+
+
+    .catalog-old-price {
+        min-height: 14px;
+
+        color: #a39a93;
+
+        font-size: 8px;
+
+        text-decoration:
+            line-through;
+    }
+
+
+    .catalog-current-price {
+        color:
+            var(--cat-red);
+
+        font-size: 16px;
+
+        line-height: 1.25;
+
+        font-weight: 950;
+
+        letter-spacing: -.02em;
+    }
+
+
+    .catalog-current-price small {
+        color: #8e8178;
+
+        font-size: 8px;
+
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+       CUSTOMER ACTIONS
+    ========================================================= */
+
+    .catalog-actions {
+        display: grid;
+
+        grid-template-columns:
+            36px
+            minmax(0, 1fr);
+
+        gap: 6px;
+
+        margin-top: 10px;
+    }
+
+
+    .catalog-view-btn {
+        width: 36px;
+        height: 37px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            1px solid #ddd4cb;
+
+        border-radius: 8px;
+
+        color:
+            var(--cat-brown);
+
+        background: #fff;
+
+        font-size: 14px;
+    }
+
+
+    .catalog-view-btn:hover {
+        color: #fff;
+
+        border-color:
+            var(--cat-brown);
+
+        background:
+            var(--cat-brown);
+    }
+
+
+    .catalog-cart-btn {
+        width: 100%;
+        min-height: 37px;
+
+        border: 0;
+
+        border-radius: 8px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--cat-red),
+                var(--cat-red-dark)
+            );
+
+        font-size: 9px;
+
+        font-weight: 950;
+
+        transition:
+            transform .17s ease,
+            box-shadow .17s ease;
+    }
+
+
+    .catalog-cart-btn:hover {
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 7px 15px
+            rgba(180,62,46,.17);
+    }
+
+
+    .catalog-cart-btn:disabled {
+        opacity: .48;
+
+        cursor: not-allowed;
+
+        transform: none;
+        box-shadow: none;
+    }
+
+
+    /* =========================================================
+       ADMIN ACTIONS
+    ========================================================= */
+
+    .catalog-admin-actions {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 5px;
+
+        margin-top: 10px;
+
+        padding-top: 9px;
+
+        border-top:
+            1px solid #eee6dd;
+    }
+
+
+    .catalog-admin-btn {
+        min-height: 33px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding:
+            0 5px;
+
+        border:
+            1px solid #ddd3c8;
+
+        border-radius: 7px;
+
+        color: #56473e;
+
+        background: #fff;
+
+        font-size: 8px;
+
+        font-weight: 900;
+
+        transition:
+            .16s ease;
+    }
+
+
+    .catalog-admin-btn:hover {
+        color: var(--cat-red);
+
+        border-color: #deb8ae;
+
+        background: #fff7f4;
+    }
+
+
+    .catalog-admin-btn.edit {
+        color: #6b4a13;
+
+        border-color: #e7cc91;
+
+        background: #fff8e3;
+    }
+
+
+    .catalog-admin-btn.featured {
+        color: #6d4b12;
+
+        border-color: #e4c674;
+
+        background: #fff4ca;
+    }
+
+
+    .catalog-admin-btn.sale {
+        color: #a2382c;
+
+        border-color: #e7bbb5;
+
+        background: #fff5f3;
+    }
+
+
+    .catalog-admin-btn.delete {
+        color: #a23b31;
+    }
+
+
+    /* =========================================================
+       EMPTY
+    ========================================================= */
+
+    .catalog-empty {
+        min-height: 390px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 35px;
+
+        border:
+            1px dashed #ddcbb5;
+
+        border-radius: 16px;
+
+        background: #fff;
+
+        text-align: center;
+    }
+
+
+    .catalog-empty-icon {
+        font-size: 54px;
+    }
+
+
+    .catalog-empty h3 {
+        margin:
+            12px 0 4px;
+
+        color: var(--cat-text);
+
+        font-size: 20px;
+
+        font-weight: 950;
+    }
+
+
+    .catalog-empty p {
+        margin:
+            0 0 15px;
+
+        color: var(--cat-muted);
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+       PAGINATION
+    ========================================================= */
+
+    .catalog-pagination {
+        display: flex;
+        justify-content: center;
+
+        margin-top: 28px;
+    }
+
+
+    .catalog-pagination
+    .page-link {
+        color: var(--cat-brown);
+
+        border-color: #e2d8cd;
+
+        font-size: 10px;
+    }
+
+
+    .catalog-pagination
+    .page-item.active
+    .page-link {
+        border-color:
+            var(--cat-red);
+
+        background:
+            var(--cat-red);
+    }
+
+
+    /* =========================================================
+       PROMOTION MODAL
+    ========================================================= */
+
+    .catalog-modal
+    .modal-content {
+        overflow: hidden;
+
+        border: 0;
+
+        border-radius: 18px;
+
+        box-shadow:
+            0 25px 70px
+            rgba(40,29,21,.22);
+    }
+
+
+    .catalog-modal
+    .modal-header {
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--cat-red),
+                var(--cat-brown)
+            );
+    }
+
+
+    .catalog-modal
+    .modal-header
+    .btn-close {
+        filter:
+            invert(1);
+    }
+
+
+    /* =========================================================
+       BREAKPOINTS
+    ========================================================= */
+
+    @media (min-width: 1450px) {
+
+        .catalog-grid {
+            grid-template-columns:
+                repeat(
+                    5,
+                    minmax(0, 1fr)
+                );
+        }
+
+    }
+
+
+    @media (max-width: 1199.98px) {
+
+        .catalog-layout {
+            grid-template-columns:
+                225px
+                minmax(0, 1fr);
+        }
+
+
+        .catalog-grid {
+            grid-template-columns:
+                repeat(
+                    3,
+                    minmax(0, 1fr)
+                );
+        }
+
+
+        .catalog-product-media {
+            height: 195px;
+        }
+
+    }
+
 
     @media (max-width: 991.98px) {
-        .products-page {
-            padding-top: 22px !important;
+
+        .catalog-layout {
+            grid-template-columns: 1fr;
         }
 
-        .products-page .products-hero {
-            padding: 34px 30px;
-            border-radius: 24px;
+
+        .catalog-filter-toggle {
+            display: inline-flex;
         }
 
-        .products-page .filter-card {
-            padding: 22px;
-        }
-    }
 
-    @media (max-width: 575.98px) {
-        .products-page::after {
+        .catalog-filter {
+            position: static;
+
             display: none;
         }
 
-        .products-page .products-hero {
-            padding: 28px 22px;
-            border-radius: 20px;
+
+        .catalog-filter.is-open {
+            display: block;
         }
 
-        .products-page .products-hero::before {
-            opacity: .55;
+
+        .catalog-grid {
+            grid-template-columns:
+                repeat(
+                    3,
+                    minmax(0, 1fr)
+                );
         }
 
-        .products-page .filter-card {
-            padding: 20px;
-            border-radius: 20px;
+
+        .catalog-heading {
+            padding:
+                22px;
         }
 
-        .products-page .product-card {
-            border-radius: 18px;
+
+        .catalog-toolbar {
+            align-items: flex-start;
+
+            flex-direction: column;
         }
 
-        .products-page .product-image-wrap {
-            height: 215px;
+
+        .catalog-toolbar-actions {
+            width: 100%;
+
+            justify-content: space-between;
         }
 
-        .products-page .product-card:hover {
-            transform: none;
-        }
     }
+
+
+    @media (max-width: 767.98px) {
+
+        .catalog-heading {
+            align-items: flex-start;
+
+            flex-direction: column;
+
+            gap: 14px;
+        }
+
+
+        .catalog-heading-stat {
+            min-width: 120px;
+
+            text-align: left;
+        }
+
+
+        .catalog-grid {
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(0, 1fr)
+                );
+
+            gap: 9px;
+        }
+
+
+        .catalog-product-media {
+            height: 180px;
+        }
+
+    }
+
+
+    @media (max-width: 575.98px) {
+
+        .catalog-heading {
+            padding:
+                19px 17px;
+
+            border-radius: 14px;
+        }
+
+
+        .catalog-title {
+            font-size: 26px;
+        }
+
+
+        .catalog-description {
+            font-size: 10px;
+        }
+
+
+        .catalog-toolbar-actions {
+            align-items: stretch;
+
+            flex-direction: column;
+        }
+
+
+        .catalog-sort-form {
+            width: 100%;
+        }
+
+
+        .catalog-sort {
+            flex: 1;
+        }
+
+
+        .catalog-product-media {
+            height: 155px;
+        }
+
+
+        .catalog-product-body {
+            padding: 9px;
+        }
+
+
+        .catalog-product-name {
+            min-height: 35px;
+
+            font-size: 11px;
+        }
+
+
+        .catalog-current-price {
+            font-size: 14px;
+        }
+
+
+        .catalog-product-meta {
+            align-items: flex-start;
+
+            flex-direction: column;
+
+            gap: 2px;
+        }
+
+
+        .catalog-actions {
+            grid-template-columns: 1fr;
+        }
+
+
+        .catalog-view-btn {
+            display: none;
+        }
+
+
+        .catalog-admin-actions {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
 
     @media (prefers-reduced-motion: reduce) {
-        .products-page *,
-        .products-page *::before,
-        .products-page *::after {
-            transition: none !important;
-            animation: none !important;
-        }
-    }
 
+        .catalog-page *,
+        .catalog-page *::before,
+        .catalog-page *::after {
+            transition: none !important;
+        }
+
+    }
 </style>
 
-<div class="products-page container py-4">
 
-    {{-- HERO --}}
-    <section class="products-hero mb-4">
-        <div class="row align-items-center g-3">
-            <div class="col-lg-8">
-                <div class="small fw-bold mb-2" style="color:#f2c15c;">
-                    🌿 TINH HOA TÂY BẮC
-                </div>
+<div class="catalog-page">
 
-                <h1 class="fw-bold mb-2">
-                    🥩 Đặc sản Tây Bắc
-                </h1>
 
-                <p class="mb-0" style="color:rgba(255,255,255,.78);">
-                    Tìm kiếm và lựa chọn những đặc sản mang đậm
-                    hương vị núi rừng Tây Bắc.
-                </p>
-            </div>
+    {{-- =====================================================
+        BREADCRUMB
+    ====================================================== --}}
+    <div class="catalog-breadcrumb">
 
-            <div class="col-lg-4 text-lg-end">
-                <span class="badge px-3 py-2 fs-6"
-                      style="background:#f2c15c;color:#3b2114;">
-                    {{ $products->total() }} sản phẩm
-                </span>
-            </div>
-        </div>
-    </section>
+        <a href="{{ url('/') }}">
+            Trang chủ
+        </a>
 
-    {{-- TÌM KIẾM + LỌC --}}
-    <section class="filter-card mb-4">
+        <span>›</span>
 
-        <form
-            action="{{ route('products.index') }}"
-            method="GET"
-        >
-            <div class="row g-3">
+        <span>
+            Sản phẩm
+        </span>
 
-                <div class="col-lg-4 col-md-6">
-                    <label class="filter-label">
-                        🔎 Tìm kiếm
-                    </label>
 
-                    <input
-                        type="text"
-                        name="search"
-                        class="form-control"
-                        value="{{ request('search') }}"
-                        placeholder="Nhập tên đặc sản..."
-                    >
-                </div>
+        @if($selectedCategory)
 
-                <div class="col-lg-2 col-md-6">
-                    <label class="filter-label">
-                        🧺 Danh mục
-                    </label>
+            <span>›</span>
 
-                    <select
-                        name="category_id"
-                        class="form-select"
-                    >
-                        <option value="">
-                            Tất cả danh mục
-                        </option>
+            <span>
+                {{ $selectedCategory->name }}
+            </span>
 
-                        @foreach($categories as $category)
-                            <option
-                                value="{{ $category->id }}"
-                                {{ request('category_id') == $category->id ? 'selected' : '' }}
-                            >
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-lg-2 col-md-6">
-                    <label class="filter-label">
-                        💰 Giá từ
-                    </label>
-
-                    <input
-                        type="number"
-                        name="min_price"
-                        min="0"
-                        class="form-control"
-                        value="{{ request('min_price') }}"
-                        placeholder="0"
-                    >
-                </div>
-
-                <div class="col-lg-2 col-md-6">
-                    <label class="filter-label">
-                        💰 Giá đến
-                    </label>
-
-                    <input
-                        type="number"
-                        name="max_price"
-                        min="0"
-                        class="form-control"
-                        value="{{ request('max_price') }}"
-                        placeholder="5.000.000"
-                    >
-                </div>
-
-                <div class="col-lg-2 col-md-6">
-                    <label class="filter-label">
-                        📦 Tình trạng
-                    </label>
-
-                    <select
-                        name="stock"
-                        class="form-select"
-                    >
-                        <option value="">Tất cả</option>
-
-                        <option
-                            value="in_stock"
-                            {{ request('stock') === 'in_stock' ? 'selected' : '' }}
-                        >
-                            Còn hàng
-                        </option>
-
-                        <option
-                            value="out_of_stock"
-                            {{ request('stock') === 'out_of_stock' ? 'selected' : '' }}
-                        >
-                            Hết hàng
-                        </option>
-                    </select>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <label class="filter-label">
-                        ↕️ Sắp xếp
-                    </label>
-
-                    <select
-                        name="sort"
-                        class="form-select"
-                    >
-                        <option value="">
-                            Mới nhất
-                        </option>
-
-                        <option
-                            value="price_asc"
-                            {{ request('sort') === 'price_asc' ? 'selected' : '' }}
-                        >
-                            Giá thấp → cao
-                        </option>
-
-                        <option
-                            value="price_desc"
-                            {{ request('sort') === 'price_desc' ? 'selected' : '' }}
-                        >
-                            Giá cao → thấp
-                        </option>
-
-                        <option
-                            value="name_asc"
-                            {{ request('sort') === 'name_asc' ? 'selected' : '' }}
-                        >
-                            Tên A → Z
-                        </option>
-
-                        <option
-                            value="name_desc"
-                            {{ request('sort') === 'name_desc' ? 'selected' : '' }}
-                        >
-                            Tên Z → A
-                        </option>
-                    </select>
-                </div>
-
-                <div class="col-lg-8 d-flex align-items-end gap-2">
-
-                    <button
-                        type="submit"
-                        class="btn btn-tb px-4"
-                    >
-                        🔎 Tìm kiếm & lọc
-                    </button>
-
-                    <a
-                        href="{{ route('products.index') }}"
-                        class="btn btn-outline-secondary px-4"
-                    >
-                        ↻ Xóa bộ lọc
-                    </a>
-
-                </div>
-
-            </div>
-        </form>
-
-    </section>
-
-    {{-- KẾT QUẢ --}}
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-
-        <div>
-            <h4 class="fw-bold mb-1">
-                Danh sách đặc sản
-            </h4>
-
-            <div class="result-count">
-                Tìm thấy {{ $products->total() }} sản phẩm
-            </div>
-        </div>
-
-        @if(Auth::check() && Auth::user()->role === 'admin')
-            <div class="d-flex gap-2 flex-wrap">
-                <a
-                    href="{{ route('admin.products.create') }}"
-                    class="btn btn-tb"
-                >
-                    ➕ Thêm sản phẩm
-                </a>
-
-                <a
-                    href="{{ route('admin.products.index') }}"
-                    class="btn btn-outline-tb"
-                >
-                    ⚙️ Quản lý nâng cao
-                </a>
-            </div>
         @endif
 
     </div>
 
-    @if($products->isEmpty())
 
-        <div class="card border-0 text-center py-5">
+    {{-- =====================================================
+        HEADER
+    ====================================================== --}}
+    <section class="catalog-heading">
 
-            <div style="font-size:70px;">
-                🔎
+        <div class="catalog-heading-copy">
+
+            <div class="catalog-eyebrow">
+                🌿 Gian hàng đặc sản Tây Bắc
             </div>
 
-            <h4 class="fw-bold mt-3">
-                Không tìm thấy sản phẩm
-            </h4>
 
-            <p class="text-muted">
-                Hãy thử thay đổi từ khóa hoặc điều kiện lọc.
-            </p>
+            <h1 class="catalog-title">
 
-            <div>
-                <a
-                    href="{{ route('products.index') }}"
-                    class="btn btn-tb"
-                >
-                    Xem tất cả đặc sản
-                </a>
+                @if($selectedCategory)
+
+                    {{ $selectedCategory->name }}
+
+                @elseif(request('search'))
+
+                    Kết quả tìm kiếm
+
+                @else
+
+                    Khám phá đặc sản Tây Bắc
+
+                @endif
+
+            </h1>
+
+
+            <div class="catalog-description">
+
+                @if(request('search'))
+
+                    Kết quả phù hợp với từ khóa
+                    “{{ request('search') }}”.
+
+                @elseif($selectedCategory)
+
+                    Khám phá các sản phẩm thuộc
+                    danh mục {{ $selectedCategory->name }}.
+
+                @else
+
+                    Tìm kiếm những hương vị vùng cao
+                    với giá bán, khuyến mãi,
+                    tồn kho và quy cách mua
+                    được hiển thị rõ ràng.
+
+                @endif
+
             </div>
 
         </div>
 
-    @else
 
-        <div
-            class="
-                row
-                row-cols-1
-                row-cols-sm-2
-                row-cols-lg-3
-                row-cols-xl-4
-                g-4
-            "
+        <div class="catalog-heading-stat">
+
+            <strong>
+                {{ number_format($products->total()) }}
+            </strong>
+
+            <span>
+                sản phẩm phù hợp
+            </span>
+
+        </div>
+
+    </section>
+
+
+    {{-- =====================================================
+        MAIN LAYOUT
+    ====================================================== --}}
+    <div class="catalog-layout">
+
+
+        {{-- =================================================
+            FILTER
+        ================================================== --}}
+        <aside
+            class="catalog-filter"
+            id="catalogFilter"
         >
 
-            @foreach($products as $product)
+            <div class="catalog-filter-header">
 
-                <div class="col">
-
-                    <div class="product-card">
-
-                        <div class="product-image-wrap">
-
-                            @if($product->quantity > 0)
-
-                                <span class="badge bg-success stock-badge">
-                                    Còn hàng
-                                </span>
-
-                            @else
-
-                                <span class="badge bg-danger stock-badge">
-                                    Hết hàng
-                                </span>
-
-                            @endif
+                <strong>
+                    ☰ Bộ lọc sản phẩm
+                </strong>
 
 
-                            @if(
-                                $product->image
-                                && Storage::disk('public')->exists($product->image)
-                            )
+                @if($activeFilterCount > 0)
 
-                                <img
-                                    src="{{ Storage::disk('public')->url($product->image) }}"
-                                    alt="{{ $product->name }}"
-                                    class="product-image"
+                    <span class="catalog-filter-count">
+                        {{ $activeFilterCount }}
+                    </span>
+
+                @endif
+
+            </div>
+
+
+            <form
+                action="{{ route('products.index') }}"
+                method="GET"
+            >
+
+                <div class="catalog-filter-body">
+
+
+                    {{-- SEARCH --}}
+                    <div class="filter-group">
+
+                        <label
+                            for="catalogSearch"
+                            class="filter-heading"
+                        >
+                            🔎 Tìm sản phẩm
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="catalogSearch"
+                            name="search"
+                            value="{{ request('search') }}"
+                            class="catalog-input"
+                            placeholder="Tên đặc sản..."
+                        >
+
+                    </div>
+
+
+                    {{-- CATEGORY --}}
+                    <div class="filter-group">
+
+                        <label
+                            for="catalogCategory"
+                            class="filter-heading"
+                        >
+                            🧺 Danh mục
+                        </label>
+
+
+                        <select
+                            id="catalogCategory"
+                            name="category_id"
+                            class="catalog-select"
+                        >
+
+                            <option value="">
+                                Tất cả danh mục
+                            </option>
+
+
+                            @foreach($categories as $category)
+
+                                <option
+                                    value="{{ $category->id }}"
+                                    {{ request('category_id') == $category->id ? 'selected' : '' }}
+                                >
+                                    {{ $category->name }}
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- PRICE --}}
+                    <div class="filter-group">
+
+                        <span class="filter-heading">
+                            💰 Khoảng giá
+                        </span>
+
+
+                        <div class="filter-price-grid">
+
+                            <input
+                                type="number"
+                                name="min_price"
+                                min="0"
+                                value="{{ request('min_price') }}"
+                                class="catalog-input"
+                                placeholder="Từ"
+                            >
+
+
+                            <input
+                                type="number"
+                                name="max_price"
+                                min="0"
+                                value="{{ request('max_price') }}"
+                                class="catalog-input"
+                                placeholder="Đến"
+                            >
+
+                        </div>
+
+
+                        <div
+                            style="
+                                margin-top:5px;
+                                color:#9a8e85;
+                                font-size:8px;
+                            "
+                        >
+                            Đơn vị: VNĐ
+                        </div>
+
+                    </div>
+
+
+                    {{-- STOCK --}}
+                    <div class="filter-group">
+
+                        <span class="filter-heading">
+                            📦 Tình trạng hàng
+                        </span>
+
+
+                        <div class="stock-options">
+
+
+                            <div class="stock-option">
+
+                                <input
+                                    type="radio"
+                                    name="stock"
+                                    id="stockAll"
+                                    value=""
+                                    {{ request('stock', '') === '' ? 'checked' : '' }}
                                 >
 
-                            @else
+                                <label for="stockAll">
 
-                                <div class="product-fallback">
-                                    🧺
-                                </div>
+                                    <span class="stock-dot">
+                                    </span>
 
-                            @endif
+                                    Tất cả sản phẩm
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="stock-option">
+
+                                <input
+                                    type="radio"
+                                    name="stock"
+                                    id="stockIn"
+                                    value="in_stock"
+                                    {{ request('stock') === 'in_stock' ? 'checked' : '' }}
+                                >
+
+                                <label for="stockIn">
+
+                                    <span class="stock-dot in">
+                                    </span>
+
+                                    Còn hàng
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="stock-option">
+
+                                <input
+                                    type="radio"
+                                    name="stock"
+                                    id="stockOut"
+                                    value="out_of_stock"
+                                    {{ request('stock') === 'out_of_stock' ? 'checked' : '' }}
+                                >
+
+                                <label for="stockOut">
+
+                                    <span class="stock-dot out">
+                                    </span>
+
+                                    Hết hàng
+
+                                </label>
+
+                            </div>
 
                         </div>
 
-
-                        <div class="p-4 d-flex flex-column flex-grow-1">
-
-                            <div class="mb-2">
-
-                                <span class="badge category-badge">
-                                    {{ $product->category->name ?? 'Chưa phân loại' }}
-                                </span>
-
-                            </div>
+                    </div>
 
 
-                            <h5 class="fw-bold mb-2 product-title">
-                                {{ $product->name }}
-                            </h5>
+                    {{-- KEEP SORT --}}
+                    @if(request('sort'))
+
+                        <input
+                            type="hidden"
+                            name="sort"
+                            value="{{ request('sort') }}"
+                        >
+
+                    @endif
 
 
-                            <p class="text-muted small product-description">
-                                {{
-                                    \Illuminate\Support\Str::limit(
-                                        $product->description
-                                        ?? 'Đặc sản Tây Bắc đậm đà hương vị núi rừng.',
-                                        90
-                                    )
-                                }}
-                            </p>
+                    <button
+                        type="submit"
+                        class="filter-submit"
+                    >
+                        🔎 Áp dụng bộ lọc
+                    </button>
 
 
-                            <div class="product-bottom">
+                    @if($activeFilterCount > 0 || request('sort'))
 
-                            <div class="price mb-1">
-                                @if($product->isOnSale())
-                                    <span class="text-muted text-decoration-line-through small me-2">
-                                        {{ number_format($product->price, 0, ',', '.') }} đ
-                                    </span>
-                                    <span>
-                                        {{ number_format($product->getCurrentPrice(), 0, ',', '.') }} đ
-                                    </span>
-                                    <span class="badge bg-danger ms-1">
-                                        -{{ $product->getDiscountPercent() }}%
-                                    </span>
-                                @else
-                                    {{ number_format($product->price, 0, ',', '.') }} đ
-                                @endif
-                            </div>
+                        <a
+                            href="{{ route('products.index') }}"
+                            class="filter-reset"
+                        >
+                            ↻ Xóa tất cả bộ lọc
+                        </a>
 
-                            <small class="text-muted mb-3">
-                                Kho: {{ $product->quantity }} sản phẩm
-                            </small>
+                    @endif
 
-                            <div class="sold-count mb-3">
-                                🔥 Đã bán
-                                {{ rtrim(rtrim(number_format((float) $product->sold_quantity, 2, '.', ''), '0'), '.') }} {{ $product->unit }}
-                            </div>
+                </div>
+
+            </form>
+
+        </aside>
 
 
-                            <div class="d-grid gap-2">
+        {{-- =================================================
+            CONTENT
+        ================================================== --}}
+        <div class="catalog-content">
 
-                                @if(Auth::check() && Auth::user()->role === 'admin')
 
-                                    <a
-                                        href="{{ route('products.show', $product) }}"
-                                        class="btn btn-outline-tb"
-                                    >
-                                        👁 Xem chi tiết
-                                    </a>
+            {{-- TOOLBAR --}}
+            <div class="catalog-toolbar">
 
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <a
-                                                href="{{ route('admin.products.edit', $product) }}"
-                                                class="btn btn-warning w-100 fw-bold"
-                                            >
-                                                ✏️ Sửa
-                                            </a>
-                                        </div>
+                <div class="catalog-result">
 
-                                        <div class="col-6">
-                                            <form
-                                                action="{{ route('admin.products.toggleFeatured', $product) }}"
-                                                method="POST"
-                                            >
-                                                @csrf
-                                                @method('PATCH')
+                    <div class="catalog-result-title">
 
-                                                <button
-                                                    type="submit"
-                                                    class="btn {{ $product->is_featured ? 'btn-warning' : 'btn-outline-warning' }} w-100 fw-bold"
-                                                >
-                                                    {{ $product->is_featured ? '★ Đã ghim' : '☆ Nổi bật' }}
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
+                        {{
+                            request('search')
+                            ? 'Kết quả cho “' . request('search') . '”'
+                            : 'Danh sách sản phẩm'
+                        }}
 
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <button
-                                                type="button"
-                                                class="btn {{ $product->isOnSale() ? 'btn-danger' : 'btn-outline-danger' }} w-100"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#promotionModal{{ $product->id }}"
-                                            >
-                                                🔥 {{ $product->isOnSale() ? 'Sửa sale' : 'Sale' }}
-                                            </button>
-                                        </div>
+                    </div>
 
-                                        <div class="col-6">
-                                            <form
-                                                action="{{ route('admin.products.destroy', $product) }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');"
-                                            >
-                                                @csrf
-                                                @method('DELETE')
 
-                                                <button type="submit" class="btn btn-outline-danger w-100">
-                                                    🗑️ Xóa
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
+                    <div class="catalog-result-sub">
 
-                                @elseif(Auth::check())
-
-                                    <a
-                                        href="{{ route('products.show', $product) }}"
-                                        class="btn btn-outline-tb"
-                                    >
-                                        👁 Xem chi tiết
-                                    </a>
-
-                                    <form
-                                        action="{{ route('cart.add', $product) }}"
-                                        method="POST"
-                                    >
-                                        @csrf
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-tb w-100"
-                                            {{ $product->quantity <= 0 ? 'disabled' : '' }}
-                                        >
-                                            {{ $product->quantity > 0 ? '🛒 Thêm vào giỏ hàng' : '❌ Hết hàng' }}
-                                        </button>
-                                    </form>
-
-                                @else
-
-                                    <a
-                                        href="{{ route('products.show', $product) }}"
-                                        class="btn btn-outline-tb"
-                                    >
-                                        👁 Xem chi tiết
-                                    </a>
-
-                                    <a href="{{ route('login') }}" class="btn btn-tb">
-                                        🔐 Đăng nhập để mua
-                                    </a>
-
-                                @endif
-
-                            </div>
-
-                            </div>{{-- /.product-bottom --}}
-
-                        </div>
+                        Hiển thị
+                        {{ $products->firstItem() ?? 0 }}
+                        –
+                        {{ $products->lastItem() ?? 0 }}
+                        trong
+                        {{ $products->total() }}
+                        sản phẩm
 
                     </div>
 
                 </div>
 
-                @if(Auth::check() && Auth::user()->role === 'admin')
-                    <div
-                        class="modal fade"
-                        id="promotionModal{{ $product->id }}"
-                        tabindex="-1"
-                        aria-hidden="true"
+
+                <div class="catalog-toolbar-actions">
+
+
+                    <button
+                        type="button"
+                        class="catalog-filter-toggle"
+                        id="catalogFilterToggle"
                     >
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content border-0 rounded-4">
-                                <form
-                                    action="{{ route('admin.products.setPromotion', $product) }}"
-                                    method="POST"
+                        ☰ Bộ lọc
+
+                        @if($activeFilterCount > 0)
+
+                            <span
+                                class="
+                                    badge
+                                    bg-danger
+                                    rounded-pill
+                                "
+                            >
+                                {{ $activeFilterCount }}
+                            </span>
+
+                        @endif
+
+                    </button>
+
+
+                    @if(Auth::check() && Auth::user()->role === 'admin')
+
+                        <a
+                            href="{{ route('admin.products.create') }}"
+                            class="catalog-admin-add"
+                        >
+                            ＋ Thêm sản phẩm
+                        </a>
+
+                    @endif
+
+
+                    {{-- SORT --}}
+                    <form
+                        action="{{ route('products.index') }}"
+                        method="GET"
+                        class="catalog-sort-form"
+                    >
+
+                        @if(request('search'))
+
+                            <input
+                                type="hidden"
+                                name="search"
+                                value="{{ request('search') }}"
+                            >
+
+                        @endif
+
+
+                        @if(request('category_id'))
+
+                            <input
+                                type="hidden"
+                                name="category_id"
+                                value="{{ request('category_id') }}"
+                            >
+
+                        @endif
+
+
+                        @if(request('min_price'))
+
+                            <input
+                                type="hidden"
+                                name="min_price"
+                                value="{{ request('min_price') }}"
+                            >
+
+                        @endif
+
+
+                        @if(request('max_price'))
+
+                            <input
+                                type="hidden"
+                                name="max_price"
+                                value="{{ request('max_price') }}"
+                            >
+
+                        @endif
+
+
+                        @if(request('stock'))
+
+                            <input
+                                type="hidden"
+                                name="stock"
+                                value="{{ request('stock') }}"
+                            >
+
+                        @endif
+
+
+                        <span class="catalog-sort-label">
+                            Sắp xếp:
+                        </span>
+
+
+                        <select
+                            name="sort"
+                            class="catalog-sort"
+                            onchange="this.form.submit()"
+                        >
+
+                            <option
+                                value=""
+                                {{ request('sort') === null || request('sort') === '' ? 'selected' : '' }}
+                            >
+                                Mới nhất
+                            </option>
+
+
+                            <option
+                                value="price_asc"
+                                {{ request('sort') === 'price_asc' ? 'selected' : '' }}
+                            >
+                                Giá thấp → cao
+                            </option>
+
+
+                            <option
+                                value="price_desc"
+                                {{ request('sort') === 'price_desc' ? 'selected' : '' }}
+                            >
+                                Giá cao → thấp
+                            </option>
+
+
+                            <option
+                                value="name_asc"
+                                {{ request('sort') === 'name_asc' ? 'selected' : '' }}
+                            >
+                                Tên A → Z
+                            </option>
+
+
+                            <option
+                                value="name_desc"
+                                {{ request('sort') === 'name_desc' ? 'selected' : '' }}
+                            >
+                                Tên Z → A
+                            </option>
+
+                        </select>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            {{-- ACTIVE FILTERS --}}
+            @if($activeFilterCount > 0)
+
+                <div class="catalog-active-filters">
+
+
+                    @if(request('search'))
+
+                        <span class="filter-chip">
+                            🔎 {{ request('search') }}
+                        </span>
+
+                    @endif
+
+
+                    @if($selectedCategory)
+
+                        <span class="filter-chip">
+                            🧺 {{ $selectedCategory->name }}
+                        </span>
+
+                    @endif
+
+
+                    @if(request('min_price'))
+
+                        <span class="filter-chip">
+
+                            Từ
+                            {{
+                                number_format(
+                                    (float) request('min_price'),
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </span>
+
+                    @endif
+
+
+                    @if(request('max_price'))
+
+                        <span class="filter-chip">
+
+                            Đến
+                            {{
+                                number_format(
+                                    (float) request('max_price'),
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </span>
+
+                    @endif
+
+
+                    @if(request('stock') === 'in_stock')
+
+                        <span class="filter-chip">
+                            ● Còn hàng
+                        </span>
+
+                    @elseif(request('stock') === 'out_of_stock')
+
+                        <span class="filter-chip">
+                            ● Hết hàng
+                        </span>
+
+                    @endif
+
+                </div>
+
+            @endif
+
+
+            {{-- =================================================
+                EMPTY
+            ================================================== --}}
+            @if($products->isEmpty())
+
+                <div class="catalog-empty">
+
+                    <div>
+
+                        <div class="catalog-empty-icon">
+                            🔎
+                        </div>
+
+
+                        <h3>
+                            Không tìm thấy sản phẩm
+                        </h3>
+
+
+                        <p>
+                            Hãy thử thay đổi từ khóa,
+                            danh mục hoặc khoảng giá.
+                        </p>
+
+
+                        <a
+                            href="{{ route('products.index') }}"
+                            class="
+                                btn
+                                btn-dark
+                                btn-sm
+                                px-4
+                            "
+                        >
+                            Xem tất cả sản phẩm
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+            {{-- =================================================
+                PRODUCTS
+            ================================================== --}}
+            @else
+
+                <div class="catalog-grid">
+
+
+                    @foreach($products as $product)
+
+                        @php
+                            $productImage =
+                                $product->image
+
+                                ? (
+                                    str_starts_with(
+                                        $product->image,
+                                        'http'
+                                    )
+
+                                    ? $product->image
+
+                                    : asset(
+                                        'storage/'
+                                        .
+                                        ltrim(
+                                            $product->image,
+                                            '/'
+                                        )
+                                    )
+                                )
+
+                                : null;
+
+
+                            $stockQuantity =
+                                (float) $product->quantity;
+
+
+                            $soldQuantity =
+                                (float) (
+                                    $product->sold_quantity
+                                    ??
+                                    0
+                                );
+                        @endphp
+
+
+                        <article class="catalog-product">
+
+
+                            {{-- IMAGE --}}
+                            <div class="catalog-product-media">
+
+
+                                @if($product->isOnSale())
+
+                                    <span class="catalog-sale-badge">
+
+                                        -{{
+                                            $product
+                                                ->getDiscountPercent()
+                                        }}%
+
+                                    </span>
+
+                                @endif
+
+
+                                @if($product->is_featured)
+
+                                    <span class="catalog-featured-badge">
+                                        ⭐ Nổi bật
+                                    </span>
+
+                                @endif
+
+
+                                <a
+                                    href="{{
+                                        route(
+                                            'products.show',
+                                            $product
+                                        )
+                                    }}"
+                                    class="catalog-product-image-link"
                                 >
-                                    @csrf
-                                    @method('PATCH')
 
-                                    <div class="modal-header">
-                                        <div>
-                                            <h5 class="modal-title fw-bold">🔥 Thiết lập khuyến mãi</h5>
-                                            <div class="small text-muted mt-1">{{ $product->name }}</div>
-                                        </div>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
+                                    @if($productImage)
 
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Giá gốc</label>
-                                            <input
-                                                type="text"
-                                                class="form-control"
-                                                value="{{ number_format((float) $product->price, 0, ',', '.') }} đ"
-                                                disabled
-                                            >
-                                        </div>
+                                        <img
+                                            src="{{ $productImage }}"
+                                            alt="{{ $product->name }}"
+                                            class="catalog-product-image"
+                                            loading="lazy"
+                                            onerror="
+                                                this.style.display='none';
+                                                this.nextElementSibling.style.display='grid';
+                                            "
+                                        >
 
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Giá khuyến mãi</label>
-                                            <input
-                                                type="number"
-                                                name="sale_price"
-                                                class="form-control"
-                                                min="0"
-                                                max="{{ $product->price }}"
-                                                value="{{ $product->sale_price ? (float) $product->sale_price : '' }}"
-                                                required
-                                            >
+
+                                        <div
+                                            class="catalog-product-fallback"
+                                            style="display:none;"
+                                        >
+                                            🧺
                                         </div>
 
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-bold">Bắt đầu</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    name="sale_start"
-                                                    class="form-control"
-                                                    value="{{ $product->sale_start ? $product->sale_start->format('Y-m-d\\TH:i') : now()->format('Y-m-d\\TH:i') }}"
-                                                >
-                                            </div>
+                                    @else
 
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-bold">Kết thúc</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    name="sale_end"
-                                                    class="form-control"
-                                                    value="{{ $product->sale_end ? $product->sale_end->format('Y-m-d\\TH:i') : now()->addDays(7)->format('Y-m-d\\TH:i') }}"
-                                                >
-                                            </div>
+                                        <div class="catalog-product-fallback">
+                                            🧺
                                         </div>
-                                    </div>
 
-                                    <div class="modal-footer">
-                                        @if($product->sale_price)
-                                            <button
-                                                type="submit"
-                                                form="removeSaleForm{{ $product->id }}"
-                                                class="btn btn-outline-danger me-auto"
-                                            >
-                                                🗑️ Gỡ sale
-                                            </button>
+                                    @endif
+
+                                </a>
+
+                            </div>
+
+
+                            {{-- BODY --}}
+                            <div class="catalog-product-body">
+
+
+                                <div class="catalog-product-category">
+
+                                    {{
+                                        $product->category?->name
+                                        ??
+                                        'Đặc sản Tây Bắc'
+                                    }}
+
+                                </div>
+
+
+                                <a
+                                    href="{{
+                                        route(
+                                            'products.show',
+                                            $product
+                                        )
+                                    }}"
+                                    class="catalog-product-name"
+                                >
+                                    {{ $product->name }}
+                                </a>
+
+
+                                <div class="catalog-product-meta">
+
+                                    <span class="catalog-sold">
+
+                                        🔥 Đã bán
+
+                                        {{
+                                            $formatQuantity(
+                                                $soldQuantity
+                                            )
+                                        }}
+
+                                        @if($product->unit)
+
+                                            {{ $product->unit }}
+
                                         @endif
 
-                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                                            Đóng
-                                        </button>
-                                        <button type="submit" class="btn btn-danger">
-                                            🔥 Lưu khuyến mãi
-                                        </button>
-                                    </div>
-                                </form>
+                                    </span>
 
-                                @if($product->sale_price)
-                                    <form
-                                        id="removeSaleForm{{ $product->id }}"
-                                        action="{{ route('admin.products.removePromotion', $product) }}"
-                                        method="POST"
-                                        class="d-none"
+
+                                    <span
+                                        class="
+                                            catalog-stock
+                                            {{
+                                                $stockQuantity > 0
+                                                ? ''
+                                                : 'out'
+                                            }}
+                                        "
                                     >
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
+
+                                        {{
+                                            $stockQuantity > 0
+                                            ? 'Còn hàng'
+                                            : 'Hết hàng'
+                                        }}
+
+                                    </span>
+
+                                </div>
+
+
+                                {{-- PRICE --}}
+                                <div class="catalog-price-area">
+
+                                    <div class="catalog-old-price">
+
+                                        @if($product->isOnSale())
+
+                                            {{
+                                                number_format(
+                                                    (float) $product->price,
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                            }}đ
+
+                                        @endif
+
+                                    </div>
+
+
+                                    <div class="catalog-current-price">
+
+                                        {{
+                                            number_format(
+                                                $product
+                                                    ->getCurrentPrice(),
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}đ
+
+
+                                        @if($product->unit)
+
+                                            <small>
+                                                /{{ $product->unit }}
+                                            </small>
+
+                                        @endif
+
+                                    </div>
+
+                                </div>
+
+
+                                {{-- ==========================================
+                                    ADMIN
+                                =========================================== --}}
+                                @if(Auth::check() && Auth::user()->role === 'admin')
+
+                                    <div class="catalog-admin-actions">
+
+
+                                        <a
+                                            href="{{
+                                                route(
+                                                    'products.show',
+                                                    $product
+                                                )
+                                            }}"
+                                            class="catalog-admin-btn"
+                                        >
+                                            👁 Xem
+                                        </a>
+
+
+                                        <a
+                                            href="{{
+                                                route(
+                                                    'admin.products.edit',
+                                                    $product
+                                                )
+                                            }}"
+                                            class="
+                                                catalog-admin-btn
+                                                edit
+                                            "
+                                        >
+                                            ✏ Sửa
+                                        </a>
+
+
+                                        <form
+                                            action="{{
+                                                route(
+                                                    'admin.products.toggleFeatured',
+                                                    $product
+                                                )
+                                            }}"
+                                            method="POST"
+                                        >
+
+                                            @csrf
+                                            @method('PATCH')
+
+
+                                            <button
+                                                type="submit"
+                                                class="
+                                                    catalog-admin-btn
+                                                    featured
+                                                    w-100
+                                                "
+                                            >
+
+                                                {{
+                                                    $product->is_featured
+                                                    ? '★ Đã ghim'
+                                                    : '☆ Ghim'
+                                                }}
+
+                                            </button>
+
+                                        </form>
+
+
+                                        <button
+                                            type="button"
+                                            class="
+                                                catalog-admin-btn
+                                                sale
+                                            "
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#promotionModal{{ $product->id }}"
+                                        >
+
+                                            {{
+                                                $product->isOnSale()
+                                                ? '🔥 Sửa sale'
+                                                : '🔥 Sale'
+                                            }}
+
+                                        </button>
+
+
+                                        <form
+                                            action="{{
+                                                route(
+                                                    'admin.products.destroy',
+                                                    $product
+                                                )
+                                            }}"
+                                            method="POST"
+                                            style="grid-column:1 / -1;"
+                                            onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');"
+                                        >
+
+                                            @csrf
+                                            @method('DELETE')
+
+
+                                            <button
+                                                type="submit"
+                                                class="
+                                                    catalog-admin-btn
+                                                    delete
+                                                    w-100
+                                                "
+                                            >
+                                                🗑 Xóa sản phẩm
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+
+                                {{-- ==========================================
+                                    CUSTOMER
+                                =========================================== --}}
+                                @elseif(Auth::check())
+
+                                    <div class="catalog-actions">
+
+
+                                        <a
+                                            href="{{
+                                                route(
+                                                    'products.show',
+                                                    $product
+                                                )
+                                            }}"
+                                            class="catalog-view-btn"
+                                            title="Xem chi tiết"
+                                        >
+                                            👁
+                                        </a>
+
+
+                                        <form
+                                            action="{{
+                                                route(
+                                                    'cart.add',
+                                                    $product
+                                                )
+                                            }}"
+                                            method="POST"
+                                        >
+
+                                            @csrf
+
+
+                                            <button
+                                                type="submit"
+                                                class="catalog-cart-btn"
+                                                {{ $stockQuantity <= 0 ? 'disabled' : '' }}
+                                            >
+
+                                                @if($stockQuantity > 0)
+
+                                                    🛒 Thêm vào giỏ
+
+                                                @else
+
+                                                    Hết hàng
+
+                                                @endif
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+
+                                {{-- ==========================================
+                                    GUEST
+                                =========================================== --}}
+                                @else
+
+                                    <div class="catalog-actions">
+
+
+                                        <a
+                                            href="{{
+                                                route(
+                                                    'products.show',
+                                                    $product
+                                                )
+                                            }}"
+                                            class="catalog-view-btn"
+                                            title="Xem chi tiết"
+                                        >
+                                            👁
+                                        </a>
+
+
+                                        <a
+                                            href="{{ route('login') }}"
+                                            class="
+                                                catalog-cart-btn
+                                                d-flex
+                                                align-items-center
+                                                justify-content-center
+                                            "
+                                        >
+                                            🔐 Đăng nhập để mua
+                                        </a>
+
+                                    </div>
+
                                 @endif
+
                             </div>
-                        </div>
+
+                        </article>
+
+
+                        {{-- ================================================
+                            PROMOTION MODAL ADMIN
+                        ================================================= --}}
+                        @if(Auth::check() && Auth::user()->role === 'admin')
+
+                            <div
+                                class="
+                                    modal
+                                    fade
+                                    catalog-modal
+                                "
+                                id="promotionModal{{ $product->id }}"
+                                tabindex="-1"
+                                aria-hidden="true"
+                            >
+
+                                <div
+                                    class="
+                                        modal-dialog
+                                        modal-dialog-centered
+                                    "
+                                >
+
+                                    <div class="modal-content">
+
+
+                                        <form
+                                            action="{{
+                                                route(
+                                                    'admin.products.setPromotion',
+                                                    $product
+                                                )
+                                            }}"
+                                            method="POST"
+                                        >
+
+                                            @csrf
+                                            @method('PATCH')
+
+
+                                            <div class="modal-header">
+
+                                                <div>
+
+                                                    <h5
+                                                        class="
+                                                            modal-title
+                                                            fw-bold
+                                                        "
+                                                    >
+                                                        🔥 Thiết lập khuyến mãi
+                                                    </h5>
+
+
+                                                    <div
+                                                        class="
+                                                            small
+                                                            mt-1
+                                                        "
+                                                        style="
+                                                            color:
+                                                                rgba(
+                                                                    255,
+                                                                    255,
+                                                                    255,
+                                                                    .7
+                                                                );
+                                                        "
+                                                    >
+                                                        {{ $product->name }}
+                                                    </div>
+
+                                                </div>
+
+
+                                                <button
+                                                    type="button"
+                                                    class="btn-close"
+                                                    data-bs-dismiss="modal"
+                                                    aria-label="Đóng"
+                                                >
+                                                </button>
+
+                                            </div>
+
+
+                                            <div class="modal-body">
+
+
+                                                <div class="mb-3">
+
+                                                    <label
+                                                        class="
+                                                            form-label
+                                                            fw-bold
+                                                        "
+                                                    >
+                                                        Giá gốc
+                                                    </label>
+
+
+                                                    <input
+                                                        type="text"
+                                                        class="form-control"
+                                                        value="{{
+                                                            number_format(
+                                                                (float) $product->price,
+                                                                0,
+                                                                ',',
+                                                                '.'
+                                                            )
+                                                        }} đ"
+                                                        disabled
+                                                    >
+
+                                                </div>
+
+
+                                                <div class="mb-3">
+
+                                                    <label
+                                                        class="
+                                                            form-label
+                                                            fw-bold
+                                                        "
+                                                    >
+                                                        Giá khuyến mãi
+                                                    </label>
+
+
+                                                    <input
+                                                        type="number"
+                                                        name="sale_price"
+                                                        class="form-control"
+                                                        min="0"
+                                                        max="{{ $product->price }}"
+                                                        value="{{
+                                                            $product->sale_price
+                                                            ? (float) $product->sale_price
+                                                            : ''
+                                                        }}"
+                                                        required
+                                                    >
+
+                                                </div>
+
+
+                                                <div class="row g-3">
+
+
+                                                    <div class="col-md-6">
+
+                                                        <label
+                                                            class="
+                                                                form-label
+                                                                fw-bold
+                                                            "
+                                                        >
+                                                            Bắt đầu
+                                                        </label>
+
+
+                                                        <input
+                                                            type="datetime-local"
+                                                            name="sale_start"
+                                                            class="form-control"
+                                                            value="{{
+                                                                $product->sale_start
+                                                                ? $product->sale_start->format('Y-m-d\TH:i')
+                                                                : now()->format('Y-m-d\TH:i')
+                                                            }}"
+                                                        >
+
+                                                    </div>
+
+
+                                                    <div class="col-md-6">
+
+                                                        <label
+                                                            class="
+                                                                form-label
+                                                                fw-bold
+                                                            "
+                                                        >
+                                                            Kết thúc
+                                                        </label>
+
+
+                                                        <input
+                                                            type="datetime-local"
+                                                            name="sale_end"
+                                                            class="form-control"
+                                                            value="{{
+                                                                $product->sale_end
+                                                                ? $product->sale_end->format('Y-m-d\TH:i')
+                                                                : now()->addDays(7)->format('Y-m-d\TH:i')
+                                                            }}"
+                                                        >
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="modal-footer">
+
+
+                                                @if($product->sale_price)
+
+                                                    <button
+                                                        type="submit"
+                                                        form="removeSaleForm{{ $product->id }}"
+                                                        class="
+                                                            btn
+                                                            btn-outline-danger
+                                                            me-auto
+                                                        "
+                                                    >
+                                                        🗑 Gỡ sale
+                                                    </button>
+
+                                                @endif
+
+
+                                                <button
+                                                    type="button"
+                                                    class="
+                                                        btn
+                                                        btn-light
+                                                    "
+                                                    data-bs-dismiss="modal"
+                                                >
+                                                    Đóng
+                                                </button>
+
+
+                                                <button
+                                                    type="submit"
+                                                    class="
+                                                        btn
+                                                        btn-danger
+                                                    "
+                                                >
+                                                    🔥 Lưu khuyến mãi
+                                                </button>
+
+                                            </div>
+
+                                        </form>
+
+
+                                        @if($product->sale_price)
+
+                                            <form
+                                                id="removeSaleForm{{ $product->id }}"
+                                                action="{{
+                                                    route(
+                                                        'admin.products.removePromotion',
+                                                        $product
+                                                    )
+                                                }}"
+                                                method="POST"
+                                                class="d-none"
+                                            >
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                            </form>
+
+                                        @endif
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        @endif
+
+                    @endforeach
+
+                </div>
+
+
+                {{-- PAGINATION --}}
+                @if($products->hasPages())
+
+                    <div class="catalog-pagination">
+
+                        {{ $products->links() }}
+
                     </div>
+
                 @endif
 
-            @endforeach
+            @endif
 
         </div>
 
-
-        <div class="d-flex justify-content-center mt-5">
-            {{ $products->links() }}
-        </div>
-
-    @endif
+    </div>
 
 </div>
+
+
+<script>
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        const toggle =
+            document.getElementById(
+                'catalogFilterToggle'
+            );
+
+
+        const filter =
+            document.getElementById(
+                'catalogFilter'
+            );
+
+
+        if (
+            toggle
+            &&
+            filter
+        ) {
+
+            toggle.addEventListener(
+                'click',
+                function () {
+
+                    const opened =
+                        filter
+                            .classList
+                            .toggle(
+                                'is-open'
+                            );
+
+
+                    toggle.innerHTML =
+                        opened
+                        ? '× Đóng bộ lọc'
+                        : '☰ Bộ lọc';
+
+                }
+            );
+
+        }
+
+    }
+);
+</script>
 
 @endsection

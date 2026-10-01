@@ -1,46 +1,2177 @@
 @extends('layouts.app')
 
-@section('title', 'Thanh toán')
+@section('title', 'Thanh toán | Tinh Hoa Tây Bắc')
 
 @section('content')
 
-<div class="container py-4">
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | CẤU HÌNH CHECKOUT
+    |--------------------------------------------------------------------------
+    */
 
-    <h2 class="fw-bold mb-4 checkout-page-title">
-        🛒 Thanh toán
-    </h2>
+    $selectedShipping =
+        old(
+            'shipping_method',
+            'standard'
+        );
+
+    $selectedPayment =
+        old(
+            'payment_method',
+            'cod'
+        );
 
 
-    {{-- THÔNG BÁO --}}
+    /*
+    |--------------------------------------------------------------------------
+    | ĐỊA CHỈ
+    |--------------------------------------------------------------------------
+    */
 
-    @if(session('error'))
+    $defaultAddress =
+        $addresses->firstWhere(
+            'is_default',
+            true
+        )
+        ??
+        $addresses->first();
 
-        <div class="alert alert-danger">
-            {{ session('error') }}
+
+    $selectedAddressId =
+        old(
+            'selected_address_id',
+            $defaultAddress?->id
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SẢN PHẨM ĐỂ HIỂN THỊ ẢNH
+    |--------------------------------------------------------------------------
+    */
+
+    $checkoutProductIds =
+        array_keys($cart);
+
+
+    $checkoutProducts =
+        empty($checkoutProductIds)
+
+        ? collect()
+
+        : \App\Models\Product::query()
+            ->whereIn(
+                'id',
+                $checkoutProductIds
+            )
+            ->get()
+            ->keyBy('id');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PHÍ VẬN CHUYỂN
+    |--------------------------------------------------------------------------
+    */
+
+    $shippingOptions = [
+        'standard' => [
+            'name' => 'Giao hàng tiết kiệm',
+            'description' => 'Dự kiến 3 - 5 ngày',
+            'fee' => 25000,
+            'icon' => '📦',
+        ],
+
+        'fast' => [
+            'name' => 'Giao hàng nhanh',
+            'description' => 'Dự kiến 1 - 2 ngày',
+            'fee' => 35000,
+            'icon' => '🚚',
+        ],
+
+        'express' => [
+            'name' => 'Giao hàng hỏa tốc',
+            'description' => 'Ưu tiên giao trong ngày',
+            'fee' => 50000,
+            'icon' => '⚡',
+        ],
+    ];
+
+
+    $initialShippingFee =
+        $shippingOptions[
+            $selectedShipping
+        ]['fee']
+        ??
+        25000;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT QUANTITY
+    |--------------------------------------------------------------------------
+    */
+
+    $formatQuantity =
+        function ($value) {
+
+            return rtrim(
+                rtrim(
+                    number_format(
+                        (float) $value,
+                        2,
+                        '.',
+                        ''
+                    ),
+                    '0'
+                ),
+                '.'
+            );
+
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VOUCHER DATA FOR JAVASCRIPT
+    |--------------------------------------------------------------------------
+    */
+
+    $voucherJsData =
+        $availableVouchers
+
+            ->map(
+                function ($voucher) {
+
+                    return [
+                        'code' =>
+                            $voucher->code,
+
+                        'type' =>
+                            $voucher->type,
+
+                        'value' =>
+                            (float)
+                            $voucher->value,
+
+                        'min_order_value' =>
+                            (float)
+                            $voucher
+                                ->min_order_value,
+
+                        'max_discount' =>
+                            $voucher
+                                ->max_discount
+                            !==
+                            null
+
+                            ? (float)
+                                $voucher
+                                    ->max_discount
+
+                            : null,
+                    ];
+
+                }
+            )
+
+            ->values();
+@endphp
+
+
+<style>
+    /* =========================================================
+       CHECKOUT ECOMMERCE
+    ========================================================= */
+
+    .checkout-shop {
+        --checkout-green: #35562f;
+        --checkout-green-dark: #274522;
+
+        --checkout-brown: #633820;
+        --checkout-brown-dark: #3d2316;
+
+        --checkout-red: #b43e2e;
+        --checkout-red-dark: #8c2f24;
+
+        --checkout-gold: #e5ad42;
+        --checkout-gold-light: #fff1cd;
+
+        --checkout-border: #e7dfd5;
+
+        --checkout-text: #302923;
+        --checkout-muted: #786f68;
+
+        --checkout-shadow:
+            0 8px 28px
+            rgba(55, 39, 27, .07);
+
+        --checkout-shadow-lg:
+            0 18px 45px
+            rgba(55, 39, 27, .12);
+
+        color:
+            var(--checkout-text);
+    }
+
+
+    .checkout-shop *,
+    .checkout-shop *::before,
+    .checkout-shop *::after {
+        box-sizing: border-box;
+    }
+
+
+    .checkout-shop a {
+        text-decoration: none;
+    }
+
+
+    /* =========================================================
+       BREADCRUMB
+    ========================================================= */
+
+    .checkout-breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        gap: 7px;
+
+        margin-bottom: 14px;
+
+        color: #958b84;
+
+        font-size: 11px;
+    }
+
+
+    .checkout-breadcrumb a {
+        color: #665349;
+
+        font-weight: 800;
+    }
+
+
+    .checkout-breadcrumb a:hover {
+        color:
+            var(--checkout-red);
+    }
+
+
+    /* =========================================================
+       PROGRESS
+    ========================================================= */
+
+    .checkout-progress {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(0, 1fr)
+            );
+
+        margin-bottom: 18px;
+
+        overflow: hidden;
+
+        border:
+            1px solid
+            var(--checkout-border);
+
+        border-radius: 14px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--checkout-shadow);
+    }
+
+
+    .checkout-progress-item {
+        min-height: 57px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 9px;
+
+        padding:
+            10px;
+
+        color: #766c64;
+
+        font-size: 11px;
+
+        font-weight: 850;
+    }
+
+
+    .checkout-progress-item:not(:last-child) {
+        border-right:
+            1px solid
+            var(--checkout-border);
+    }
+
+
+    .checkout-progress-item.done {
+        color:
+            var(--checkout-green);
+    }
+
+
+    .checkout-progress-item.active {
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--checkout-brown-dark),
+                var(--checkout-brown)
+            );
+    }
+
+
+    .checkout-progress-number {
+        width: 27px;
+        height: 27px;
+
+        flex: 0 0 27px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            1px solid
+            currentColor;
+
+        border-radius: 50%;
+
+        font-size: 10px;
+
+        font-weight: 950;
+    }
+
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .checkout-heading {
+        position: relative;
+
+        overflow: hidden;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 25px;
+
+        margin-bottom: 20px;
+
+        padding:
+            24px 28px;
+
+        border:
+            1px solid #e1d3c0;
+
+        border-radius: 18px;
+
+        background:
+            radial-gradient(
+                circle at 88% 14%,
+                rgba(229,173,66,.18),
+                transparent 28%
+            ),
+
+            linear-gradient(
+                120deg,
+                #fffdf9,
+                #fff7ea 58%,
+                #f1f6ee
+            );
+
+        box-shadow:
+            var(--checkout-shadow);
+    }
+
+
+    .checkout-heading::after {
+        content: "";
+
+        position: absolute;
+
+        right: -30px;
+        bottom: -55px;
+
+        width: 250px;
+        height: 145px;
+
+        opacity: .075;
+
+        background:
+            var(--checkout-green);
+
+        clip-path:
+            polygon(
+                0 100%,
+                20% 51%,
+                38% 72%,
+                58% 23%,
+                77% 62%,
+                100% 13%,
+                100% 100%
+            );
+    }
+
+
+    .checkout-heading-copy {
+        position: relative;
+
+        z-index: 2;
+    }
+
+
+    .checkout-eyebrow {
+        margin-bottom: 5px;
+
+        color:
+            var(--checkout-red);
+
+        font-size: 10px;
+
+        font-weight: 950;
+
+        letter-spacing: .1em;
+
+        text-transform: uppercase;
+    }
+
+
+    .checkout-title {
+        margin: 0;
+
+        color:
+            var(--checkout-text);
+
+        font-size:
+            clamp(
+                27px,
+                3vw,
+                38px
+            );
+
+        line-height: 1.1;
+
+        font-weight: 950;
+
+        letter-spacing: -.045em;
+    }
+
+
+    .checkout-description {
+        max-width: 680px;
+
+        margin-top: 7px;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 12.5px;
+
+        line-height: 1.65;
+    }
+
+
+    .checkout-safe {
+        position: relative;
+
+        z-index: 2;
+
+        flex: 0 0 auto;
+
+        padding:
+            11px 14px;
+
+        border:
+            1px solid #cbd8c5;
+
+        border-radius: 12px;
+
+        color:
+            var(--checkout-green-dark);
+
+        background:
+            rgba(255,255,255,.85);
+
+        font-size: 10px;
+
+        font-weight: 900;
+    }
+
+
+    /* =========================================================
+       MAIN LAYOUT
+    ========================================================= */
+
+    .checkout-layout {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            390px;
+
+        gap: 20px;
+
+        align-items: start;
+    }
+
+
+    .checkout-main {
+        min-width: 0;
+
+        display: grid;
+
+        gap: 15px;
+    }
+
+
+    /* =========================================================
+       SECTION
+    ========================================================= */
+
+    .checkout-card {
+        overflow: hidden;
+
+        border:
+            1px solid
+            var(--checkout-border);
+
+        border-radius: 16px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--checkout-shadow);
+    }
+
+
+    .checkout-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 15px;
+
+        padding:
+            16px 18px;
+
+        border-bottom:
+            1px solid
+            var(--checkout-border);
+
+        background:
+            linear-gradient(
+                180deg,
+                #fff,
+                #fffcf7
+            );
+    }
+
+
+    .checkout-card-title-wrap {
+        display: flex;
+        align-items: center;
+
+        gap: 11px;
+
+        min-width: 0;
+    }
+
+
+    .checkout-card-icon {
+        width: 39px;
+        height: 39px;
+
+        flex: 0 0 39px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+            1px solid #e7ca96;
+
+        border-radius: 11px;
+
+        background:
+            var(--checkout-gold-light);
+
+        font-size: 18px;
+    }
+
+
+    .checkout-card-title {
+        margin: 0;
+
+        color:
+            #453930;
+
+        font-size: 14px;
+
+        font-weight: 950;
+    }
+
+
+    .checkout-card-subtitle {
+        margin-top: 2px;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 10px;
+    }
+
+
+    .checkout-card-body {
+        padding: 18px;
+    }
+
+
+    .checkout-manage-link {
+        flex: 0 0 auto;
+
+        min-height: 34px;
+
+        display: inline-flex;
+        align-items: center;
+
+        padding:
+            0 10px;
+
+        border:
+            1px solid #dfc5a3;
+
+        border-radius: 8px;
+
+        color:
+            var(--checkout-brown);
+
+        background: #fff;
+
+        font-size: 9px;
+
+        font-weight: 900;
+    }
+
+
+    .checkout-manage-link:hover {
+        color: #fff;
+
+        border-color:
+            var(--checkout-brown);
+
+        background:
+            var(--checkout-brown);
+    }
+
+
+    /* =========================================================
+       ADDRESSES
+    ========================================================= */
+
+    .checkout-address-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 10px;
+
+        margin-bottom: 17px;
+    }
+
+
+    .checkout-address-card {
+        position: relative;
+
+        min-height: 130px;
+
+        display: block;
+
+        padding: 14px;
+
+        border:
+            1px solid #e6ddd2;
+
+        border-radius: 12px;
+
+        color:
+            var(--checkout-text);
+
+        background: #fff;
+
+        cursor: pointer;
+
+        transition:
+            border-color .18s ease,
+            background .18s ease,
+            box-shadow .18s ease,
+            transform .18s ease;
+    }
+
+
+    .checkout-address-card:hover {
+        border-color: #d8b780;
+
+        transform:
+            translateY(-1px);
+    }
+
+
+    .checkout-address-card.selected {
+        border-color:
+            var(--checkout-red);
+
+        background:
+            #fff8f4;
+
+        box-shadow:
+            0 0 0 3px
+            rgba(180,62,46,.07);
+    }
+
+
+    .checkout-address-card input {
+        position: absolute;
+
+        opacity: 0;
+
+        pointer-events: none;
+    }
+
+
+    .checkout-address-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 8px;
+    }
+
+
+    .checkout-address-label {
+        color:
+            var(--checkout-brown-dark);
+
+        font-size: 11px;
+
+        font-weight: 950;
+    }
+
+
+    .checkout-default-badge {
+        flex: 0 0 auto;
+
+        padding:
+            4px 6px;
+
+        border-radius: 999px;
+
+        color:
+            var(--checkout-green-dark);
+
+        background:
+            #edf5e9;
+
+        font-size: 8px;
+
+        font-weight: 900;
+    }
+
+
+    .checkout-address-person {
+        margin-top: 8px;
+
+        color:
+            #4b4038;
+
+        font-size: 11px;
+
+        font-weight: 850;
+    }
+
+
+    .checkout-address-text {
+        margin-top: 5px;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 10px;
+
+        line-height: 1.5;
+    }
+
+
+    .checkout-address-other {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        min-height: 130px;
+
+        text-align: center;
+    }
+
+
+    .checkout-address-other-icon {
+        font-size: 26px;
+    }
+
+
+    /* =========================================================
+       FORM
+    ========================================================= */
+
+    .checkout-form-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 13px;
+    }
+
+
+    .checkout-field.full {
+        grid-column:
+            1 / -1;
+    }
+
+
+    .checkout-label {
+        display: block;
+
+        margin-bottom: 6px;
+
+        color: #51443b;
+
+        font-size: 10.5px;
+
+        font-weight: 900;
+    }
+
+
+    .checkout-required {
+        color:
+            var(--checkout-red);
+    }
+
+
+    .checkout-input-wrap {
+        position: relative;
+    }
+
+
+    .checkout-input-icon {
+        position: absolute;
+
+        z-index: 2;
+
+        top: 50%;
+        left: 12px;
+
+        transform:
+            translateY(-50%);
+
+        font-size: 15px;
+
+        pointer-events: none;
+    }
+
+
+    .checkout-textarea-wrap
+    .checkout-input-icon {
+        top: 15px;
+
+        transform: none;
+    }
+
+
+    .checkout-input,
+    .checkout-textarea {
+        width: 100%;
+
+        border:
+            1px solid #ddd3c7;
+
+        border-radius: 10px;
+
+        outline: 0;
+
+        color:
+            var(--checkout-text);
+
+        background: #fff;
+
+        font-size: 12px;
+
+        transition:
+            border-color .17s ease,
+            box-shadow .17s ease;
+    }
+
+
+    .checkout-input {
+        height: 45px;
+
+        padding:
+            0 12px 0 38px;
+    }
+
+
+    .checkout-textarea {
+        min-height: 95px;
+
+        padding:
+            12px 12px 12px 38px;
+
+        resize: vertical;
+
+        line-height: 1.55;
+    }
+
+
+    .checkout-input:focus,
+    .checkout-textarea:focus {
+        border-color:
+            var(--checkout-gold);
+
+        box-shadow:
+            0 0 0 3px
+            rgba(229,173,66,.11);
+    }
+
+
+    .checkout-help-note {
+        display: flex;
+        align-items: flex-start;
+
+        gap: 7px;
+
+        margin-top: 14px;
+
+        padding:
+            10px 11px;
+
+        border:
+            1px solid #ebd6aa;
+
+        border-radius: 9px;
+
+        color: #69543e;
+
+        background: #fff9e8;
+
+        font-size: 9.5px;
+
+        line-height: 1.55;
+    }
+
+
+    /* =========================================================
+       SHIPPING
+    ========================================================= */
+
+    .checkout-options {
+        display: grid;
+
+        gap: 9px;
+    }
+
+
+    .checkout-option {
+        position: relative;
+    }
+
+
+    .checkout-option input {
+        position: absolute;
+
+        opacity: 0;
+
+        pointer-events: none;
+    }
+
+
+    .checkout-option-label {
+        min-height: 73px;
+
+        display: grid;
+
+        grid-template-columns:
+            43px
+            minmax(0, 1fr)
+            auto;
+
+        align-items: center;
+
+        gap: 12px;
+
+        padding:
+            12px 13px;
+
+        border:
+            1px solid #e4dbd0;
+
+        border-radius: 11px;
+
+        background: #fff;
+
+        cursor: pointer;
+
+        transition:
+            border-color .18s ease,
+            background .18s ease,
+            box-shadow .18s ease;
+    }
+
+
+    .checkout-option-label:hover {
+        border-color:
+            #d6bc96;
+    }
+
+
+    .checkout-option input:checked
+    +
+    .checkout-option-label {
+        border-color:
+            var(--checkout-green);
+
+        background:
+            #f4f8f2;
+
+        box-shadow:
+            0 0 0 3px
+            rgba(53,86,47,.06);
+    }
+
+
+    .checkout-option-icon {
+        width: 43px;
+        height: 43px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 10px;
+
+        background:
+            #fff2d5;
+
+        font-size: 20px;
+    }
+
+
+    .checkout-option-title {
+        color: #463a32;
+
+        font-size: 11.5px;
+
+        font-weight: 950;
+    }
+
+
+    .checkout-option-description {
+        margin-top: 2px;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 9.5px;
+    }
+
+
+    .checkout-option-price {
+        color:
+            var(--checkout-red);
+
+        font-size: 12px;
+
+        font-weight: 950;
+
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       PAYMENT
+    ========================================================= */
+
+    .checkout-payment-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 10px;
+    }
+
+
+    .checkout-payment {
+        position: relative;
+    }
+
+
+    .checkout-payment input {
+        position: absolute;
+
+        opacity: 0;
+
+        pointer-events: none;
+    }
+
+
+    .checkout-payment-label {
+        min-height: 107px;
+
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+
+        padding: 14px;
+
+        border:
+            1px solid #e4dbd0;
+
+        border-radius: 12px;
+
+        background: #fff;
+
+        cursor: pointer;
+
+        transition:
+            .18s ease;
+    }
+
+
+    .checkout-payment-label:hover {
+        border-color:
+            #d8ba8d;
+    }
+
+
+    .checkout-payment input:checked
+    +
+    .checkout-payment-label {
+        border-color:
+            var(--checkout-red);
+
+        background:
+            #fff8f5;
+
+        box-shadow:
+            0 0 0 3px
+            rgba(180,62,46,.06);
+    }
+
+
+    .checkout-payment-icon {
+        font-size: 24px;
+    }
+
+
+    .checkout-payment-title {
+        margin-top: 7px;
+
+        color:
+            #463a32;
+
+        font-size: 11.5px;
+
+        font-weight: 950;
+    }
+
+
+    .checkout-payment-description {
+        margin-top: 3px;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 9.5px;
+
+        line-height: 1.45;
+    }
+
+
+    .checkout-bank-info {
+        display: none;
+
+        margin-top: 11px;
+
+        padding: 13px;
+
+        border:
+            1px solid #d7c8b5;
+
+        border-radius: 11px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #fffaf0,
+                #f2f7ef
+            );
+    }
+
+
+    .checkout-bank-info.show {
+        display: block;
+    }
+
+
+    .checkout-bank-info-title {
+        color:
+            var(--checkout-brown-dark);
+
+        font-size: 11px;
+
+        font-weight: 950;
+    }
+
+
+    .checkout-bank-info p {
+        margin:
+            5px 0 0;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 9.5px;
+
+        line-height: 1.55;
+    }
+
+
+    .checkout-payment-code {
+        display: inline-flex;
+
+        margin-top: 8px;
+
+        padding:
+            5px 8px;
+
+        border:
+            1px dashed #d8b46d;
+
+        border-radius: 7px;
+
+        color:
+            var(--checkout-red);
+
+        background: #fff;
+
+        font-size: 10px;
+
+        font-weight: 950;
+
+        letter-spacing: .04em;
+    }
+
+
+    /* =========================================================
+       VOUCHERS
+    ========================================================= */
+
+    .checkout-voucher-input {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            auto;
+
+        gap: 7px;
+    }
+
+
+    .checkout-voucher-button {
+        min-width: 87px;
+
+        border: 0;
+
+        border-radius: 9px;
+
+        color: #fff;
+
+        background:
+            var(--checkout-red);
+
+        font-size: 10px;
+
+        font-weight: 900;
+    }
+
+
+    .checkout-voucher-button:hover {
+        background:
+            var(--checkout-red-dark);
+    }
+
+
+    .checkout-voucher-message {
+        min-height: 21px;
+
+        margin-top: 6px;
+
+        font-size: 9.5px;
+    }
+
+
+    .checkout-voucher-list {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 9px;
+
+        margin-top: 13px;
+    }
+
+
+    .checkout-voucher {
+        position: relative;
+
+        overflow: hidden;
+
+        min-height: 115px;
+
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+
+        gap: 8px;
+
+        padding:
+            12px;
+
+        border:
+            1px dashed #dfbf7d;
+
+        border-radius: 11px;
+
+        background:
+            #fffaf0;
+    }
+
+
+    .checkout-voucher::before {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        bottom: 0;
+        left: 0;
+
+        width: 4px;
+
+        background:
+            var(--checkout-gold);
+    }
+
+
+    .checkout-voucher.disabled {
+        opacity: .55;
+
+        filter:
+            grayscale(.25);
+
+        background: #f6f5f3;
+    }
+
+
+    .checkout-voucher-code {
+        display: inline-flex;
+
+        width: fit-content;
+
+        padding:
+            4px 7px;
+
+        border-radius: 6px;
+
+        color:
+            var(--checkout-red);
+
+        background: #fff;
+
+        font-size: 9px;
+
+        font-weight: 950;
+
+        letter-spacing: .03em;
+    }
+
+
+    .checkout-voucher-name {
+        margin-top: 5px;
+
+        color:
+            #4c4037;
+
+        font-size: 10.5px;
+
+        font-weight: 900;
+    }
+
+
+    .checkout-voucher-description {
+        margin-top: 3px;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 9px;
+
+        line-height: 1.45;
+    }
+
+
+    .checkout-voucher-action {
+        width: 100%;
+        min-height: 30px;
+
+        border:
+            1px solid #dab6ad;
+
+        border-radius: 7px;
+
+        color:
+            var(--checkout-red);
+
+        background: #fff;
+
+        font-size: 8.5px;
+
+        font-weight: 900;
+    }
+
+
+    .checkout-voucher-action:hover:not(:disabled) {
+        color: #fff;
+
+        border-color:
+            var(--checkout-red);
+
+        background:
+            var(--checkout-red);
+    }
+
+
+    .checkout-voucher-action:disabled {
+        cursor: not-allowed;
+    }
+
+
+    /* =========================================================
+       ORDER SUMMARY
+    ========================================================= */
+
+    .checkout-summary {
+        position: sticky;
+
+        top: 177px;
+
+        overflow: hidden;
+
+        border:
+            1px solid
+            var(--checkout-border);
+
+        border-radius: 16px;
+
+        background: #fff;
+
+        box-shadow:
+            var(--checkout-shadow-lg);
+    }
+
+
+    .checkout-summary-head {
+        padding:
+            16px 17px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--checkout-brown-dark),
+                var(--checkout-brown)
+            );
+    }
+
+
+    .checkout-summary-title {
+        font-size: 14px;
+
+        font-weight: 950;
+    }
+
+
+    .checkout-summary-subtitle {
+        margin-top: 2px;
+
+        color:
+            rgba(255,255,255,.67);
+
+        font-size: 9.5px;
+    }
+
+
+    /* =========================================================
+       PRODUCTS
+    ========================================================= */
+
+    .checkout-products {
+        max-height: 355px;
+
+        overflow-y: auto;
+
+        padding:
+            4px 15px;
+    }
+
+
+    .checkout-product {
+        display: grid;
+
+        grid-template-columns:
+            62px
+            minmax(0, 1fr)
+            auto;
+
+        gap: 9px;
+
+        padding:
+            11px 0;
+
+        border-bottom:
+            1px solid #eee7df;
+    }
+
+
+    .checkout-product:last-child {
+        border-bottom: 0;
+    }
+
+
+    .checkout-product-media {
+        position: relative;
+
+        width: 62px;
+        height: 62px;
+
+        overflow: hidden;
+
+        border:
+            1px solid #e9e0d6;
+
+        border-radius: 9px;
+
+        background:
+            #faf8f4;
+    }
+
+
+    .checkout-product-media img {
+        width: 100%;
+        height: 100%;
+
+        padding: 3px;
+
+        object-fit: contain;
+    }
+
+
+    .checkout-product-fallback {
+        width: 100%;
+        height: 100%;
+
+        display: grid;
+        place-items: center;
+
+        color: #9c8d81;
+
+        font-size: 24px;
+    }
+
+
+    .checkout-product-qty {
+        position: absolute;
+
+        top: -1px;
+        right: -1px;
+
+        min-width: 19px;
+        height: 19px;
+
+        display: grid;
+        place-items: center;
+
+        padding:
+            0 4px;
+
+        border-radius:
+            0 8px 0 8px;
+
+        color: #fff;
+
+        background:
+            var(--checkout-red);
+
+        font-size: 8px;
+
+        font-weight: 950;
+    }
+
+
+    .checkout-product-info {
+        min-width: 0;
+    }
+
+
+    .checkout-product-name {
+        color: #3c332d;
+
+        font-size: 10.5px;
+
+        line-height: 1.4;
+
+        font-weight: 900;
+
+        display: -webkit-box;
+
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+
+        overflow: hidden;
+    }
+
+
+    .checkout-product-meta {
+        margin-top: 4px;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 8.5px;
+    }
+
+
+    .checkout-product-price {
+        align-self: center;
+
+        color:
+            var(--checkout-brown-dark);
+
+        font-size: 10.5px;
+
+        font-weight: 950;
+
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       SUMMARY TOTAL
+    ========================================================= */
+
+    .checkout-summary-body {
+        padding:
+            15px 17px 17px;
+
+        border-top:
+            1px solid
+            var(--checkout-border);
+    }
+
+
+    .checkout-summary-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 12px;
+
+        margin-bottom: 10px;
+
+        color:
+            var(--checkout-muted);
+
+        font-size: 10.5px;
+    }
+
+
+    .checkout-summary-row strong {
+        color: #4a3e36;
+
+        font-size: 11px;
+    }
+
+
+    .checkout-summary-discount {
+        color:
+            var(--checkout-green) !important;
+    }
+
+
+    .checkout-summary-divider {
+        height: 1px;
+
+        margin:
+            14px 0;
+
+        background:
+            #eae1d7;
+    }
+
+
+    .checkout-summary-total {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        gap: 10px;
+    }
+
+
+    .checkout-summary-total-label {
+        color: #40352e;
+
+        font-size: 13px;
+
+        font-weight: 950;
+    }
+
+
+    .checkout-summary-total-note {
+        margin-top: 2px;
+
+        color: #998d84;
+
+        font-size: 8.5px;
+    }
+
+
+    .checkout-summary-total-price {
+        color:
+            var(--checkout-red);
+
+        font-size: 23px;
+
+        line-height: 1;
+
+        font-weight: 950;
+
+        letter-spacing: -.035em;
+
+        text-align: right;
+    }
+
+
+    .checkout-order-button {
+        width: 100%;
+        min-height: 49px;
+
+        margin-top: 16px;
+
+        border: 0;
+
+        border-radius: 10px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--checkout-red),
+                var(--checkout-red-dark)
+            );
+
+        box-shadow:
+            0 9px 20px
+            rgba(180,62,46,.21);
+
+        font-size: 11.5px;
+
+        font-weight: 950;
+
+        transition:
+            transform .17s ease,
+            box-shadow .17s ease;
+    }
+
+
+    .checkout-order-button:hover {
+        transform:
+            translateY(-1px);
+
+        box-shadow:
+            0 13px 27px
+            rgba(180,62,46,.27);
+    }
+
+
+    .checkout-order-button.bank {
+        background:
+            linear-gradient(
+                135deg,
+                var(--checkout-green),
+                var(--checkout-green-dark)
+            );
+
+        box-shadow:
+            0 9px 20px
+            rgba(53,86,47,.19);
+    }
+
+
+    .checkout-back {
+        min-height: 39px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-top: 7px;
+
+        border:
+            1px solid #ddd3c7;
+
+        border-radius: 9px;
+
+        color: #66574d;
+
+        background: #fff;
+
+        font-size: 9.5px;
+
+        font-weight: 850;
+    }
+
+
+    .checkout-back:hover {
+        color:
+            var(--checkout-red);
+
+        border-color:
+            #dab9b0;
+
+        background: #fff8f5;
+    }
+
+
+    .checkout-trust {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 6px;
+
+        margin-top: 11px;
+    }
+
+
+    .checkout-trust-item {
+        padding:
+            8px;
+
+        border:
+            1px solid #eee5da;
+
+        border-radius: 8px;
+
+        color: #6b5b50;
+
+        background:
+            #fdfbf8;
+
+        font-size: 8.5px;
+
+        line-height: 1.4;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 1199.98px) {
+
+        .checkout-layout {
+            grid-template-columns:
+                minmax(0, 1fr)
+                340px;
+        }
+
+    }
+
+
+    @media (max-width: 991.98px) {
+
+        .checkout-layout {
+            grid-template-columns: 1fr;
+        }
+
+
+        .checkout-summary {
+            position: static;
+        }
+
+    }
+
+
+    @media (max-width: 767.98px) {
+
+        .checkout-heading {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+
+        .checkout-progress-item span:last-child {
+            display: none;
+        }
+
+
+        .checkout-address-grid,
+        .checkout-form-grid,
+        .checkout-payment-grid,
+        .checkout-voucher-list {
+            grid-template-columns: 1fr;
+        }
+
+
+        .checkout-field.full {
+            grid-column: auto;
+        }
+
+    }
+
+
+    @media (max-width: 575.98px) {
+
+        .checkout-progress-item {
+            min-height: 48px;
+
+            padding:
+                8px 4px;
+        }
+
+
+        .checkout-heading {
+            padding:
+                20px 17px;
+
+            border-radius: 14px;
+        }
+
+
+        .checkout-card-head {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+
+        .checkout-manage-link {
+            width: 100%;
+
+            justify-content: center;
+        }
+
+
+        .checkout-card-body {
+            padding: 14px;
+        }
+
+
+        .checkout-option-label {
+            grid-template-columns:
+                39px
+                minmax(0, 1fr);
+
+            gap: 9px;
+        }
+
+
+        .checkout-option-price {
+            grid-column: 2;
+        }
+
+
+        .checkout-product {
+            grid-template-columns:
+                54px
+                minmax(0, 1fr);
+        }
+
+
+        .checkout-product-media {
+            width: 54px;
+            height: 54px;
+        }
+
+
+        .checkout-product-price {
+            grid-column:
+                2;
+
+            justify-self: start;
+        }
+
+    }
+</style>
+
+
+<div class="checkout-shop">
+
+
+    {{-- =====================================================
+        BREADCRUMB
+    ====================================================== --}}
+    <div class="checkout-breadcrumb">
+
+        <a href="{{ url('/') }}">
+            Trang chủ
+        </a>
+
+        <span>›</span>
+
+        <a href="{{ route('cart.index') }}">
+            Giỏ hàng
+        </a>
+
+        <span>›</span>
+
+        <span>
+            Thanh toán
+        </span>
+
+    </div>
+
+
+    {{-- =====================================================
+        PROGRESS
+    ====================================================== --}}
+    <div class="checkout-progress">
+
+        <div class="checkout-progress-item done">
+
+            <span class="checkout-progress-number">
+                ✓
+            </span>
+
+            <span>
+                Giỏ hàng
+            </span>
+
         </div>
 
-    @endif
 
+        <div class="checkout-progress-item active">
 
-    @if($errors->any())
+            <span class="checkout-progress-number">
+                2
+            </span>
 
-        <div class="alert alert-danger">
-
-            <ul class="mb-0">
-
-                @foreach($errors->all() as $error)
-
-                    <li>{{ $error }}</li>
-
-                @endforeach
-
-            </ul>
+            <span>
+                Thanh toán
+            </span>
 
         </div>
 
-    @endif
+
+        <div class="checkout-progress-item">
+
+            <span class="checkout-progress-number">
+                3
+            </span>
+
+            <span>
+                Hoàn tất đơn
+            </span>
+
+        </div>
+
+    </div>
 
 
+    {{-- =====================================================
+        HEADING
+    ====================================================== --}}
+    <section class="checkout-heading">
+
+        <div class="checkout-heading-copy">
+
+            <div class="checkout-eyebrow">
+                🔒 Checkout an toàn
+            </div>
+
+
+            <h1 class="checkout-title">
+                Hoàn tất đơn hàng
+            </h1>
+
+
+            <div class="checkout-description">
+
+                Xác nhận thông tin nhận hàng,
+                lựa chọn vận chuyển,
+                voucher và phương thức thanh toán
+                trước khi tạo đơn.
+
+            </div>
+
+        </div>
+
+
+        <div class="checkout-safe">
+            🔐 Thông tin đơn hàng được bảo vệ
+        </div>
+
+    </section>
+
+
+    {{-- =====================================================
+        FORM
+    ====================================================== --}}
     <form
         action="{{ route('checkout.process') }}"
         method="POST"
@@ -50,622 +2181,1409 @@
         @csrf
 
 
-        {{-- =====================================
-             ĐỊA CHỈ NHẬN HÀNG
-        ====================================== --}}
-        @php
-            $defaultAddress = $addresses->firstWhere('is_default', true) ?? $addresses->first();
-            $selectedAddressId = old('selected_address_id', $defaultAddress?->id);
-        @endphp
+        <div class="checkout-layout">
 
-        <div class="checkout-section mb-4">
-            <div class="checkout-section-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="checkout-section-icon">📍</div>
-                    <div>
-                        <h4 class="fw-bold mb-1">Địa chỉ nhận hàng</h4>
-                        <p class="text-muted mb-0">Chọn địa chỉ đã lưu hoặc nhập địa chỉ khác.</p>
-                    </div>
-                </div>
-                <a href="{{ route('addresses.index') }}" class="btn btn-outline-danger btn-sm">⚙️ Quản lý địa chỉ</a>
-            </div>
 
-            @if($addresses->isNotEmpty())
-                <div class="saved-address-grid mt-4">
-                    @foreach($addresses as $address)
-                        @php
-                            $fullAddress = collect([
-                                $address->address_detail,
-                                $address->ward,
-                                $address->province,
-                            ])->filter()->implode(', ');
-                        @endphp
-                        <label class="saved-address-card {{ (string)$selectedAddressId === (string)$address->id ? 'selected' : '' }}">
-                            <input type="radio" name="selected_address_id" value="{{ $address->id }}"
-                                class="address-radio"
-                                data-name="{{ $address->receiver_name }}"
-                                data-phone="{{ $address->phone }}"
-                                data-address="{{ $fullAddress }}"
-                                {{ (string)$selectedAddressId === (string)$address->id ? 'checked' : '' }}>
-                            <div class="d-flex justify-content-between gap-3">
-                                <div>
-                                    <div class="fw-bold">{{ $address->label }}</div>
-                                    <div class="mt-1"><strong>{{ $address->receiver_name }}</strong> · {{ $address->phone }}</div>
-                                    <div class="text-muted small mt-1">{{ $fullAddress }}</div>
-                                </div>
-                                @if($address->is_default)
-                                    <span class="badge text-bg-success align-self-start">Mặc định</span>
-                                @endif
+            {{-- =================================================
+                LEFT SIDE
+            ================================================== --}}
+            <div class="checkout-main">
+
+
+                {{-- =============================================
+                    ADDRESS
+                ============================================== --}}
+                <section class="checkout-card">
+
+                    <div class="checkout-card-head">
+
+                        <div class="checkout-card-title-wrap">
+
+                            <div class="checkout-card-icon">
+                                📍
                             </div>
-                        </label>
-                    @endforeach
-
-                    <label class="saved-address-card {{ old('selected_address_id') === 'other' ? 'selected' : '' }}">
-                        <input type="radio" name="selected_address_id" value="other" class="address-radio"
-                            {{ old('selected_address_id') === 'other' ? 'checked' : '' }}>
-                        <div class="fw-bold">➕ Sử dụng địa chỉ khác</div>
-                        <div class="text-muted small mt-1">Nhập thông tin giao hàng cho đơn này.</div>
-                    </label>
-                </div>
-            @else
-                <div class="alert alert-warning mt-4 mb-0">
-                    Bạn chưa có địa chỉ đã lưu. Có thể nhập bên dưới hoặc
-                    <a href="{{ route('addresses.index') }}" class="fw-bold">thêm địa chỉ mới</a>.
-                </div>
-            @endif
-
-            <div class="row g-4 mt-1" id="manualAddressFields">
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
-                    <div class="input-group checkout-input">
-                        <span class="input-group-text">👤</span>
-                        <input type="text" id="customerName" name="customer_name" class="form-control"
-                            value="{{ old('customer_name', $defaultAddress?->receiver_name ?? Auth::user()->name) }}"
-                            placeholder="Nhập họ và tên người nhận" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
-                    <div class="input-group checkout-input">
-                        <span class="input-group-text">📞</span>
-                        <input type="text" id="customerPhone" name="customer_phone" class="form-control"
-                            value="{{ old('customer_phone', $defaultAddress?->phone) }}"
-                            placeholder="Ví dụ: 0385742505" required>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <label class="form-label fw-semibold">Địa chỉ giao hàng <span class="text-danger">*</span></label>
-                    <div class="input-group checkout-input align-items-stretch">
-                        <span class="input-group-text align-items-start pt-3">🏠</span>
-                        <textarea id="shippingAddress" name="shipping_address" class="form-control" rows="3"
-                            placeholder="Số nhà, đường, phường/xã, tỉnh/thành phố..." required>{{ old('shipping_address', $defaultAddress ? collect([$defaultAddress->address_detail, $defaultAddress->ward, $defaultAddress->province])->filter()->implode(', ') : '') }}</textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="delivery-note mt-4"><span class="me-2">💡</span><span>Chọn địa chỉ đã lưu để hệ thống tự điền thông tin. Bạn vẫn có thể chỉnh lại trước khi đặt hàng.</span></div>
-        </div>
-
-        {{-- =====================================
-             SẢN PHẨM
-        ====================================== --}}
-
-        <div class="card border-0 shadow-sm mb-3">
-
-            <div class="card-body">
-
-                <h5 class="fw-bold mb-4">
-                    📦 Sản phẩm
-                </h5>
 
 
-                @foreach($cart as $id => $item)
+                            <div>
 
-                    @php
+                                <h2 class="checkout-card-title">
+                                    Thông tin nhận hàng
+                                </h2>
 
-                        $itemTotal =
-                            $item['price'] *
-                            $item['quantity'];
-
-                    @endphp
-
-
-                    <div
-                        class="d-flex justify-content-between align-items-center border-bottom py-3"
-                    >
-
-                        <div>
-
-                            <strong>
-                                {{ $item['name'] }}
-                            </strong>
-
-                            <div class="text-muted small">
-
-                                {{ number_format($item['price'], 0, ',', '.') }}
-                                đ
-                                ×
-                                {{ $item['quantity'] }}
+                                <div class="checkout-card-subtitle">
+                                    Chọn địa chỉ đã lưu hoặc nhập địa chỉ khác.
+                                </div>
 
                             </div>
 
                         </div>
 
 
-                        <strong>
-
-                            {{ number_format($itemTotal, 0, ',', '.') }}
-                            đ
-
-                        </strong>
-
-                    </div>
-
-                @endforeach
-
-            </div>
-
-        </div>
-
-
-        {{-- =====================================
-             VẬN CHUYỂN
-        ====================================== --}}
-
-        <div class="card border-0 shadow-sm mb-3">
-
-            <div class="card-body">
-
-                <h5 class="fw-bold mb-4">
-                    🚚 Phương thức vận chuyển
-                </h5>
-
-
-                <div class="shipping-option mb-2">
-
-                    <input
-                        type="radio"
-                        name="shipping_method"
-                        value="standard"
-                        id="standard"
-                        data-fee="25000"
-                        checked
-                    >
-
-                    <label
-                        for="standard"
-                        class="d-flex justify-content-between w-100"
-                    >
-
-                        <span>
-                            <strong>Tiết kiệm</strong>
-                            <br>
-                            <small class="text-muted">
-                                Giao hàng từ 3 - 5 ngày
-                            </small>
-                        </span>
-
-                        <strong>
-                            25.000đ
-                        </strong>
-
-                    </label>
-
-                </div>
-
-
-                <div class="shipping-option mb-2">
-
-                    <input
-                        type="radio"
-                        name="shipping_method"
-                        value="fast"
-                        id="fast"
-                        data-fee="35000"
-                    >
-
-                    <label
-                        for="fast"
-                        class="d-flex justify-content-between w-100"
-                    >
-
-                        <span>
-                            <strong>Nhanh</strong>
-                            <br>
-                            <small class="text-muted">
-                                Giao hàng từ 1 - 2 ngày
-                            </small>
-                        </span>
-
-                        <strong>
-                            35.000đ
-                        </strong>
-
-                    </label>
-
-                </div>
-
-
-                <div class="shipping-option">
-
-                    <input
-                        type="radio"
-                        name="shipping_method"
-                        value="express"
-                        id="express"
-                        data-fee="50000"
-                    >
-
-                    <label
-                        for="express"
-                        class="d-flex justify-content-between w-100"
-                    >
-
-                        <span>
-                            <strong>Hỏa tốc</strong>
-                            <br>
-                            <small class="text-muted">
-                                Nhận hàng trong ngày
-                            </small>
-                        </span>
-
-                        <strong>
-                            50.000đ
-                        </strong>
-
-                    </label>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- =====================================
-             VOUCHER
-        ====================================== --}}
-
-        <div class="card border-0 shadow-sm mb-3">
-
-            <div class="card-body">
-
-                <h5 class="fw-bold mb-3">
-                    🎟️ Voucher
-                </h5>
-
-
-                <div class="input-group">
-
-                    <input
-                        type="text"
-                        name="voucher_code"
-                        id="voucherCode"
-                        class="form-control"
-                        value="{{ old('voucher_code') }}"
-                        placeholder="Nhập mã giảm giá"
-                    >
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger"
-                        onclick="applyVoucher()"
-                    >
-                        Áp dụng
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="voucherMessage"
-                    class="mt-2"
-                ></div>
-
-                {{-- DANH SÁCH VOUCHER KHẢ DỤNG --}}
-                <div class="mt-4">
-                    <div class="fw-bold mb-2">
-                        🎁 Voucher đang khả dụng
-                    </div>
-
-                    @forelse($availableVouchers as $voucher)
-                        @php
-                            $canUseVoucher =
-                                $subtotal >= (float) $voucher->min_order_value;
-
-                            if ($voucher->type === 'percent') {
-                                $voucherDescription =
-                                    'Giảm ' .
-                                    rtrim(rtrim(number_format($voucher->value, 2, '.', ''), '0'), '.') .
-                                    '%';
-
-                                if ($voucher->max_discount !== null) {
-                                    $voucherDescription .=
-                                        ', tối đa ' .
-                                        number_format($voucher->max_discount, 0, ',', '.') .
-                                        'đ';
-                                }
-                            } elseif ($voucher->type === 'fixed') {
-                                $voucherDescription =
-                                    'Giảm ' .
-                                    number_format($voucher->value, 0, ',', '.') .
-                                    'đ';
-                            } else {
-                                $voucherDescription =
-                                    'Giảm phí vận chuyển tối đa ' .
-                                    number_format($voucher->value, 0, ',', '.') .
-                                    'đ';
-                            }
-                        @endphp
-
-                        <div
-                            class="voucher-option {{ $canUseVoucher ? '' : 'voucher-disabled' }}"
+                        <a
+                            href="{{ route('addresses.index') }}"
+                            class="checkout-manage-link"
                         >
-                            <div class="voucher-option-content">
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="voucher-badge">
-                                        {{ $voucher->code }}
+                            ⚙ Quản lý địa chỉ
+                        </a>
+
+                    </div>
+
+
+                    <div class="checkout-card-body">
+
+
+                        {{-- SAVED ADDRESSES --}}
+                        @if($addresses->isNotEmpty())
+
+                            <div class="checkout-address-grid">
+
+
+                                @foreach($addresses as $address)
+
+                                    @php
+                                        $fullAddress =
+                                            collect([
+                                                $address->address_detail,
+                                                $address->ward,
+                                                $address->province,
+                                            ])
+                                            ->filter()
+                                            ->implode(', ');
+
+
+                                        $addressSelected =
+                                            (string)
+                                            $selectedAddressId
+                                            ===
+                                            (string)
+                                            $address->id;
+                                    @endphp
+
+
+                                    <label
+                                        class="
+                                            checkout-address-card
+                                            {{
+                                                $addressSelected
+                                                ? 'selected'
+                                                : ''
+                                            }}
+                                        "
+                                    >
+
+                                        <input
+                                            type="radio"
+                                            name="selected_address_id"
+                                            value="{{ $address->id }}"
+                                            class="checkout-address-radio"
+                                            data-name="{{
+                                                $address->receiver_name
+                                            }}"
+                                            data-phone="{{
+                                                $address->phone
+                                            }}"
+                                            data-address="{{
+                                                $fullAddress
+                                            }}"
+                                            {{
+                                                $addressSelected
+                                                ? 'checked'
+                                                : ''
+                                            }}
+                                        >
+
+
+                                        <div class="checkout-address-top">
+
+                                            <span class="checkout-address-label">
+
+                                                {{
+                                                    $address->label
+                                                    ??
+                                                    'Địa chỉ'
+                                                }}
+
+                                            </span>
+
+
+                                            @if($address->is_default)
+
+                                                <span class="checkout-default-badge">
+                                                    Mặc định
+                                                </span>
+
+                                            @endif
+
+                                        </div>
+
+
+                                        <div class="checkout-address-person">
+
+                                            {{
+                                                $address->receiver_name
+                                            }}
+
+                                            ·
+
+                                            {{ $address->phone }}
+
+                                        </div>
+
+
+                                        <div class="checkout-address-text">
+                                            {{ $fullAddress }}
+                                        </div>
+
+                                    </label>
+
+                                @endforeach
+
+
+                                {{-- OTHER ADDRESS --}}
+                                <label
+                                    class="
+                                        checkout-address-card
+                                        checkout-address-other
+                                        {{
+                                            old(
+                                                'selected_address_id'
+                                            )
+                                            ===
+                                            'other'
+                                            ? 'selected'
+                                            : ''
+                                        }}
+                                    "
+                                >
+
+                                    <input
+                                        type="radio"
+                                        name="selected_address_id"
+                                        value="other"
+                                        class="checkout-address-radio"
+                                        {{
+                                            old(
+                                                'selected_address_id'
+                                            )
+                                            ===
+                                            'other'
+                                            ? 'checked'
+                                            : ''
+                                        }}
+                                    >
+
+
+                                    <div>
+
+                                        <div class="checkout-address-other-icon">
+                                            ＋
+                                        </div>
+
+                                        <div class="checkout-address-label mt-2">
+                                            Sử dụng địa chỉ khác
+                                        </div>
+
+                                        <div class="checkout-address-text">
+                                            Nhập thông tin nhận hàng
+                                            riêng cho đơn này.
+                                        </div>
+
+                                    </div>
+
+                                </label>
+
+                            </div>
+
+
+                        @else
+
+                            <div class="checkout-help-note mb-3">
+
+                                <span>
+                                    💡
+                                </span>
+
+                                <span>
+
+                                    Bạn chưa lưu địa chỉ nào.
+                                    Có thể nhập thông tin bên dưới
+                                    hoặc
+
+                                    <a
+                                        href="{{ route('addresses.index') }}"
+                                        style="
+                                            color:#b43e2e;
+                                            font-weight:900;
+                                        "
+                                    >
+                                        thêm địa chỉ mới
+                                    </a>.
+
+                                </span>
+
+                            </div>
+
+                        @endif
+
+
+                        {{-- MANUAL FIELDS --}}
+                        <div class="checkout-form-grid">
+
+
+                            <div class="checkout-field">
+
+                                <label
+                                    for="customerName"
+                                    class="checkout-label"
+                                >
+                                    Họ và tên
+
+                                    <span class="checkout-required">
+                                        *
+                                    </span>
+                                </label>
+
+
+                                <div class="checkout-input-wrap">
+
+                                    <span class="checkout-input-icon">
+                                        👤
                                     </span>
 
-                                    <strong>
-                                        {{ $voucher->name }}
-                                    </strong>
+
+                                    <input
+                                        type="text"
+                                        id="customerName"
+                                        name="customer_name"
+                                        class="checkout-input"
+                                        value="{{
+                                            old(
+                                                'customer_name',
+                                                $defaultAddress
+                                                    ?->receiver_name
+                                                ??
+                                                Auth::user()->name
+                                            )
+                                        }}"
+                                        placeholder="Tên người nhận"
+                                        maxlength="255"
+                                        required
+                                    >
+
                                 </div>
 
-                                <div class="small mt-2">
-                                    {{ $voucherDescription }}
-                                </div>
-
-                                <div class="small text-muted mt-1">
-                                    Đơn tối thiểu:
-                                    {{ number_format($voucher->min_order_value, 0, ',', '.') }}đ
-
-                                    @if($voucher->usage_limit !== null)
-                                        · Còn
-                                        {{ max($voucher->usage_limit - $voucher->used_count, 0) }}
-                                        lượt
-                                    @endif
-                                </div>
-
-                                @unless($canUseVoucher)
-                                    <div class="small text-danger mt-1">
-                                        Đơn hàng chưa đủ điều kiện áp dụng.
-                                    </div>
-                                @endunless
                             </div>
+
+
+                            <div class="checkout-field">
+
+                                <label
+                                    for="customerPhone"
+                                    class="checkout-label"
+                                >
+                                    Số điện thoại
+
+                                    <span class="checkout-required">
+                                        *
+                                    </span>
+                                </label>
+
+
+                                <div class="checkout-input-wrap">
+
+                                    <span class="checkout-input-icon">
+                                        ☎
+                                    </span>
+
+
+                                    <input
+                                        type="tel"
+                                        id="customerPhone"
+                                        name="customer_phone"
+                                        class="checkout-input"
+                                        value="{{
+                                            old(
+                                                'customer_phone',
+                                                $defaultAddress
+                                                    ?->phone
+                                            )
+                                        }}"
+                                        placeholder="Ví dụ: 0385742505"
+                                        maxlength="20"
+                                        required
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="checkout-field full">
+
+                                <label
+                                    for="shippingAddress"
+                                    class="checkout-label"
+                                >
+                                    Địa chỉ giao hàng
+
+                                    <span class="checkout-required">
+                                        *
+                                    </span>
+                                </label>
+
+
+                                <div
+                                    class="
+                                        checkout-input-wrap
+                                        checkout-textarea-wrap
+                                    "
+                                >
+
+                                    <span class="checkout-input-icon">
+                                        🏠
+                                    </span>
+
+
+                                    <textarea
+                                        id="shippingAddress"
+                                        name="shipping_address"
+                                        class="checkout-textarea"
+                                        maxlength="500"
+                                        placeholder="Số nhà, đường, phường/xã, tỉnh/thành phố..."
+                                        required
+                                    >{{ old(
+                                        'shipping_address',
+                                        $defaultAddress
+                                            ? collect([
+                                                $defaultAddress->address_detail,
+                                                $defaultAddress->ward,
+                                                $defaultAddress->province,
+                                            ])->filter()->implode(', ')
+                                            : ''
+                                    ) }}</textarea>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="checkout-help-note">
+
+                            <span>
+                                💡
+                            </span>
+
+                            <span>
+
+                                Khi chọn một địa chỉ đã lưu,
+                                thông tin người nhận sẽ được
+                                tự động điền vào biểu mẫu.
+                                Bạn vẫn có thể chỉnh sửa
+                                trước khi đặt hàng.
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                {{-- =============================================
+                    SHIPPING
+                ============================================== --}}
+                <section class="checkout-card">
+
+                    <div class="checkout-card-head">
+
+                        <div class="checkout-card-title-wrap">
+
+                            <div class="checkout-card-icon">
+                                🚚
+                            </div>
+
+
+                            <div>
+
+                                <h2 class="checkout-card-title">
+                                    Phương thức vận chuyển
+                                </h2>
+
+                                <div class="checkout-card-subtitle">
+                                    Chọn tốc độ giao hàng phù hợp.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="checkout-card-body">
+
+                        <div class="checkout-options">
+
+
+                            @foreach($shippingOptions as $shippingKey => $shipping)
+
+                                <div class="checkout-option">
+
+                                    <input
+                                        type="radio"
+                                        name="shipping_method"
+                                        id="shipping_{{
+                                            $shippingKey
+                                        }}"
+                                        value="{{
+                                            $shippingKey
+                                        }}"
+                                        data-fee="{{
+                                            $shipping['fee']
+                                        }}"
+                                        {{
+                                            $selectedShipping
+                                            ===
+                                            $shippingKey
+                                            ? 'checked'
+                                            : ''
+                                        }}
+                                    >
+
+
+                                    <label
+                                        for="shipping_{{
+                                            $shippingKey
+                                        }}"
+                                        class="checkout-option-label"
+                                    >
+
+                                        <span class="checkout-option-icon">
+
+                                            {{
+                                                $shipping['icon']
+                                            }}
+
+                                        </span>
+
+
+                                        <span>
+
+                                            <span class="checkout-option-title">
+
+                                                {{
+                                                    $shipping['name']
+                                                }}
+
+                                            </span>
+
+                                            <span class="checkout-option-description">
+
+                                                {{
+                                                    $shipping['description']
+                                                }}
+
+                                            </span>
+
+                                        </span>
+
+
+                                        <span class="checkout-option-price">
+
+                                            {{
+                                                number_format(
+                                                    $shipping['fee'],
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                            }}đ
+
+                                        </span>
+
+                                    </label>
+
+                                </div>
+
+                            @endforeach
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                {{-- =============================================
+                    VOUCHER
+                ============================================== --}}
+                <section class="checkout-card">
+
+                    <div class="checkout-card-head">
+
+                        <div class="checkout-card-title-wrap">
+
+                            <div class="checkout-card-icon">
+                                🎟
+                            </div>
+
+
+                            <div>
+
+                                <h2 class="checkout-card-title">
+                                    Voucher
+                                </h2>
+
+                                <div class="checkout-card-subtitle">
+                                    Nhập mã hoặc chọn voucher khả dụng.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="checkout-card-body">
+
+
+                        <div class="checkout-voucher-input">
+
+                            <input
+                                type="text"
+                                name="voucher_code"
+                                id="voucherCode"
+                                class="checkout-input"
+                                value="{{
+                                    old(
+                                        'voucher_code'
+                                    )
+                                }}"
+                                placeholder="Nhập mã giảm giá"
+                                maxlength="50"
+                                style="
+                                    padding-left:12px;
+                                "
+                            >
+
 
                             <button
                                 type="button"
-                                class="btn btn-sm {{ $canUseVoucher ? 'btn-outline-danger' : 'btn-outline-secondary' }}"
-                                onclick="selectVoucher('{{ $voucher->code }}')"
-                                {{ $canUseVoucher ? '' : 'disabled' }}
+                                class="checkout-voucher-button"
+                                id="applyVoucherButton"
                             >
                                 Áp dụng
                             </button>
+
                         </div>
-                    @empty
-                        <div class="text-muted small">
-                            Hiện chưa có voucher nào khả dụng.
+
+
+                        <div
+                            id="voucherMessage"
+                            class="checkout-voucher-message"
+                        >
                         </div>
-                    @endforelse
-                </div>
+
+
+                        @if($availableVouchers->isNotEmpty())
+
+                            <div class="checkout-voucher-list">
+
+
+                                @foreach($availableVouchers as $voucher)
+
+                                    @php
+                                        $canUseVoucher =
+                                            $subtotal
+                                            >=
+                                            (float)
+                                            $voucher
+                                                ->min_order_value;
+
+
+                                        if (
+                                            $voucher->type
+                                            ===
+                                            'percent'
+                                        ) {
+
+                                            $voucherDescription =
+                                                'Giảm '
+                                                .
+                                                rtrim(
+                                                    rtrim(
+                                                        number_format(
+                                                            $voucher->value,
+                                                            2,
+                                                            '.',
+                                                            ''
+                                                        ),
+                                                        '0'
+                                                    ),
+                                                    '.'
+                                                )
+                                                .
+                                                '%';
+
+
+                                            if (
+                                                $voucher
+                                                    ->max_discount
+                                                !==
+                                                null
+                                            ) {
+
+                                                $voucherDescription .=
+                                                    ' · tối đa '
+                                                    .
+                                                    number_format(
+                                                        $voucher
+                                                            ->max_discount,
+                                                        0,
+                                                        ',',
+                                                        '.'
+                                                    )
+                                                    .
+                                                    'đ';
+
+                                            }
+
+                                        }
+                                        elseif (
+                                            $voucher->type
+                                            ===
+                                            'fixed'
+                                        ) {
+
+                                            $voucherDescription =
+                                                'Giảm '
+                                                .
+                                                number_format(
+                                                    $voucher->value,
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                                .
+                                                'đ';
+
+                                        }
+                                        else {
+
+                                            $voucherDescription =
+                                                'Giảm phí vận chuyển tối đa '
+                                                .
+                                                number_format(
+                                                    $voucher->value,
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                                .
+                                                'đ';
+
+                                        }
+                                    @endphp
+
+
+                                    <div
+                                        class="
+                                            checkout-voucher
+                                            {{
+                                                $canUseVoucher
+                                                ? ''
+                                                : 'disabled'
+                                            }}
+                                        "
+                                    >
+
+                                        <div>
+
+                                            <span class="checkout-voucher-code">
+
+                                                {{ $voucher->code }}
+
+                                            </span>
+
+
+                                            <div class="checkout-voucher-name">
+
+                                                {{ $voucher->name }}
+
+                                            </div>
+
+
+                                            <div class="checkout-voucher-description">
+
+                                                {{ $voucherDescription }}
+
+                                                <br>
+
+                                                Đơn tối thiểu:
+
+                                                {{
+                                                    number_format(
+                                                        $voucher
+                                                            ->min_order_value,
+                                                        0,
+                                                        ',',
+                                                        '.'
+                                                    )
+                                                }}đ
+
+
+                                                @if(
+                                                    $voucher
+                                                        ->usage_limit
+                                                    !==
+                                                    null
+                                                )
+
+                                                    · Còn
+
+                                                    {{
+                                                        max(
+                                                            $voucher
+                                                                ->usage_limit
+                                                            -
+                                                            $voucher
+                                                                ->used_count,
+                                                            0
+                                                        )
+                                                    }}
+
+                                                    lượt
+
+                                                @endif
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <button
+                                            type="button"
+                                            class="checkout-voucher-action"
+                                            data-voucher-code="{{
+                                                $voucher->code
+                                            }}"
+                                            {{
+                                                $canUseVoucher
+                                                ? ''
+                                                : 'disabled'
+                                            }}
+                                        >
+
+                                            {{
+                                                $canUseVoucher
+                                                ? 'Dùng voucher này'
+                                                : 'Chưa đủ điều kiện'
+                                            }}
+
+                                        </button>
+
+                                    </div>
+
+                                @endforeach
+
+                            </div>
+
+
+                        @else
+
+                            <div class="checkout-help-note">
+
+                                <span>
+                                    🎟
+                                </span>
+
+                                <span>
+                                    Hiện chưa có voucher khả dụng.
+                                </span>
+
+                            </div>
+
+                        @endif
+
+                    </div>
+
+                </section>
+
+
+                {{-- =============================================
+                    PAYMENT
+                ============================================== --}}
+                <section class="checkout-card">
+
+                    <div class="checkout-card-head">
+
+                        <div class="checkout-card-title-wrap">
+
+                            <div class="checkout-card-icon">
+                                💳
+                            </div>
+
+
+                            <div>
+
+                                <h2 class="checkout-card-title">
+                                    Phương thức thanh toán
+                                </h2>
+
+                                <div class="checkout-card-subtitle">
+                                    Chọn cách bạn muốn thanh toán đơn hàng.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="checkout-card-body">
+
+
+                        <div class="checkout-payment-grid">
+
+
+                            {{-- COD --}}
+                            <div class="checkout-payment">
+
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="cod"
+                                    id="paymentCod"
+                                    {{
+                                        $selectedPayment
+                                        ===
+                                        'cod'
+                                        ? 'checked'
+                                        : ''
+                                    }}
+                                >
+
+
+                                <label
+                                    for="paymentCod"
+                                    class="checkout-payment-label"
+                                >
+
+                                    <span class="checkout-payment-icon">
+                                        💵
+                                    </span>
+
+
+                                    <span class="checkout-payment-title">
+                                        Thanh toán khi nhận hàng
+                                    </span>
+
+
+                                    <span class="checkout-payment-description">
+
+                                        Thanh toán tiền
+                                        cho đơn vị vận chuyển
+                                        khi nhận sản phẩm.
+
+                                    </span>
+
+                                </label>
+
+                            </div>
+
+
+                            {{-- BANK --}}
+                            <div class="checkout-payment">
+
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="bank"
+                                    id="paymentBank"
+                                    {{
+                                        $selectedPayment
+                                        ===
+                                        'bank'
+                                        ? 'checked'
+                                        : ''
+                                    }}
+                                >
+
+
+                                <label
+                                    for="paymentBank"
+                                    class="checkout-payment-label"
+                                >
+
+                                    <span class="checkout-payment-icon">
+                                        🏦
+                                    </span>
+
+
+                                    <span class="checkout-payment-title">
+                                        Chuyển khoản ngân hàng
+                                    </span>
+
+
+                                    <span class="checkout-payment-description">
+
+                                        Tạo đơn trước,
+                                        sau đó quét QR
+                                        với đúng số tiền
+                                        và nội dung chuyển khoản.
+
+                                    </span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="checkout-bank-info"
+                            id="bankTransferInfo"
+                        >
+
+                            <div class="checkout-bank-info-title">
+
+                                🏦 Thanh toán QR tự động
+
+                            </div>
+
+
+                            <p>
+
+                                Sau khi bấm
+                                <strong>
+                                    “Tạo đơn &amp; thanh toán QR”
+                                </strong>,
+                                hệ thống sẽ chuyển đến
+                                trang chi tiết đơn hàng
+                                để hiển thị QR
+                                đúng số tiền.
+
+                            </p>
+
+
+                            <p>
+
+                                Mã thanh toán riêng
+                                của phiên này:
+
+                            </p>
+
+
+                            <span class="checkout-payment-code">
+
+                                {{ $paymentCode }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                {{-- =============================================
+                    NOTES
+                ============================================== --}}
+                <section class="checkout-card">
+
+                    <div class="checkout-card-head">
+
+                        <div class="checkout-card-title-wrap">
+
+                            <div class="checkout-card-icon">
+                                📝
+                            </div>
+
+
+                            <div>
+
+                                <h2 class="checkout-card-title">
+                                    Ghi chú đơn hàng
+                                </h2>
+
+                                <div class="checkout-card-subtitle">
+                                    Không bắt buộc.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="checkout-card-body">
+
+                        <div
+                            class="
+                                checkout-input-wrap
+                                checkout-textarea-wrap
+                            "
+                        >
+
+                            <span class="checkout-input-icon">
+                                ✍
+                            </span>
+
+
+                            <textarea
+                                name="notes"
+                                class="checkout-textarea"
+                                rows="4"
+                                maxlength="1000"
+                                placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao..."
+                            >{{ old('notes') }}</textarea>
+
+                        </div>
+
+                    </div>
+
+                </section>
 
             </div>
 
-        </div>
+
+            {{-- =================================================
+                RIGHT SUMMARY
+            ================================================== --}}
+            <aside class="checkout-summary">
 
 
-        {{-- =====================================
-             THANH TOÁN
-        ====================================== --}}
+                <div class="checkout-summary-head">
 
-        <div class="card border-0 shadow-sm mb-3">
+                    <div class="checkout-summary-title">
+                        🧾 Đơn hàng của bạn
+                    </div>
 
-            <div class="card-body">
+                    <div class="checkout-summary-subtitle">
 
-                <h5 class="fw-bold mb-3">
-                    💳 Phương thức thanh toán
-                </h5>
+                        {{ count($cart) }}
+                        loại sản phẩm
 
-
-                <div class="form-check border rounded p-3 mb-2">
-
-                    <input
-                        class="form-check-input"
-                        type="radio"
-                        name="payment_method"
-                        value="cod"
-                        id="cod"
-                        checked
-                    >
-
-                    <label
-                        class="form-check-label"
-                        for="cod"
-                    >
-                        🚚 Thanh toán khi nhận hàng (COD)
-                    </label>
+                    </div>
 
                 </div>
 
 
-     <div class="form-check border rounded p-3">
-
-    <input
-        class="form-check-input"
-        type="radio"
-        name="payment_method"
-        value="bank"
-        id="bank"
-    >
-
-    <label
-        class="form-check-label"
-        for="bank"
-    >
-        🏦 Chuyển khoản ngân hàng
-    </label>
-
-</div>
+                {{-- PRODUCTS --}}
+                <div class="checkout-products">
 
 
-{{-- ==========================================
-    THANH TOÁN CHUYỂN KHOẢN TỰ ĐỘNG
-========================================== --}}
-<div
-    id="bankTransferInfo"
-    class="card border-primary mt-3"
-    style="display: none;"
->
-    <div class="card-header bg-primary text-white">
-        <strong>🏦 Chuyển khoản tự động</strong>
-    </div>
+                    @foreach($cart as $id => $item)
 
-    <div class="card-body">
-        <div class="alert alert-info mb-3">
-            <strong>Bước 1:</strong> Bấm “Tạo đơn & thanh toán QR”.<br>
-            <strong>Bước 2:</strong> Hệ thống sẽ tạo đơn hàng và hiển thị mã QR có
-            <strong>đúng số tiền + mã thanh toán riêng của đơn</strong>.<br>
-            <strong>Bước 3:</strong> Sau khi ngân hàng ghi nhận giao dịch, trang đơn hàng
-            sẽ tự chuyển sang <strong>✅ Thanh toán thành công</strong>.
-        </div>
-
-        <div class="small text-muted">
-            Không chuyển khoản trước khi đơn hàng được tạo để tránh giao dịch
-            không có mã đơn tương ứng.
-        </div>
-    </div>
-</div>
-
-        {{-- =====================================
-             GHI CHÚ
-        ====================================== --}}
-
-        <div class="card border-0 shadow-sm mb-3">
-
-            <div class="card-body">
-
-                <h5 class="fw-bold mb-3">
-                    📝 Ghi chú
-                </h5>
-
-                <textarea
-                    name="notes"
-                    class="form-control"
-                    rows="3"
-                    placeholder="Ghi chú cho người bán..."
-                >{{ old('notes') }}</textarea>
-
-            </div>
-
-        </div>
+                        @php
+                            $checkoutProduct =
+                                $checkoutProducts
+                                    ->get(
+                                        (int) $id
+                                    );
 
 
-        {{-- =====================================
-             TỔNG THANH TOÁN
-        ====================================== --}}
+                            $checkoutImage =
+                                null;
 
-        <div class="card border-0 shadow-sm">
 
-            <div class="card-body">
+                            if (
+                                $checkoutProduct
+                                &&
+                                $checkoutProduct->image
+                            ) {
 
-                <div class="d-flex justify-content-between mb-2">
+                                $checkoutImage =
+                                    str_starts_with(
+                                        $checkoutProduct->image,
+                                        'http'
+                                    )
 
-                    <span>
-                        Tạm tính
-                    </span>
+                                    ? $checkoutProduct->image
 
-                    <span>
+                                    : asset(
+                                        'storage/'
+                                        .
+                                        ltrim(
+                                            $checkoutProduct->image,
+                                            '/'
+                                        )
+                                    );
+
+                            }
+
+
+                            $itemPrice =
+                                (float)
+                                $item['price'];
+
+
+                            $itemQuantity =
+                                (float)
+                                $item['quantity'];
+
+
+                            $itemTotal =
+                                $itemPrice
+                                *
+                                $itemQuantity;
+
+
+                            $itemUnit =
+                                $item['unit']
+                                ??
+                                'sản phẩm';
+                        @endphp
+
+
+                        <div class="checkout-product">
+
+
+                            <div class="checkout-product-media">
+
+                                @if($checkoutImage)
+
+                                    <img
+                                        src="{{ $checkoutImage }}"
+                                        alt="{{ $item['name'] }}"
+                                        loading="lazy"
+                                        onerror="
+                                            this.style.display='none';
+                                            this.nextElementSibling.style.display='grid';
+                                        "
+                                    >
+
+
+                                    <div
+                                        class="checkout-product-fallback"
+                                        style="display:none;"
+                                    >
+                                        🧺
+                                    </div>
+
+                                @else
+
+                                    <div class="checkout-product-fallback">
+                                        🧺
+                                    </div>
+
+                                @endif
+
+
+                                <span class="checkout-product-qty">
+
+                                    {{
+                                        $formatQuantity(
+                                            $itemQuantity
+                                        )
+                                    }}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="checkout-product-info">
+
+                                <div class="checkout-product-name">
+
+                                    {{ $item['name'] }}
+
+                                </div>
+
+
+                                <div class="checkout-product-meta">
+
+                                    {{
+                                        number_format(
+                                            $itemPrice,
+                                            0,
+                                            ',',
+                                            '.'
+                                        )
+                                    }}đ
+
+                                    /
+
+                                    {{ $itemUnit }}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="checkout-product-price">
+
+                                {{
+                                    number_format(
+                                        $itemTotal,
+                                        0,
+                                        ',',
+                                        '.'
+                                    )
+                                }}đ
+
+                            </div>
+
+                        </div>
+
+                    @endforeach
+
+                </div>
+
+
+                {{-- TOTAL --}}
+                <div class="checkout-summary-body">
+
+
+                    <div class="checkout-summary-row">
+
+                        <span>
+                            Tạm tính
+                        </span>
+
                         <strong id="subtotal">
-                            {{ number_format($subtotal, 0, ',', '.') }}đ
-                        </strong>
-                    </span>
 
-                </div>
+                            {{
+                                number_format(
+                                    $subtotal,
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
 
-
-                <div class="d-flex justify-content-between mb-2">
-
-                    <span>
-                        Phí vận chuyển
-                    </span>
-
-                    <span>
-                        <strong id="shippingFee">
-                            25.000đ
-                        </strong>
-                    </span>
-
-                </div>
-
-
-                <div class="d-flex justify-content-between mb-3">
-
-                    <span>
-                        Giảm giá
-                    </span>
-
-                    <span class="text-success">
-
-                        -
-                        <strong id="discount">
-                            0đ
-                        </strong>
-
-                    </span>
-
-                </div>
-
-
-                <hr>
-
-
-                <div class="d-flex justify-content-between align-items-center">
-
-                    <div>
-
-                        <strong class="fs-5">
-                            Tổng thanh toán
                         </strong>
 
                     </div>
 
 
-                    <div>
+                    <div class="checkout-summary-row">
+
+                        <span>
+                            Phí vận chuyển
+                        </span>
+
+                        <strong id="shippingFee">
+
+                            {{
+                                number_format(
+                                    $initialShippingFee,
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="checkout-summary-row">
+
+                        <span>
+                            Voucher
+                        </span>
 
                         <strong
-                            class="fs-3 text-danger"
-                            id="total"
+                            id="discount"
+                            class="checkout-summary-discount"
                         >
-                            {{ number_format($subtotal + 25000, 0, ',', '.') }}đ
+                            -0đ
                         </strong>
 
                     </div>
 
-                </div>
+
+                    <div class="checkout-summary-divider">
+                    </div>
 
 
-                <div class="text-end mt-4">
+                    <div class="checkout-summary-total">
+
+                        <div>
+
+                            <div class="checkout-summary-total-label">
+                                Tổng thanh toán
+                            </div>
+
+                            <div class="checkout-summary-total-note">
+                                Đã gồm phí vận chuyển
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="checkout-summary-total-price"
+                            id="total"
+                        >
+
+                            {{
+                                number_format(
+                                    $subtotal
+                                    +
+                                    $initialShippingFee,
+                                    0,
+                                    ',',
+                                    '.'
+                                )
+                            }}đ
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        id="orderButton"
+                        class="checkout-order-button"
+                    >
+                        🛍 Đặt hàng COD
+                    </button>
+
 
                     <a
                         href="{{ route('cart.index') }}"
-                        class="btn btn-outline-secondary me-2"
+                        class="checkout-back"
                     >
-                        ← Quay lại
+                        ← Quay lại giỏ hàng
                     </a>
 
 
-                   <button
-    type="submit"
-    id="orderButton"
-    class="btn btn-danger btn-lg px-5"
->
-    🛍️ Đặt hàng COD
-</button>
+                    <div class="checkout-trust">
+
+                        <div class="checkout-trust-item">
+                            🔒 Đặt hàng an toàn
+                        </div>
+
+                        <div class="checkout-trust-item">
+                            📦 Theo dõi đơn hàng
+                        </div>
+
+                        <div class="checkout-trust-item">
+                            💳 Thanh toán linh hoạt
+                        </div>
+
+                        <div class="checkout-trust-item">
+                            ☎ Hỗ trợ khi cần
+                        </div>
+
+                    </div>
 
                 </div>
 
-            </div>
+            </aside>
 
         </div>
 
@@ -674,796 +3592,878 @@
 </div>
 
 
-{{-- ==========================================
-     CSS
-========================================== --}}
-
-<style>
-
-:root {
-    --tb-brown: #5f341d;
-    --tb-brown-dark: #2c1810;
-    --tb-red: #a83b2d;
-    --tb-orange: #d97706;
-    --tb-gold: #f2c15c;
-    --tb-green: #48633b;
-    --tb-cream: #fffaf0;
-    --tb-soft: #f8efe2;
-    --tb-border: #ead8bf;
-    --tb-text: #2f241e;
-}
-
-body {
-    background: linear-gradient(180deg, #fffaf0 0%, #f8efe2 100%);
-    color: var(--tb-text);
-}
-
-.checkout-page-title {
-    color: var(--tb-brown-dark);
-}
-
-.card,
-.checkout-section {
-    border: 1px solid var(--tb-border) !important;
-    background: #fffdf8 !important;
-    box-shadow: 0 10px 30px rgba(95, 52, 29, 0.08) !important;
-}
-
-.card {
-    border-radius: 20px !important;
-}
-
-.card h5,
-.checkout-section h4 {
-    color: var(--tb-brown-dark);
-}
-
-.btn-danger,
-.btn-tb-primary {
-    background: linear-gradient(135deg, var(--tb-red), var(--tb-brown)) !important;
-    border-color: var(--tb-red) !important;
-    color: #fff !important;
-}
-
-.btn-danger:hover,
-.btn-tb-primary:hover {
-    background: linear-gradient(135deg, #8f3025, var(--tb-brown-dark)) !important;
-    border-color: #8f3025 !important;
-}
-
-.btn-outline-danger {
-    color: var(--tb-red) !important;
-    border-color: var(--tb-red) !important;
-}
-
-.btn-outline-danger:hover {
-    color: #fff !important;
-    background: var(--tb-red) !important;
-}
-
-.text-danger {
-    color: var(--tb-red) !important;
-}
-
-.text-success {
-    color: var(--tb-green) !important;
-}
-
-.form-control,
-.form-select {
-    border-color: var(--tb-border) !important;
-    background: #fff !important;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: var(--tb-red) !important;
-    box-shadow: 0 0 0 3px rgba(168, 59, 45, 0.10) !important;
-}
-
-.input-group-text {
-    border-color: var(--tb-border) !important;
-    background: var(--tb-soft) !important;
-}
-
-.form-check-input:checked {
-    background-color: var(--tb-red) !important;
-    border-color: var(--tb-red) !important;
-}
-
-/* ==========================================
-   ĐỊA CHỈ NHẬN HÀNG
-========================================== */
-.checkout-section {
-    background: #fffdf8;
-    border-radius: 22px;
-    padding: 28px;
-    border: 1px solid var(--tb-border);
-    box-shadow: 0 10px 30px rgba(95, 52, 29, 0.08);
-}
-
-.checkout-section-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--tb-border);
-}
-
-.checkout-section-icon {
-    width: 55px;
-    height: 55px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 25px;
-    flex-shrink: 0;
-    background: linear-gradient(135deg, #f8efe2, #fff3d6);
-}
-
-.checkout-input .input-group-text {
-    background: var(--tb-soft);
-    border: 1px solid var(--tb-border);
-    border-right: none;
-    min-width: 48px;
-    justify-content: center;
-}
-
-.checkout-input .form-control {
-    min-height: 48px;
-    border: 1px solid var(--tb-border);
-    box-shadow: none;
-}
-
-.checkout-input .form-control:focus {
-    border-color: var(--tb-red);
-    box-shadow: 0 0 0 3px rgba(168, 59, 45, 0.10);
-}
-
-.checkout-input:focus-within .input-group-text {
-    border-color: var(--tb-red);
-}
-
-.checkout-input textarea.form-control {
-    min-height: 105px;
-    resize: vertical;
-}
-
-.delivery-note {
-    background: #fff3d6;
-    color: #6b4a36;
-    padding: 14px 16px;
-    border-radius: 12px;
-    font-size: 14px;
-}
-
-@media (max-width: 767.98px) {
-    .checkout-section {
-        padding: 20px;
-    }
-
-    .checkout-section-header {
-        align-items: flex-start;
-    }
-}
-
-.shipping-option {
-    border: 1px solid var(--tb-border);
-    border-radius: 14px;
-    padding: 15px;
-    transition: 0.2s;
-    background: #fffdf8;
-}
-
-.shipping-option:hover {
-    border-color: var(--tb-red);
-    background: #fff7f2;
-}
-
-.shipping-option input {
-    margin-right: 10px;
-}
-
-.shipping-option label {
-    cursor: pointer;
-}
-
-
-/* ==========================================
-   VOUCHER KHẢ DỤNG
-========================================== */
-.voucher-option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 14px 16px;
-    margin-top: 10px;
-    border: 1px dashed var(--tb-gold);
-    border-radius: 14px;
-    background: var(--tb-cream);
-}
-
-.voucher-option-content {
-    min-width: 0;
-}
-
-.voucher-badge {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 8px;
-    background: var(--tb-soft);
-    color: var(--tb-red);
-    font-weight: 800;
-    letter-spacing: .5px;
-}
-
-.voucher-disabled {
-    opacity: .62;
-    background: #f8f9fa;
-}
-
-@media (max-width: 575.98px) {
-    .voucher-option {
-        align-items: stretch;
-        flex-direction: column;
-    }
-}
-
-
-
-#bankTransferInfo {
-    border-color: var(--tb-border) !important;
-}
-
-#bankTransferInfo .card-header {
-    background: linear-gradient(
-        135deg,
-        var(--tb-brown),
-        var(--tb-green)
-    ) !important;
-    border-color: transparent !important;
-}
-
-#bankTransferAmount,
-#bankTransferInfo .text-primary {
-    color: var(--tb-red) !important;
-}
-
-.alert-info {
-    background: #fff3d6 !important;
-    border-color: #f0d5a4 !important;
-    color: #6b4a36 !important;
-}
-
-.alert-warning {
-    background: #fff7df !important;
-    border-color: #efd39b !important;
-    color: #6b4a36 !important;
-}
-
-
-
-.saved-address-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
-.saved-address-card { display:block; position:relative; padding:16px; border:1px solid var(--tb-border); border-radius:14px; background:#fff; cursor:pointer; transition:.2s; }
-.saved-address-card:hover, .saved-address-card.selected { border-color:var(--tb-red); box-shadow:0 0 0 3px rgba(168,59,45,.08); background:#fffaf7; }
-.saved-address-card .address-radio { position:absolute; opacity:0; pointer-events:none; }
-@media(max-width:767.98px){ .saved-address-grid{grid-template-columns:1fr;} }
-
-</style>
-
-
-{{-- ==========================================
-     JAVASCRIPT
-========================================== --}}
-
-@php
-    $voucherJsData = $availableVouchers
-        ->map(function ($voucher) {
-            return [
-                'code' => $voucher->code,
-                'type' => $voucher->type,
-                'value' => (float) $voucher->value,
-                'min_order_value' => (float) $voucher->min_order_value,
-                'max_discount' => $voucher->max_discount !== null
-                    ? (float) $voucher->max_discount
-                    : null,
-            ];
-        })
-        ->values();
-@endphp
-
 <script>
-function applySavedAddress(input) {
-    // Bỏ trạng thái selected khỏi tất cả thẻ địa chỉ
-    document
-        .querySelectorAll('.saved-address-card')
-        .forEach(card => card.classList.remove('selected'));
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
 
-    // Đánh dấu thẻ vừa chọn
-    input
-        .closest('.saved-address-card')
-        ?.classList.add('selected');
+        /*
+        |--------------------------------------------------------------------------
+        | ELEMENTS
+        |--------------------------------------------------------------------------
+        */
 
-    const name =
-        document.getElementById('customerName');
-
-    const phone =
-        document.getElementById('customerPhone');
-
-    const address =
-        document.getElementById('shippingAddress');
+        const subtotal =
+            Number(
+                @json(
+                    (float) $subtotal
+                )
+            );
 
 
-    // ==========================================
-    // SỬ DỤNG ĐỊA CHỈ KHÁC
-    // => XÓA TRẮNG TOÀN BỘ THÔNG TIN
-    // ==========================================
-    if (input.value === 'other') {
+        const availableVouchers =
+            @json($voucherJsData);
 
-        if (name) {
-            name.value = '';
-            name.focus();
+
+        const voucherInput =
+            document.getElementById(
+                'voucherCode'
+            );
+
+
+        const voucherMessage =
+            document.getElementById(
+                'voucherMessage'
+            );
+
+
+        const shippingFeeElement =
+            document.getElementById(
+                'shippingFee'
+            );
+
+
+        const discountElement =
+            document.getElementById(
+                'discount'
+            );
+
+
+        const totalElement =
+            document.getElementById(
+                'total'
+            );
+
+
+        const applyVoucherButton =
+            document.getElementById(
+                'applyVoucherButton'
+            );
+
+
+        const orderButton =
+            document.getElementById(
+                'orderButton'
+            );
+
+
+        const bankTransferInfo =
+            document.getElementById(
+                'bankTransferInfo'
+            );
+
+
+        let discount = 0;
+
+        let voucherApplied = false;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MONEY
+        |--------------------------------------------------------------------------
+        */
+
+        function formatMoney(value) {
+
+            return new Intl
+                .NumberFormat(
+                    'vi-VN'
+                )
+                .format(
+                    Math.round(
+                        Number(value)
+                        ||
+                        0
+                    )
+                )
+                +
+                'đ';
+
         }
 
-        if (phone) {
-            phone.value = '';
-        }
 
-        if (address) {
-            address.value = '';
-        }
+        /*
+        |--------------------------------------------------------------------------
+        | SHIPPING FEE
+        |--------------------------------------------------------------------------
+        */
 
-        return;
-    }
+        function getShippingFee() {
 
-
-    // ==========================================
-    // ĐỊA CHỈ ĐÃ LƯU
-    // => TỰ ĐIỀN THÔNG TIN
-    // ==========================================
-    if (name) {
-        name.value =
-            input.dataset.name || '';
-    }
-
-    if (phone) {
-        phone.value =
-            input.dataset.phone || '';
-    }
-
-    if (address) {
-        address.value =
-            input.dataset.address || '';
-    }
-}
+            const selected =
+                document.querySelector(
+                    'input[name="shipping_method"]:checked'
+                );
 
 
-// Bắt sự kiện chọn địa chỉ
-document
-    .querySelectorAll('.address-radio')
-    .forEach(function(input) {
-
-        input.addEventListener(
-            'change',
-            function() {
-                applySavedAddress(this);
+            if (!selected) {
+                return 0;
             }
-        );
-
-    });
 
 
-// Nếu trang được load lại do validation,
-// đồng bộ form theo địa chỉ đang được chọn.
-const checkedAddress =
-    document.querySelector(
-        '.address-radio:checked'
-    );
+            return Number(
+                selected.dataset.fee
+                ||
+                0
+            );
 
-if (checkedAddress) {
-    applySavedAddress(checkedAddress);
-}
+        }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL
+        |--------------------------------------------------------------------------
+        */
 
-const subtotal = {{ $subtotal }};
+        function updateTotal() {
 
-let discount = 0;
-
-let voucherApplied = false;
-
-const availableVouchers = @json($voucherJsData);
-
-
-
-// Format tiền Việt Nam
-function formatMoney(number)
-{
-    return new Intl.NumberFormat('vi-VN')
-        .format(number) + 'đ';
-}
+            const shippingFee =
+                getShippingFee();
 
 
-// Lấy phí ship
-function getShippingFee()
-{
-    const selected =
-        document.querySelector(
-            'input[name="shipping_method"]:checked'
-        );
-
-    return Number(
-        selected.dataset.fee
-    );
-}
+            const total =
+                Math.max(
+                    subtotal
+                    +
+                    shippingFee
+                    -
+                    discount,
+                    0
+                );
 
 
-// Cập nhật tổng tiền
-function updateTotal()
-{
-    const shippingFee =
-        getShippingFee();
-
-    const total =
-        subtotal +
-        shippingFee -
-        discount;
-
-    document.getElementById(
-        'shippingFee'
-    ).innerText =
-        formatMoney(shippingFee);
+            shippingFeeElement.textContent =
+                formatMoney(
+                    shippingFee
+                );
 
 
-    document.getElementById(
-        'discount'
-    ).innerText =
-        formatMoney(discount);
+            discountElement.textContent =
+                '-'
+                +
+                formatMoney(
+                    discount
+                );
 
 
-    document.getElementById(
-        'total'
-    ).innerText =
-        formatMoney(
-            Math.max(total, 0)
-        );
-        const bankAmount =
-    document.getElementById(
-        'bankTransferAmount'
-    );
+            totalElement.textContent =
+                formatMoney(
+                    total
+                );
 
-if (bankAmount)
-{
-    bankAmount.innerText =
-        formatMoney(
-            Math.max(total, 0)
-        );
-}
-updateBankQr(
-    Math.max(total, 0)
-);
-}
+        }
 
 
-// Chọn phương thức vận chuyển
-document
-    .querySelectorAll(
-        'input[name="shipping_method"]'
-    )
-    .forEach(function(input)
-    {
-        input.addEventListener(
-            'change',
-            function()
-            {
-                if (voucherApplied) {
-                    applyVoucher();
-                } else {
-                    updateTotal();
+        /*
+        |--------------------------------------------------------------------------
+        | VOUCHER
+        |--------------------------------------------------------------------------
+        */
+
+        function calculateVoucher(
+            code,
+            showMessage = true
+        ) {
+
+            const normalizedCode =
+                String(
+                    code
+                    ||
+                    ''
+                )
+                .trim()
+                .toUpperCase();
+
+
+            discount = 0;
+
+            voucherApplied = false;
+
+
+            if (
+                normalizedCode
+                ===
+                ''
+            ) {
+
+                if (showMessage) {
+
+                    voucherMessage.innerHTML =
+                        '<span style="color:#b43e2e;">Vui lòng nhập mã voucher.</span>';
+
                 }
+                else {
+
+                    voucherMessage.innerHTML =
+                        '';
+
+                }
+
+
+                updateTotal();
+
+                return false;
+
             }
-        );
-    });
 
 
-// Chọn voucher từ danh sách
-function selectVoucher(code)
-{
-    document.getElementById(
-        'voucherCode'
-    ).value = code;
+            const voucher =
+                availableVouchers.find(
+                    function (item) {
 
-    applyVoucher();
-}
+                        return String(
+                            item.code
+                        )
+                        .toUpperCase()
+                        ===
+                        normalizedCode;
+
+                    }
+                );
 
 
-// Áp dụng voucher
-function applyVoucher()
-{
-    const code =
-        document.getElementById(
-            'voucherCode'
-        ).value
-        .trim()
-        .toUpperCase();
+            if (!voucher) {
 
-    const message =
-        document.getElementById(
-            'voucherMessage'
-        );
+                if (showMessage) {
 
-    const shippingFee =
-        getShippingFee();
+                    voucherMessage.innerHTML =
+                        '<span style="color:#b43e2e;">✕ Voucher không tồn tại hoặc hiện không khả dụng.</span>';
 
-    discount = 0;
-    voucherApplied = false;
+                }
 
-    if (code === '')
-    {
-        message.innerHTML =
-            '<span class="text-danger">Vui lòng nhập mã voucher.</span>';
 
-        updateTotal();
-        return;
-    }
+                updateTotal();
 
-    const voucher =
-        availableVouchers.find(function(item)
-        {
-            return item.code.toUpperCase() === code;
-        });
+                return false;
 
-    if (!voucher)
-    {
-        message.innerHTML =
-            '<span class="text-danger">✕ Voucher không tồn tại hoặc hiện không khả dụng.</span>';
+            }
 
-        updateTotal();
-        return;
-    }
 
-    if (subtotal < voucher.min_order_value)
-    {
-        message.innerHTML =
-            '<span class="text-danger">✕ Đơn hàng phải đạt tối thiểu '
-            + formatMoney(voucher.min_order_value)
-            + ' để sử dụng voucher này.</span>';
-
-        updateTotal();
-        return;
-    }
-
-    if (voucher.type === 'percent')
-    {
-        const percent =
-            Math.min(Number(voucher.value), 100);
-
-        discount =
-            subtotal * (percent / 100);
-    }
-    else if (voucher.type === 'fixed')
-    {
-        discount =
-            Math.min(
-                Number(voucher.value),
+            if (
                 subtotal
+                <
+                Number(
+                    voucher
+                        .min_order_value
+                )
+            ) {
+
+                if (showMessage) {
+
+                    voucherMessage.innerHTML =
+                        '<span style="color:#b43e2e;">✕ Đơn hàng phải đạt tối thiểu '
+                        +
+                        formatMoney(
+                            voucher
+                                .min_order_value
+                        )
+                        +
+                        ' để dùng voucher này.</span>';
+
+                }
+
+
+                updateTotal();
+
+                return false;
+
+            }
+
+
+            const shippingFee =
+                getShippingFee();
+
+
+            if (
+                voucher.type
+                ===
+                'percent'
+            ) {
+
+                const percent =
+                    Math.min(
+                        Number(
+                            voucher.value
+                        ),
+                        100
+                    );
+
+
+                discount =
+                    subtotal
+                    *
+                    (
+                        percent
+                        /
+                        100
+                    );
+
+            }
+            else if (
+                voucher.type
+                ===
+                'fixed'
+            ) {
+
+                discount =
+                    Math.min(
+                        Number(
+                            voucher.value
+                        ),
+                        subtotal
+                    );
+
+            }
+            else if (
+                voucher.type
+                ===
+                'shipping'
+            ) {
+
+                discount =
+                    Math.min(
+                        Number(
+                            voucher.value
+                        ),
+                        shippingFee
+                    );
+
+            }
+
+
+            if (
+                voucher.max_discount
+                !==
+                null
+            ) {
+
+                discount =
+                    Math.min(
+                        discount,
+                        Number(
+                            voucher
+                                .max_discount
+                        )
+                    );
+
+            }
+
+
+            discount =
+                Math.max(
+                    discount,
+                    0
+                );
+
+
+            voucherApplied = true;
+
+
+            voucherInput.value =
+                normalizedCode;
+
+
+            if (showMessage) {
+
+                voucherMessage.innerHTML =
+                    '<span style="color:#35562f;font-weight:800;">✓ Đã áp dụng voucher '
+                    +
+                    normalizedCode
+                    +
+                    '.</span>';
+
+            }
+
+
+            updateTotal();
+
+            return true;
+
+        }
+
+
+        if (applyVoucherButton) {
+
+            applyVoucherButton
+                .addEventListener(
+                    'click',
+                    function () {
+
+                        calculateVoucher(
+                            voucherInput.value,
+                            true
+                        );
+
+                    }
+                );
+
+        }
+
+
+        if (voucherInput) {
+
+            voucherInput
+                .addEventListener(
+                    'keydown',
+                    function (event) {
+
+                        if (
+                            event.key
+                            ===
+                            'Enter'
+                        ) {
+
+                            event
+                                .preventDefault();
+
+
+                            calculateVoucher(
+                                voucherInput.value,
+                                true
+                            );
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        document
+            .querySelectorAll(
+                '[data-voucher-code]'
+            )
+            .forEach(
+                function (button) {
+
+                    button
+                        .addEventListener(
+                            'click',
+                            function () {
+
+                                const code =
+                                    button.dataset
+                                        .voucherCode;
+
+
+                                voucherInput.value =
+                                    code;
+
+
+                                calculateVoucher(
+                                    code,
+                                    true
+                                );
+
+                            }
+                        );
+
+                }
             );
-    }
-    else if (voucher.type === 'shipping')
-    {
-        discount =
-            Math.min(
-                Number(voucher.value),
-                shippingFee
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SHIPPING CHANGE
+        |--------------------------------------------------------------------------
+        */
+
+        document
+            .querySelectorAll(
+                'input[name="shipping_method"]'
+            )
+            .forEach(
+                function (input) {
+
+                    input
+                        .addEventListener(
+                            'change',
+                            function () {
+
+                                if (
+                                    voucherApplied
+                                ) {
+
+                                    calculateVoucher(
+                                        voucherInput.value,
+                                        false
+                                    );
+
+                                }
+                                else {
+
+                                    updateTotal();
+
+                                }
+
+                            }
+                        );
+
+                }
             );
-    }
 
-    if (voucher.max_discount !== null)
-    {
-        discount =
-            Math.min(
-                discount,
-                Number(voucher.max_discount)
+
+        /*
+        |--------------------------------------------------------------------------
+        | PAYMENT
+        |--------------------------------------------------------------------------
+        */
+
+        function updatePaymentMethod() {
+
+            const selected =
+                document.querySelector(
+                    'input[name="payment_method"]:checked'
+                );
+
+
+            const bankSelected =
+                selected
+                &&
+                selected.value
+                ===
+                'bank';
+
+
+            if (bankTransferInfo) {
+
+                bankTransferInfo
+                    .classList
+                    .toggle(
+                        'show',
+                        bankSelected
+                    );
+
+            }
+
+
+            if (!orderButton) {
+                return;
+            }
+
+
+            if (bankSelected) {
+
+                orderButton.textContent =
+                    '🏦 Tạo đơn & thanh toán QR';
+
+
+                orderButton
+                    .classList
+                    .add(
+                        'bank'
+                    );
+
+            }
+            else {
+
+                orderButton.textContent =
+                    '🛍 Đặt hàng COD';
+
+
+                orderButton
+                    .classList
+                    .remove(
+                        'bank'
+                    );
+
+            }
+
+        }
+
+
+        document
+            .querySelectorAll(
+                'input[name="payment_method"]'
+            )
+            .forEach(
+                function (input) {
+
+                    input
+                        .addEventListener(
+                            'change',
+                            updatePaymentMethod
+                        );
+
+                }
             );
-    }
-
-    voucherApplied = true;
-
-    message.innerHTML =
-        '<span class="text-success">✓ Đã áp dụng voucher '
-        + code
-        + '.</span>';
-
-    updateTotal();
-}
-
-updateTotal();
-// ==========================================
-// PHƯƠNG THỨC THANH TOÁN
-// ==========================================
-
-const paymentMethods =
-    document.querySelectorAll(
-        'input[name="payment_method"]'
-    );
-
-const bankTransferInfo =
-    document.getElementById(
-        'bankTransferInfo'
-    );
 
 
-function updatePaymentMethod()
-{
-    const selectedPayment =
-        document.querySelector(
-            'input[name="payment_method"]:checked'
-        );
+        /*
+        |--------------------------------------------------------------------------
+        | SAVED ADDRESS
+        |--------------------------------------------------------------------------
+        */
+
+        const addressCards =
+            document.querySelectorAll(
+                '.checkout-address-card'
+            );
 
 
-    if (
-        selectedPayment
-        &&
-        selectedPayment.value === 'bank'
-    )
-    {
-        bankTransferInfo.style.display =
-            'block';
-    }
-    else
-    {
-        bankTransferInfo.style.display =
-            'none';
-    }
+        const addressRadios =
+            document.querySelectorAll(
+                '.checkout-address-radio'
+            );
 
 
-    updateOrderButton();
-}
+        const customerName =
+            document.getElementById(
+                'customerName'
+            );
 
 
-paymentMethods.forEach(
-    function(input)
-    {
-        input.addEventListener(
-            'change',
-            updatePaymentMethod
-        );
+        const customerPhone =
+            document.getElementById(
+                'customerPhone'
+            );
+
+
+        const shippingAddress =
+            document.getElementById(
+                'shippingAddress'
+            );
+
+
+        function setSelectedAddressCard(
+            input
+        ) {
+
+            addressCards
+                .forEach(
+                    function (card) {
+
+                        card
+                            .classList
+                            .remove(
+                                'selected'
+                            );
+
+                    }
+                );
+
+
+            const currentCard =
+                input.closest(
+                    '.checkout-address-card'
+                );
+
+
+            if (currentCard) {
+
+                currentCard
+                    .classList
+                    .add(
+                        'selected'
+                    );
+
+            }
+
+        }
+
+
+        function applySavedAddress(
+            input
+        ) {
+
+            setSelectedAddressCard(
+                input
+            );
+
+
+            if (
+                input.value
+                ===
+                'other'
+            ) {
+
+                customerName.value =
+                    '';
+
+
+                customerPhone.value =
+                    '';
+
+
+                shippingAddress.value =
+                    '';
+
+
+                customerName.focus();
+
+                return;
+
+            }
+
+
+            customerName.value =
+                input.dataset.name
+                ||
+                '';
+
+
+            customerPhone.value =
+                input.dataset.phone
+                ||
+                '';
+
+
+            shippingAddress.value =
+                input.dataset.address
+                ||
+                '';
+
+        }
+
+
+        addressRadios
+            .forEach(
+                function (input) {
+
+                    input
+                        .addEventListener(
+                            'change',
+                            function () {
+
+                                applySavedAddress(
+                                    input
+                                );
+
+                            }
+                        );
+
+                }
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | KHÔNG GHI ĐÈ OLD INPUT KHI VALIDATION FAIL
+        |--------------------------------------------------------------------------
+        | Chỉ đồng bộ trạng thái selected của card khi load.
+        */
+
+        const checkedAddress =
+            document.querySelector(
+                '.checkout-address-radio:checked'
+            );
+
+
+        if (checkedAddress) {
+
+            setSelectedAddressCard(
+                checkedAddress
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INITIAL VALUES
+        |--------------------------------------------------------------------------
+        */
+
+        const initialVoucher =
+            voucherInput
+            ? voucherInput.value.trim()
+            : '';
+
+
+        if (
+            initialVoucher
+            !==
+            ''
+        ) {
+
+            calculateVoucher(
+                initialVoucher,
+                true
+            );
+
+        }
+        else {
+
+            updateTotal();
+
+        }
+
+
+        updatePaymentMethod();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVENT DOUBLE SUBMIT
+        |--------------------------------------------------------------------------
+        */
+
+        const checkoutForm =
+            document.getElementById(
+                'checkoutForm'
+            );
+
+
+        if (
+            checkoutForm
+            &&
+            orderButton
+        ) {
+
+            checkoutForm
+                .addEventListener(
+                    'submit',
+                    function () {
+
+                        orderButton.disabled =
+                            true;
+
+
+                        const selectedPayment =
+                            document.querySelector(
+                                'input[name="payment_method"]:checked'
+                            );
+
+
+                        if (
+                            selectedPayment
+                            &&
+                            selectedPayment.value
+                            ===
+                            'bank'
+                        ) {
+
+                            orderButton.textContent =
+                                'Đang tạo đơn và QR...';
+
+                        }
+                        else {
+
+                            orderButton.textContent =
+                                'Đang tạo đơn hàng...';
+
+                        }
+
+                    }
+                );
+
+        }
+
     }
 );
-
-
-// ==========================================
-// THAY ĐỔI CHỮ NÚT ĐẶT HÀNG
-// ==========================================
-
-function updateOrderButton()
-{
-    const selectedPayment =
-        document.querySelector(
-            'input[name="payment_method"]:checked'
-        );
-
-    const orderButton =
-        document.getElementById(
-            'orderButton'
-        );
-
-
-    if (!orderButton)
-    {
-        return;
-    }
-
-
-    if (
-        selectedPayment
-        &&
-        selectedPayment.value === 'bank'
-    )
-    {
-        orderButton.innerHTML =
-            '🏦 Tạo đơn & thanh toán QR';
-
-        orderButton.classList.remove(
-            'btn-danger'
-        );
-
-        orderButton.classList.add(
-            'btn-primary'
-        );
-    }
-    else
-    {
-        orderButton.innerHTML =
-            '🛍️ Đặt hàng COD';
-
-        orderButton.classList.remove(
-            'btn-primary'
-        );
-
-        orderButton.classList.add(
-            'btn-danger'
-        );
-    }
-}
-
-
-// ==========================================
-// COPY NỘI DUNG CHUYỂN KHOẢN
-// ==========================================
-
-function copyTransferContent()
-{
-    const input =
-        document.getElementById(
-            'bankTransferContent'
-        );
-
-    navigator.clipboard
-        .writeText(
-            input.value
-        )
-        .then(function()
-        {
-            alert(
-                'Đã sao chép nội dung chuyển khoản!'
-            );
-        });
-}
-
-// ==========================================
-// CẬP NHẬT QR CHUYỂN KHOẢN
-// ==========================================
-
-function updateBankQr(total)
-{
-    const qr =
-        document.getElementById(
-            'bankQrCode'
-        );
-
-    const content =
-        document.getElementById(
-            'bankTransferContent'
-        );
-
-    if (!qr || !content)
-    {
-        return;
-    }
-
-    const accountNumber = '0385742505';
-
-    const bankCode = 'MB';
-
-    const transferContent =
-        content.value;
-
-    const amount =
-        Math.round(total);
-
-    qr.src =
-        'https://img.vietqr.io/image/'
-        + bankCode
-        + '-'
-        + accountNumber
-        + '-compact2.png'
-        + '?amount='
-        + amount
-        + '&addInfo='
-        + encodeURIComponent(
-            transferContent
-        )
-        + '&accountName='
-        + encodeURIComponent(
-            'DO PHUONG NAM'
-        );
-}
-updateTotal();
-updatePaymentMethod();
-
 </script>
 
 @endsection

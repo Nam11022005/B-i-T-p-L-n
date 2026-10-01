@@ -4,910 +4,1817 @@
 
 @section('content')
 
-
 <style>
-    :root {
-        --auth-brown: #5f341d;
-        --auth-brown-dark: #2c1810;
-        --auth-red: #a83b2d;
-        --auth-gold: #f2c15c;
-        --auth-green: #48633b;
-        --auth-cream: #fffaf0;
-        --auth-border: #ead8bf;
-        --auth-muted: #7b6a5e;
-    }
+    /* =========================================================
+       REGISTER - TINH HOA TÂY BẮC
+    ========================================================= */
 
-    .auth-premium-page {
+    .tb-register-page {
+        --rg-brown: #633820;
+        --rg-brown-dark: #2d1a11;
+        --rg-green: #35562f;
+        --rg-red: #b43e2e;
+        --rg-gold: #e5ad42;
+        --rg-cream: #fff8e9;
+        --rg-border: #e7d4b7;
+        --rg-text: #33261f;
+        --rg-muted: #76685e;
+
         position: relative;
         isolation: isolate;
-        min-height: calc(100vh - 170px);
-        display: grid;
-        place-items: center;
-        padding: 54px 12px 84px;
+
+        width: 100%;
+
+        padding: 42px 0 72px;
     }
 
-    .auth-premium-page::before {
-        content: "";
-        position: absolute;
-        z-index: -3;
-        inset: -40px 0 0;
-        background:
-            radial-gradient(circle at 8% 12%, rgba(242,193,92,.20), transparent 24%),
-            radial-gradient(circle at 92% 10%, rgba(72,99,59,.15), transparent 28%),
-            radial-gradient(circle at 52% 28%, rgba(168,59,45,.055), transparent 30%),
-            linear-gradient(180deg,#fffaf0 0%,#fff 74%);
-    }
 
-    .auth-premium-page::after {
+    .tb-register-page::before {
         content: "";
+
         position: absolute;
         z-index: -2;
-        right: 3%;
-        top: 90px;
-        width: 230px;
-        height: 230px;
-        border-radius: 50%;
-        opacity: .10;
+
+        inset: -30px -40px 0;
+
         pointer-events: none;
+
         background:
-            repeating-radial-gradient(circle at center, rgba(95,52,29,.35) 0 1px, transparent 1px 13px);
+            radial-gradient(
+                circle at 7% 13%,
+                rgba(229,173,66,.19),
+                transparent 25%
+            ),
+            radial-gradient(
+                circle at 92% 9%,
+                rgba(53,86,47,.13),
+                transparent 28%
+            ),
+            radial-gradient(
+                circle at 50% 46%,
+                rgba(180,62,46,.05),
+                transparent 30%
+            ),
+            linear-gradient(
+                180deg,
+                #fff9ed 0%,
+                #fdfbf7 52%,
+                #faf9f7 100%
+            );
     }
 
-    .auth-shell {
-        width: min(100%, 1040px);
-        display: grid;
-        grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
-        overflow: hidden;
-        border: 1px solid rgba(218,190,152,.78);
-        border-radius: 30px;
-        background: #fff;
-        box-shadow:
-            0 30px 80px rgba(72,43,27,.14),
-            0 4px 14px rgba(72,43,27,.05);
-    }
 
-    .auth-brand-panel {
+    .tb-register-shell {
         position: relative;
+
+        width: min(1140px, 100%);
+
+        margin: 0 auto;
+
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, .9fr)
+            minmax(0, 1.1fr);
+
         overflow: hidden;
-        min-height: 590px;
-        padding: 46px 42px;
+
+        border:
+            1px solid
+            rgba(222,195,158,.88);
+
+        border-radius: 30px;
+
+        background: #fff;
+
+        box-shadow:
+            0 32px 80px
+            rgba(73,44,27,.14);
+    }
+
+
+    .tb-register-shell::before {
+        content: "";
+
+        position: absolute;
+
+        z-index: 10;
+
+        top: 0;
+        left: 8%;
+        right: 8%;
+
+        height: 3px;
+
+        border-radius: 999px;
+
+        background:
+            linear-gradient(
+                90deg,
+                transparent,
+                var(--rg-gold),
+                var(--rg-red),
+                var(--rg-green),
+                transparent
+            );
+
+        pointer-events: none;
+    }
+
+
+    /* =========================================================
+       LEFT PANEL
+    ========================================================= */
+
+    .tb-register-brand {
+        position: relative;
+
+        overflow: hidden;
+
+        min-height: 690px;
+
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+
+        padding: 52px 46px;
+
         color: #fff;
+
         background:
-            radial-gradient(circle at 82% 14%, rgba(242,193,92,.25), transparent 28%),
-            radial-gradient(circle at 16% 110%, rgba(168,59,45,.30), transparent 34%),
-            linear-gradient(145deg,#2c1810 0%,#5f341d 52%,#48633b 100%);
+            radial-gradient(
+                circle at 82% 14%,
+                rgba(229,173,66,.27),
+                transparent 28%
+            ),
+            radial-gradient(
+                circle at 12% 112%,
+                rgba(180,62,46,.32),
+                transparent 35%
+            ),
+            linear-gradient(
+                145deg,
+                #26140d 0%,
+                #56301d 49%,
+                #35562f 100%
+            );
     }
 
-    .auth-brand-panel::before {
+
+    .tb-register-brand::before {
         content: "";
+
         position: absolute;
-        right: -40px;
-        bottom: -60px;
-        width: 350px;
-        height: 220px;
-        opacity: .11;
-        clip-path: polygon(0 100%,17% 58%,34% 73%,53% 25%,69% 58%,85% 34%,100% 66%,100% 100%);
-        background: linear-gradient(135deg,#fff,#f2c15c);
+
+        right: -70px;
+        bottom: -55px;
+
+        width: 420px;
+        height: 250px;
+
+        opacity: .13;
+
+        clip-path:
+            polygon(
+                0 100%,
+                18% 58%,
+                34% 73%,
+                53% 23%,
+                70% 58%,
+                85% 34%,
+                100% 65%,
+                100% 100%
+            );
+
+        background:
+            linear-gradient(
+                135deg,
+                #fff,
+                #f0bf5c
+            );
     }
 
-    .auth-brand-panel::after {
-        content: "🌿";
+
+    .tb-register-brand::after {
+        content: "✦";
+
         position: absolute;
-        right: 34px;
-        top: 20px;
-        font-size: 105px;
+
+        top: 30px;
+        right: 38px;
+
+        color: #ffe291;
+
+        font-size: 90px;
+
         opacity: .055;
-        transform: rotate(-14deg);
+
+        transform: rotate(18deg);
     }
 
-    .auth-brand-content,
-    .auth-brand-benefits {
+
+    .tb-register-brand-top,
+    .tb-register-benefits {
         position: relative;
+
         z-index: 2;
     }
 
-    .auth-kicker {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 11px;
-        margin-bottom: 16px;
-        border: 1px solid rgba(242,193,92,.32);
-        border-radius: 999px;
-        color: #f7dc96;
-        background: rgba(255,255,255,.055);
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: .09em;
-    }
 
-    .auth-brand-panel h1 {
-        max-width: 440px;
-        color: #fff;
-        font-size: clamp(34px,4vw,52px);
-        line-height: 1.08;
-        letter-spacing: -.9px;
-        text-shadow: 0 2px 16px rgba(0,0,0,.18);
-    }
+    .tb-register-logo {
+        width: 58px;
+        height: 58px;
 
-    .auth-brand-panel p {
-        max-width: 470px;
-        color: rgba(255,255,255,.76);
-        line-height: 1.72;
-    }
-
-    .auth-brand-benefits {
-        display: grid;
-        gap: 11px;
-    }
-
-    .auth-benefit {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: rgba(255,255,255,.82);
-        font-size: 14px;
-        font-weight: 650;
-    }
-
-    .auth-benefit span {
-        width: 31px;
-        height: 31px;
-        flex: 0 0 31px;
         display: grid;
         place-items: center;
-        border-radius: 10px;
-        background: rgba(255,255,255,.09);
-        border: 1px solid rgba(255,255,255,.10);
-    }
 
-    .auth-form-panel {
-        padding: 46px 50px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        margin-bottom: 24px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.16);
+
+        border-radius: 18px;
+
+        color: #f5d47e;
+
         background:
-            radial-gradient(circle at 100% 0%, rgba(242,193,92,.09), transparent 25%),
-            #fff;
+            rgba(255,255,255,.08);
+
+        box-shadow:
+            inset 0 1px 0
+            rgba(255,255,255,.12),
+            0 12px 26px
+            rgba(0,0,0,.14);
+
+        font-size: 25px;
     }
 
-    .auth-form-head {
-        margin-bottom: 27px;
-    }
 
-    .auth-form-head h2 {
-        color: #31231c;
-        font-size: 32px;
+    .tb-register-kicker {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 7px;
+
+        margin-bottom: 18px;
+
+        padding: 8px 12px;
+
+        border:
+            1px solid
+            rgba(229,173,66,.34);
+
+        border-radius: 999px;
+
+        color: #f5d789;
+
+        background:
+            rgba(255,255,255,.06);
+
+        font-size: 12px;
+
         font-weight: 900;
-        letter-spacing: -.6px;
+
+        letter-spacing: .08em;
+
+        text-transform: uppercase;
     }
 
-    .auth-form-head p {
-        color: var(--auth-muted);
-        line-height: 1.65;
-    }
 
-    .auth-label {
-        margin-bottom: 7px;
-        color: #503729;
-        font-size: 13px;
-        font-weight: 850;
-    }
+    .tb-register-brand h1 {
+        max-width: 460px;
 
-    .auth-input-wrap {
-        position: relative;
-    }
+        margin: 0;
 
-    .auth-input-icon {
-        position: absolute;
-        z-index: 2;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        opacity: .62;
-        pointer-events: none;
-    }
-
-    .auth-input {
-        min-height: 50px;
-        padding-left: 45px;
-        border: 1px solid #dfcbae;
-        border-radius: 14px;
-        background: #fffdf9;
-        color: #35271f;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .auth-input:focus {
-        border-color: #d5aa69;
-        background: #fff;
-        box-shadow: 0 0 0 .22rem rgba(217,119,6,.09);
-    }
-
-    .auth-input.is-invalid {
-        border-color: #c75a4c;
-    }
-
-    .auth-submit {
-        position: relative;
-        overflow: hidden;
-        min-height: 52px;
-        width: 100%;
-        border: 0;
-        border-radius: 14px;
         color: #fff;
-        background: linear-gradient(135deg,#a83b2d,#5f341d 58%,#48633b);
-        font-weight: 900;
-        letter-spacing: .1px;
-        box-shadow: 0 11px 24px rgba(95,52,29,.18);
-        transition: transform .17s ease, box-shadow .17s ease;
+
+        font-size:
+            clamp(
+                38px,
+                4vw,
+                56px
+            );
+
+        line-height: 1.05;
+
+        font-weight: 950;
+
+        letter-spacing: -1.2px;
     }
 
-    .auth-submit::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -120%;
-        width: 62%;
-        height: 100%;
-        transform: skewX(-20deg);
-        background: linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
-        transition: left .45s ease;
+
+    .tb-register-brand-copy {
+        max-width: 470px;
+
+        margin: 19px 0 0;
+
+        color:
+            rgba(255,255,255,.76);
+
+        font-size: 15px;
+
+        line-height: 1.75;
     }
 
-    .auth-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 30px rgba(95,52,29,.23);
+
+    .tb-register-benefits {
+        display: grid;
+
+        gap: 11px;
+
+        margin-top: 35px;
     }
 
-    .auth-submit:hover::after {
-        left: 145%;
-    }
 
-    .auth-link {
-        color: var(--auth-red);
-        font-weight: 800;
-        text-decoration: none;
-    }
-
-    .auth-link:hover {
-        color: var(--auth-brown);
-        text-decoration: underline;
-    }
-
-    .auth-separator {
+    .tb-register-benefit {
         display: flex;
         align-items: center;
-        gap: 13px;
-        margin: 23px 0;
-        color: #9b8a7f;
-        font-size: 12px;
+
+        gap: 11px;
+
+        padding: 11px 13px;
+
+        border:
+            1px solid
+            rgba(255,255,255,.09);
+
+        border-radius: 14px;
+
+        color:
+            rgba(255,255,255,.84);
+
+        background:
+            rgba(255,255,255,.045);
+
+        font-size: 14px;
+
         font-weight: 700;
     }
 
-    .auth-separator::before,
-    .auth-separator::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: #ead8bf;
+
+    .tb-register-benefit-icon {
+        width: 36px;
+        height: 36px;
+
+        flex: 0 0 36px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 11px;
+
+        background:
+            rgba(255,255,255,.09);
+
+        font-size: 17px;
     }
 
-    .auth-alt-box {
-        padding: 14px 16px;
-        border: 1px solid #ead8bf;
-        border-radius: 13px;
-        background: #fffaf1;
-        color: #6f5a4d;
-        text-align: center;
-        font-size: 14px;
-    }
 
-    .auth-note {
+    /* =========================================================
+       RIGHT FORM
+    ========================================================= */
+
+    .tb-register-form-panel {
+        position: relative;
+
         display: flex;
-        gap: 9px;
-        padding: 13px 15px;
-        border: 1px solid #ead2a4;
+        flex-direction: column;
+        justify-content: center;
+
+        padding: 50px 60px;
+
+        background:
+            radial-gradient(
+                circle at 100% 0%,
+                rgba(229,173,66,.10),
+                transparent 26%
+            ),
+            radial-gradient(
+                circle at 0% 100%,
+                rgba(53,86,47,.045),
+                transparent 25%
+            ),
+            #fff;
+    }
+
+
+    .tb-register-form-panel::after {
+        content: "";
+
+        position: absolute;
+
+        top: 25px;
+        right: 27px;
+
+        width: 90px;
+        height: 90px;
+
+        border:
+            1px solid
+            rgba(99,56,32,.06);
+
+        border-left: 0;
+        border-bottom: 0;
+
+        border-radius:
+            0 24px 0 0;
+
+        pointer-events: none;
+    }
+
+
+    .tb-register-form-head {
+        position: relative;
+
+        z-index: 2;
+
+        margin-bottom: 24px;
+    }
+
+
+    .tb-register-form-icon {
+        width: 42px;
+        height: 42px;
+
+        display: grid;
+        place-items: center;
+
+        margin-bottom: 15px;
+
+        border:
+            1px solid
+            #e8d1ad;
+
         border-radius: 13px;
-        background: linear-gradient(135deg,#fff9e8,#fff2d2);
-        color: #6d5332;
+
+        color: #7e4729;
+
+        background:
+            linear-gradient(
+                135deg,
+                #fff8e8,
+                #f6e0b7
+            );
+
+        box-shadow:
+            0 7px 15px
+            rgba(99,56,32,.07);
+
+        font-size: 18px;
+    }
+
+
+    .tb-register-form-head h2 {
+        margin: 0;
+
+        color: #30231c;
+
+        font-size: 34px;
+
+        line-height: 1.15;
+
+        font-weight: 950;
+
+        letter-spacing: -.7px;
+    }
+
+
+    .tb-register-form-head p {
+        margin: 9px 0 0;
+
+        max-width: 520px;
+
+        color: var(--rg-muted);
+
+        font-size: 14px;
+
+        line-height: 1.65;
+    }
+
+
+    .tb-register-trust {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 8px;
+
+        margin-bottom: 22px;
+    }
+
+
+    .tb-register-trust span {
+        display: inline-flex;
+        align-items: center;
+
+        min-height: 34px;
+
+        padding: 6px 11px;
+
+        border:
+            1px solid
+            #e6dacb;
+
+        border-radius: 999px;
+
+        color: #655349;
+
+        background: #fffdf9;
+
+        font-size: 12px;
+
+        font-weight: 750;
+    }
+
+
+    /* =========================================================
+       FORM FIELD
+    ========================================================= */
+
+    .tb-register-field {
+        margin-bottom: 16px;
+    }
+
+
+    .tb-register-label {
+        display: block;
+
+        margin-bottom: 8px;
+
+        color: #4c3529;
+
+        font-size: 14px;
+
+        font-weight: 850;
+    }
+
+
+    .tb-register-input-wrap {
+        position: relative;
+    }
+
+
+    .tb-register-input-icon {
+        position: absolute;
+
+        z-index: 2;
+
+        top: 50%;
+        left: 17px;
+
+        transform:
+            translateY(-50%);
+
+        pointer-events: none;
+
+        font-size: 17px;
+
+        opacity: .7;
+    }
+
+
+    .tb-register-input {
+        width: 100%;
+
+        min-height: 53px;
+
+        padding: 10px 48px;
+
+        border:
+            1px solid
+            #dfcbae;
+
+        border-radius: 15px;
+
+        outline: none;
+
+        color: #34261f;
+
+        background:
+            linear-gradient(
+                180deg,
+                #fffefb,
+                #fffaf3
+            );
+
+        font-size: 14px;
+
+        box-shadow:
+            inset 0 1px 0
+            rgba(255,255,255,.95);
+
+        transition:
+            border-color .18s ease,
+            box-shadow .18s ease,
+            background .18s ease;
+    }
+
+
+    .tb-register-input::placeholder {
+        color: #a69990;
+    }
+
+
+    .tb-register-input:hover {
+        border-color: #d8b98e;
+    }
+
+
+    .tb-register-input:focus {
+        border-color: #cf9f5d;
+
+        background: #fff;
+
+        box-shadow:
+            0 0 0 .22rem
+            rgba(229,173,66,.13);
+    }
+
+
+    .tb-register-input.is-invalid {
+        border-color: #c85a4b;
+    }
+
+
+    .tb-register-password {
+        padding-right: 54px;
+    }
+
+
+    .tb-register-toggle {
+        position: absolute;
+
+        z-index: 3;
+
+        top: 50%;
+        right: 9px;
+
+        transform:
+            translateY(-50%);
+
+        width: 38px;
+        height: 38px;
+
+        display: grid;
+        place-items: center;
+
+        padding: 0;
+
+        border: 0;
+
+        border-radius: 10px;
+
+        color: #705a4c;
+
+        background: transparent;
+
+        cursor: pointer;
+
+        font-size: 17px;
+    }
+
+
+    .tb-register-toggle:hover,
+    .tb-register-toggle:focus {
+        color: #4b2d1d;
+
+        background: #f7eee2;
+
+        outline: none;
+    }
+
+
+    .tb-register-error {
+        margin-top: 7px;
+
+        color: #b43e2e;
+
         font-size: 13px;
+
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+       PASSWORD STATUS
+    ========================================================= */
+
+    .tb-password-info {
+        margin-top: 8px;
+
+        color: #84756b;
+
+        font-size: 12px;
+
+        line-height: 1.5;
+    }
+
+
+    .tb-password-strength {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                4,
+                1fr
+            );
+
+        gap: 5px;
+
+        margin-top: 9px;
+    }
+
+
+    .tb-password-strength span {
+        height: 4px;
+
+        border-radius: 999px;
+
+        background: #eadfd3;
+
+        transition: .18s ease;
+    }
+
+
+    .tb-password-strength.level-1 span:nth-child(1) {
+        background: #b43e2e;
+    }
+
+
+    .tb-password-strength.level-2 span:nth-child(-n+2) {
+        background: #d58a30;
+    }
+
+
+    .tb-password-strength.level-3 span:nth-child(-n+3) {
+        background: #77914d;
+    }
+
+
+    .tb-password-strength.level-4 span {
+        background: #35562f;
+    }
+
+
+    .tb-password-match {
+        display: none;
+
+        margin-top: 7px;
+
+        font-size: 12px;
+
+        font-weight: 750;
+    }
+
+
+    .tb-password-match.show {
+        display: block;
+    }
+
+
+    .tb-password-match.ok {
+        color: #35562f;
+    }
+
+
+    .tb-password-match.error {
+        color: #b43e2e;
+    }
+
+
+    /* =========================================================
+       OTP INFO
+    ========================================================= */
+
+    .tb-register-note {
+        display: flex;
+
+        align-items: flex-start;
+
+        gap: 10px;
+
+        margin-top: 4px;
+
+        padding: 13px 14px;
+
+        border:
+            1px solid
+            #ead09d;
+
+        border-radius: 13px;
+
+        color: #6a5333;
+
+        background:
+            linear-gradient(
+                135deg,
+                #fff9e6,
+                #fff1ca
+            );
+
+        font-size: 13px;
+
         line-height: 1.55;
     }
 
-    @media (max-width: 900px) {
-        .auth-shell {
-            grid-template-columns: 1fr;
-            max-width: 640px;
-        }
 
-        .auth-brand-panel {
-            min-height: 300px;
-            padding: 34px 30px;
-        }
+    /* =========================================================
+       SUBMIT
+    ========================================================= */
 
-        .auth-brand-benefits {
-            grid-template-columns: 1fr 1fr;
-        }
+    .tb-register-submit {
+        position: relative;
 
-        .auth-form-panel {
-            padding: 38px 34px;
-        }
+        overflow: hidden;
+
+        width: 100%;
+
+        min-height: 56px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 8px;
+
+        margin-top: 20px;
+
+        border: 0;
+
+        border-radius: 16px;
+
+        color: #fff;
+
+        background:
+            linear-gradient(
+                135deg,
+                #b43e2e 0%,
+                #633820 50%,
+                #35562f 100%
+            );
+
+        box-shadow:
+            0 13px 28px
+            rgba(99,56,32,.21);
+
+        font-size: 15px;
+
+        font-weight: 900;
+
+        cursor: pointer;
+
+        transition:
+            transform .18s ease,
+            box-shadow .18s ease;
     }
 
+
+    .tb-register-submit::before {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: -120%;
+
+        width: 60%;
+        height: 100%;
+
+        transform:
+            skewX(-20deg);
+
+        background:
+            linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,.22),
+                transparent
+            );
+
+        transition:
+            left .45s ease;
+    }
+
+
+    .tb-register-submit:hover {
+        transform:
+            translateY(-2px);
+
+        box-shadow:
+            0 17px 34px
+            rgba(99,56,32,.25);
+    }
+
+
+    .tb-register-submit:hover::before {
+        left: 145%;
+    }
+
+
+    /* =========================================================
+       BOTTOM
+    ========================================================= */
+
+    .tb-register-separator {
+        display: flex;
+        align-items: center;
+
+        gap: 13px;
+
+        margin: 25px 0 19px;
+
+        color: #9a8a80;
+
+        font-size: 12px;
+
+        font-weight: 800;
+
+        letter-spacing: .04em;
+    }
+
+
+    .tb-register-separator::before,
+    .tb-register-separator::after {
+        content: "";
+
+        flex: 1;
+
+        height: 1px;
+
+        background: #ead8bf;
+    }
+
+
+    .tb-register-login-box {
+        padding: 15px 17px;
+
+        border:
+            1px solid
+            #e6d2b2;
+
+        border-radius: 14px;
+
+        color: #6d594d;
+
+        background:
+            linear-gradient(
+                135deg,
+                #fffaf1,
+                #fff4e2
+            );
+
+        text-align: center;
+
+        font-size: 14px;
+    }
+
+
+    .tb-register-link {
+        color: var(--rg-red);
+
+        font-weight: 850;
+
+        text-decoration: none;
+    }
+
+
+    .tb-register-link:hover {
+        color: var(--rg-brown);
+
+        text-decoration: underline;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 991.98px) {
+
+        .tb-register-page {
+            padding:
+                30px 0 60px;
+        }
+
+
+        .tb-register-shell {
+            max-width: 680px;
+
+            grid-template-columns: 1fr;
+        }
+
+
+        .tb-register-brand {
+            min-height: auto;
+
+            padding: 38px 34px;
+        }
+
+
+        .tb-register-brand h1 {
+            max-width: 540px;
+
+            font-size: 40px;
+        }
+
+
+        .tb-register-benefits {
+            grid-template-columns:
+                repeat(
+                    3,
+                    minmax(0,1fr)
+                );
+
+            margin-top: 28px;
+        }
+
+
+        .tb-register-benefit {
+            align-items: flex-start;
+
+            flex-direction: column;
+
+            font-size: 13px;
+        }
+
+
+        .tb-register-form-panel {
+            padding: 44px 38px;
+        }
+
+    }
+
+
     @media (max-width: 575.98px) {
-        .auth-premium-page {
-            padding: 28px 0 60px;
+
+        .tb-register-page {
+            padding:
+                18px 0 42px;
         }
 
-        .auth-premium-page::after {
-            display: none;
-        }
 
-        .auth-shell {
+        .tb-register-shell {
             border-radius: 22px;
         }
 
-        .auth-brand-panel {
-            min-height: 275px;
-            padding: 28px 22px;
+
+        .tb-register-brand {
+            padding: 29px 23px;
         }
 
-        .auth-brand-panel h1 {
+
+        .tb-register-logo {
+            width: 50px;
+            height: 50px;
+
+            margin-bottom: 18px;
+
+            border-radius: 15px;
+        }
+
+
+        .tb-register-brand h1 {
             font-size: 34px;
         }
 
-        .auth-brand-benefits {
+
+        .tb-register-brand-copy {
+            font-size: 14px;
+        }
+
+
+        .tb-register-benefits {
+            grid-template-columns: 1fr;
+
+            gap: 8px;
+
+            margin-top: 24px;
+        }
+
+
+        .tb-register-benefit {
+            flex-direction: row;
+
+            align-items: center;
+        }
+
+
+        .tb-register-form-panel {
+            padding: 32px 22px;
+        }
+
+
+        .tb-register-form-panel::after {
+            display: none;
+        }
+
+
+        .tb-register-form-head h2 {
+            font-size: 29px;
+        }
+
+
+        .tb-register-trust {
+            display: grid;
+
             grid-template-columns: 1fr;
         }
 
-        .auth-form-panel {
-            padding: 30px 22px;
+
+        .tb-register-trust span {
+            justify-content: center;
         }
 
-        .auth-form-head h2 {
-            font-size: 28px;
+
+        .tb-register-input {
+            min-height: 52px;
         }
+
     }
 
+
     @media (prefers-reduced-motion: reduce) {
-        .auth-premium-page *,
-        .auth-premium-page *::before,
-        .auth-premium-page *::after {
+
+        .tb-register-page *,
+        .tb-register-page *::before,
+        .tb-register-page *::after {
             transition: none !important;
-            animation: none !important;
         }
+
     }
 </style>
 
 
-<div class="auth-premium-page">
-    <div class="auth-shell">
-        <aside class="auth-brand-panel">
-            <div class="auth-brand-content">
-                <div class="auth-kicker">🌿 TINH HOA TÂY BẮC</div>
-                <h1>Bắt đầu hành trình khám phá đặc sản Tây Bắc.</h1>
-                <p class="mt-3 mb-0">
-                    Tạo tài khoản để lưu thông tin mua sắm, quản lý đơn hàng
-                    và nhận mã ưu đãi từ Tinh Hoa Tây Bắc.
+<div class="tb-register-page">
+
+    <div class="tb-register-shell">
+
+
+        {{-- =====================================================
+            BRAND
+        ====================================================== --}}
+        <aside class="tb-register-brand">
+
+            <div class="tb-register-brand-top">
+
+                <div class="tb-register-logo">
+                    🌿
+                </div>
+
+
+                <div class="tb-register-kicker">
+                    Tinh Hoa Tây Bắc
+                </div>
+
+
+                <h1>
+                    Bắt đầu hành trình
+                    khám phá Tây Bắc.
+                </h1>
+
+
+                <p class="tb-register-brand-copy">
+
+                    Tạo tài khoản để mua sắm thuận tiện,
+                    lưu địa chỉ giao hàng,
+                    theo dõi đơn mua
+                    và nhận những ưu đãi dành cho thành viên.
+
                 </p>
+
             </div>
 
-            <div class="auth-brand-benefits">
-                <div class="auth-benefit"><span>✅</span> Xác thực tài khoản bằng OTP</div>
-                <div class="auth-benefit"><span>📍</span> Lưu nhiều địa chỉ giao hàng</div>
-                <div class="auth-benefit"><span>🎁</span> Nhận ưu đãi dành cho thành viên</div>
+
+            <div class="tb-register-benefits">
+
+                <div class="tb-register-benefit">
+
+                    <span class="tb-register-benefit-icon">
+                        ✉️
+                    </span>
+
+                    <span>
+                        Xác thực tài khoản bằng OTP email
+                    </span>
+
+                </div>
+
+
+                <div class="tb-register-benefit">
+
+                    <span class="tb-register-benefit-icon">
+                        📍
+                    </span>
+
+                    <span>
+                        Lưu nhiều địa chỉ giao hàng
+                    </span>
+
+                </div>
+
+
+                <div class="tb-register-benefit">
+
+                    <span class="tb-register-benefit-icon">
+                        🎁
+                    </span>
+
+                    <span>
+                        Nhận voucher và ưu đãi thành viên
+                    </span>
+
+                </div>
+
             </div>
+
         </aside>
 
-        <section class="auth-form-panel">
-            <div class="auth-form-head">
-                <h2 class="mb-2">Tạo tài khoản ✨</h2>
-                <p class="mb-0">
-                    Điền thông tin bên dưới. Sau khi đăng ký, hệ thống sẽ gửi mã OTP 6 số tới email của bạn.
+
+        {{-- =====================================================
+            FORM
+        ====================================================== --}}
+        <section class="tb-register-form-panel">
+
+
+            <div class="tb-register-form-head">
+
+                <div class="tb-register-form-icon">
+                    ✨
+                </div>
+
+
+                <h2>
+                    Tạo tài khoản
+                </h2>
+
+
+                <p>
+                    Điền thông tin bên dưới.
+                    Sau khi đăng ký thành công,
+                    hệ thống sẽ gửi mã OTP
+                    tới email của bạn.
                 </p>
+
             </div>
 
 
-            <div class="d-flex flex-wrap gap-2 mb-4">
-                <span class="badge rounded-pill text-bg-light border px-3 py-2">✓ Đăng ký nhanh</span>
-                <span class="badge rounded-pill text-bg-light border px-3 py-2">✉️ OTP qua email</span>
+            <div class="tb-register-trust">
+
+                <span>
+                    ✓ Đăng ký nhanh
+                </span>
+
+                <span>
+                    ✉️ OTP qua email
+                </span>
+
+                <span>
+                    🔒 Bảo mật tài khoản
+                </span>
+
             </div>
-            <form method="POST" action="{{ route('register') }}">
+
+
+            <form
+                method="POST"
+                action="{{ route('register') }}"
+                id="registerForm"
+            >
+
                 @csrf
 
-                <div class="mb-3">
-                    <label for="name" class="auth-label">Họ và tên</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">👤</span>
+
+                {{-- NAME --}}
+                <div class="tb-register-field">
+
+                    <label
+                        for="name"
+                        class="tb-register-label"
+                    >
+                        Họ và tên
+                    </label>
+
+
+                    <div class="tb-register-input-wrap">
+
+                        <span class="tb-register-input-icon">
+                            👤
+                        </span>
+
+
                         <input
                             id="name"
                             type="text"
                             name="name"
                             value="{{ old('name') }}"
-                            class="form-control auth-input @error('name') is-invalid @enderror"
+                            class="
+                                tb-register-input
+                                @error('name')
+                                    is-invalid
+                                @enderror
+                            "
                             placeholder="Nhập họ và tên"
                             autocomplete="name"
                             required
                             autofocus
                         >
+
                     </div>
+
+
                     @error('name')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
+
+                        <div class="tb-register-error">
+                            {{ $message }}
+                        </div>
+
                     @enderror
+
                 </div>
 
-                <div class="mb-3">
-                    <label for="email" class="auth-label">Email</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">✉️</span>
+
+                {{-- EMAIL --}}
+                <div class="tb-register-field">
+
+                    <label
+                        for="email"
+                        class="tb-register-label"
+                    >
+                        Email
+                    </label>
+
+
+                    <div class="tb-register-input-wrap">
+
+                        <span class="tb-register-input-icon">
+                            ✉️
+                        </span>
+
+
                         <input
                             id="email"
                             type="email"
                             name="email"
                             value="{{ old('email') }}"
-                            class="form-control auth-input @error('email') is-invalid @enderror"
+                            class="
+                                tb-register-input
+                                @error('email')
+                                    is-invalid
+                                @enderror
+                            "
                             placeholder="example@gmail.com"
                             autocomplete="email"
                             required
                         >
+
                     </div>
+
+
                     @error('email')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
+
+                        <div class="tb-register-error">
+                            {{ $message }}
+                        </div>
+
                     @enderror
+
                 </div>
 
-                <div class="mb-3">
-                    <label for="password" class="auth-label">Mật khẩu</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">🔐</span>
+
+                {{-- PASSWORD --}}
+                <div class="tb-register-field">
+
+                    <label
+                        for="password"
+                        class="tb-register-label"
+                    >
+                        Mật khẩu
+                    </label>
+
+
+                    <div class="tb-register-input-wrap">
+
+                        <span class="tb-register-input-icon">
+                            🔐
+                        </span>
+
+
                         <input
                             id="password"
                             type="password"
                             name="password"
-                            class="form-control auth-input @error('password') is-invalid @enderror"
+                            class="
+                                tb-register-input
+                                tb-register-password
+                                @error('password')
+                                    is-invalid
+                                @enderror
+                            "
                             placeholder="Tối thiểu 8 ký tự"
                             autocomplete="new-password"
                             required
                         >
+
+
+                        <button
+                            type="button"
+                            class="tb-register-toggle"
+                            data-toggle-password="password"
+                            aria-label="Hiện mật khẩu"
+                            title="Hiện mật khẩu"
+                        >
+                            👁
+                        </button>
+
                     </div>
+
+
+                    <div class="tb-password-info">
+                        Nên sử dụng chữ hoa, chữ thường,
+                        số và ký tự đặc biệt.
+                    </div>
+
+
+                    <div
+                        class="tb-password-strength"
+                        id="passwordStrength"
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+
                     @error('password')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
+
+                        <div class="tb-register-error">
+                            {{ $message }}
+                        </div>
+
                     @enderror
+
                 </div>
 
-                <div class="mb-2">
-                    <label for="password_confirmation" class="auth-label">Xác nhận mật khẩu</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">🛡️</span>
+
+                {{-- CONFIRM PASSWORD --}}
+                <div class="tb-register-field">
+
+                    <label
+                        for="password_confirmation"
+                        class="tb-register-label"
+                    >
+                        Xác nhận mật khẩu
+                    </label>
+
+
+                    <div class="tb-register-input-wrap">
+
+                        <span class="tb-register-input-icon">
+                            🛡️
+                        </span>
+
+
                         <input
                             id="password_confirmation"
                             type="password"
                             name="password_confirmation"
-                            class="form-control auth-input"
+                            class="
+                                tb-register-input
+                                tb-register-password
+                            "
                             placeholder="Nhập lại mật khẩu"
                             autocomplete="new-password"
                             required
                         >
+
+
+                        <button
+                            type="button"
+                            class="tb-register-toggle"
+                            data-toggle-password="password_confirmation"
+                            aria-label="Hiện mật khẩu"
+                            title="Hiện mật khẩu"
+                        >
+                            👁
+                        </button>
+
                     </div>
+
+
+                    <div
+                        class="tb-password-match"
+                        id="passwordMatch"
+                    >
+                    </div>
+
                 </div>
 
-                <div class="auth-note mt-3">
-                    <span>✉️</span>
+
+                {{-- OTP NOTE --}}
+                <div class="tb-register-note">
+
                     <span>
-                        Email này sẽ được dùng để nhận mã xác thực OTP và các thông tin liên quan đến tài khoản.
+                        ✉️
                     </span>
+
+                    <span>
+                        Sau khi tạo tài khoản,
+                        một mã OTP 6 số sẽ được gửi
+                        tới email trên để xác thực tài khoản.
+                    </span>
+
                 </div>
 
-                <button type="submit" class="auth-submit mt-4">
-                    ✨ Tạo tài khoản
+
+                {{-- SUBMIT --}}
+                <button
+                    type="submit"
+                    class="tb-register-submit"
+                >
+                    <span>
+                        ✨
+                    </span>
+
+                    <span>
+                        Tạo tài khoản
+                    </span>
                 </button>
+
             </form>
 
-            <div class="auth-separator">ĐÃ CÓ TÀI KHOẢN?</div>
 
-            <div class="auth-alt-box">
-                <a href="{{ route('login') }}" class="auth-link">
+            <div class="tb-register-separator">
+                ĐÃ CÓ TÀI KHOẢN?
+            </div>
+
+
+            <div class="tb-register-login-box">
+
+                <a
+                    href="{{ route('login') }}"
+                    class="tb-register-link"
+                >
                     ← Quay lại đăng nhập
                 </a>
+
             </div>
+
         </section>
+
     </div>
+
 </div>
 
 
-<style>
-    /* =========================================================
-       AUTH LUXURY UPGRADE
-       Chỉ nâng UI - không đổi route / form / field / logic.
-    ========================================================= */
+<script>
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
 
-    .auth-premium-page {
-        overflow: hidden;
-        padding-top: 64px !important;
-        padding-bottom: 96px !important;
-    }
+        /* =============================================
+           SHOW / HIDE PASSWORD
+        ============================================= */
 
-    /* Nền tổng thể có chiều sâu hơn */
-    .auth-premium-page::before {
-        background:
-            radial-gradient(circle at 8% 12%, rgba(242,193,92,.24), transparent 25%),
-            radial-gradient(circle at 92% 10%, rgba(72,99,59,.18), transparent 29%),
-            radial-gradient(circle at 50% 32%, rgba(168,59,45,.06), transparent 31%),
-            linear-gradient(180deg,#fff8e9 0%,#fffdf8 45%,#ffffff 100%) !important;
-    }
+        const toggles =
+            document.querySelectorAll(
+                '[data-toggle-password]'
+            );
 
-    .auth-premium-page::after {
-        width: 300px !important;
-        height: 300px !important;
-        top: 65px !important;
-        right: -70px !important;
-        opacity: .085 !important;
-    }
 
-    .auth-shell {
-        position: relative;
-        width: min(100%, 1120px) !important;
-        border-radius: 34px !important;
-        border: 1px solid rgba(221,193,154,.82) !important;
-        box-shadow:
-            0 38px 95px rgba(75,42,24,.16),
-            0 8px 24px rgba(75,42,24,.06) !important;
-        isolation: isolate;
-    }
+        toggles.forEach(
+            function (button) {
 
-    /* viền ánh vàng mảnh ở mép trên */
-    .auth-shell::before {
-        content: "";
-        position: absolute;
-        z-index: 4;
-        top: 0;
-        left: 9%;
-        right: 9%;
-        height: 3px;
-        border-radius: 999px;
-        background:
-            linear-gradient(90deg,transparent,#f2c15c 24%,#d97706 48%,#48633b 76%,transparent);
-        opacity: .82;
-        pointer-events: none;
-    }
+                button.addEventListener(
+                    'click',
+                    function () {
 
-    /* PANEL TRÁI */
-    .auth-brand-panel {
-        min-height: 640px !important;
-        padding: 54px 48px !important;
-        background:
-            radial-gradient(circle at 82% 14%, rgba(242,193,92,.28), transparent 29%),
-            radial-gradient(circle at 12% 112%, rgba(168,59,45,.33), transparent 35%),
-            linear-gradient(148deg,#25130c 0%,#552e1c 46%,#48633b 100%) !important;
-    }
+                        const targetId =
+                            button.dataset
+                                .togglePassword;
 
-    .auth-brand-panel::before {
-        width: 410px !important;
-        height: 255px !important;
-        right: -50px !important;
-        bottom: -65px !important;
-        opacity: .14 !important;
-        filter: drop-shadow(0 12px 24px rgba(0,0,0,.12));
-    }
 
-    .auth-brand-panel::after {
-        content: "✦";
-        right: 44px !important;
-        top: 28px !important;
-        font-size: 86px !important;
-        opacity: .055 !important;
-        color: #f7d579;
-        transform: rotate(18deg) !important;
-    }
+                        const input =
+                            document.getElementById(
+                                targetId
+                            );
 
-    .auth-brand-content::before {
-        content: "TH";
-        display: grid;
-        place-items: center;
-        width: 56px;
-        height: 56px;
-        margin-bottom: 24px;
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,.15);
-        background:
-            linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
-        color: #f5d47e;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 22px;
-        font-weight: 900;
-        letter-spacing: .05em;
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.12),
-            0 10px 24px rgba(0,0,0,.14);
-        backdrop-filter: blur(10px);
-    }
 
-    .auth-kicker {
-        margin-bottom: 18px !important;
-        padding: 7px 12px !important;
-        background: rgba(255,255,255,.07) !important;
-        border-color: rgba(242,193,92,.34) !important;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-    }
+                        if (!input) {
+                            return;
+                        }
 
-    .auth-brand-panel h1 {
-        max-width: 470px !important;
-        font-size: clamp(38px,4.4vw,58px) !important;
-        line-height: 1.02 !important;
-        letter-spacing: -1.25px !important;
-    }
 
-    .auth-brand-panel p {
-        max-width: 490px !important;
-        font-size: 15px;
-        line-height: 1.78 !important;
-    }
+                        const isHidden =
+                            input.type
+                            ===
+                            'password';
 
-    .auth-brand-benefits {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
-        margin-top: 34px;
-    }
 
-    .auth-benefit {
-        padding: 11px 13px;
-        border: 1px solid rgba(255,255,255,.08);
-        border-radius: 14px;
-        background: rgba(255,255,255,.045);
-        backdrop-filter: blur(8px);
-        transition:
-            transform .18s ease,
-            background .18s ease,
-            border-color .18s ease;
-    }
+                        input.type =
+                            isHidden
+                            ? 'text'
+                            : 'password';
 
-    .auth-benefit:hover {
-        transform: translateX(4px);
-        background: rgba(255,255,255,.08);
-        border-color: rgba(242,193,92,.18);
-    }
 
-    .auth-benefit span {
-        width: 35px !important;
-        height: 35px !important;
-        flex-basis: 35px !important;
-        border-radius: 11px !important;
-        background:
-            linear-gradient(135deg,rgba(242,193,92,.16),rgba(255,255,255,.06)) !important;
-    }
+                        button.textContent =
+                            isHidden
+                            ? '🙈'
+                            : '👁';
 
-    /* FORM PANEL */
-    .auth-form-panel {
-        position: relative;
-        padding: 58px 62px !important;
-        background:
-            radial-gradient(circle at 100% 0%,rgba(242,193,92,.11),transparent 26%),
-            radial-gradient(circle at 0% 100%,rgba(72,99,59,.045),transparent 26%),
-            #fff !important;
-    }
 
-    .auth-form-panel::before {
-        content: "";
-        position: absolute;
-        top: 24px;
-        right: 26px;
-        width: 92px;
-        height: 92px;
-        border: 1px solid rgba(95,52,29,.055);
-        border-left: 0;
-        border-bottom: 0;
-        border-radius: 0 24px 0 0;
-        pointer-events: none;
-    }
+                        button.setAttribute(
+                            'aria-label',
+                            isHidden
+                            ? 'Ẩn mật khẩu'
+                            : 'Hiện mật khẩu'
+                        );
 
-    .auth-form-head {
-        margin-bottom: 31px !important;
-    }
 
-    .auth-form-head::before {
-        content: "✦";
-        display: inline-grid;
-        place-items: center;
-        width: 38px;
-        height: 38px;
-        margin-bottom: 14px;
-        border: 1px solid #e8d2af;
-        border-radius: 12px;
-        background:
-            linear-gradient(135deg,#fff8e8,#f7e4bd);
-        color: #8a4c2c;
-        font-size: 17px;
-        box-shadow: 0 6px 14px rgba(95,52,29,.06);
-    }
+                        button.setAttribute(
+                            'title',
+                            isHidden
+                            ? 'Ẩn mật khẩu'
+                            : 'Hiện mật khẩu'
+                        );
 
-    .auth-form-head h2 {
-        font-size: 35px !important;
-        color: #2e2019 !important;
-    }
+                    }
+                );
 
-    .auth-form-head p {
-        font-size: 14.5px;
-    }
+            }
+        );
 
-    .auth-label {
-        font-size: 12.5px !important;
-        letter-spacing: .015em;
-    }
 
-    .auth-input {
-        min-height: 54px !important;
-        padding-left: 48px !important;
-        border-radius: 15px !important;
-        border-color: #e1cdb0 !important;
-        background:
-            linear-gradient(180deg,#fffefb,#fffaf3) !important;
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.95),
-            0 4px 12px rgba(95,52,29,.025) !important;
-        transition:
-            border-color .18s ease,
-            box-shadow .18s ease,
-            background .18s ease,
-            transform .18s ease;
-    }
+        /* =============================================
+           PASSWORD STRENGTH
+        ============================================= */
 
-    .auth-input:hover {
-        border-color: #d9bb91 !important;
-    }
+        const password =
+            document.getElementById(
+                'password'
+            );
 
-    .auth-input:focus {
-        border-color: #d3a25f !important;
-        background: #fff !important;
-        box-shadow:
-            0 0 0 .22rem rgba(217,119,6,.10),
-            0 8px 18px rgba(95,52,29,.05) !important;
-        transform: translateY(-1px);
-    }
 
-    .auth-input-icon {
-        left: 17px !important;
-        opacity: .72 !important;
-        filter: grayscale(.08);
-    }
+        const confirmation =
+            document.getElementById(
+                'password_confirmation'
+            );
 
-    .auth-submit {
-        min-height: 56px !important;
-        border-radius: 16px !important;
-        background:
-            linear-gradient(135deg,#a83b2d 0%,#6a3923 48%,#48633b 100%) !important;
-        box-shadow:
-            0 13px 28px rgba(95,52,29,.21) !important;
-    }
 
-    .auth-submit:hover {
-        transform: translateY(-3px) !important;
-        box-shadow:
-            0 18px 34px rgba(95,52,29,.25) !important;
-    }
+        const strength =
+            document.getElementById(
+                'passwordStrength'
+            );
 
-    .auth-alt-box {
-        border-radius: 14px !important;
-        background:
-            linear-gradient(135deg,#fffaf1,#fff5e5) !important;
-        border-color: #e7d0ad !important;
-    }
 
-    .auth-note {
-        border-radius: 14px !important;
-        background:
-            linear-gradient(135deg,#fff8df,#fff1ca) !important;
-        border-color: #ebcf94 !important;
-    }
+        const match =
+            document.getElementById(
+                'passwordMatch'
+            );
 
-    .auth-separator {
-        margin: 26px 0 !important;
-    }
 
-    /* OTP riêng */
-    .otp-mail-icon {
-        width: 96px !important;
-        height: 96px !important;
-        border-radius: 30px !important;
-        font-size: 45px !important;
-        background:
-            radial-gradient(circle at 30% 24%,rgba(255,255,255,.94),transparent 32%),
-            linear-gradient(135deg,#fff1c9,#f3d999) !important;
-        box-shadow:
-            0 16px 34px rgba(95,52,29,.11),
-            inset 0 1px 0 rgba(255,255,255,.95) !important;
-    }
+        function updateStrength() {
 
-    .otp-email-pill {
-        padding: 8px 14px !important;
-        border-color: #e3c898 !important;
-        background:
-            linear-gradient(180deg,#fffaf0,#fff3dd) !important;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
+            if (
+                !password
+                ||
+                !strength
+            ) {
+                return;
+            }
 
-    .otp-input {
-        height: 72px !important;
-        border-radius: 18px !important;
-        background:
-            linear-gradient(180deg,#fffefb,#fff8ed) !important;
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.95),
-            0 8px 20px rgba(95,52,29,.05) !important;
-    }
 
-    .otp-resend-btn {
-        min-height: 49px !important;
-        border-radius: 14px !important;
-        background:
-            linear-gradient(180deg,#fff,#fffaf2) !important;
-        transition:
-            transform .16s ease,
-            box-shadow .16s ease,
-            background .16s ease;
-    }
+            const value =
+                password.value;
 
-    .otp-resend-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 18px rgba(95,52,29,.07);
-    }
 
-    /* responsive */
-    @media (max-width: 900px) {
-        .auth-shell {
-            max-width: 680px !important;
+            let score = 0;
+
+
+            if (value.length >= 8) {
+                score++;
+            }
+
+
+            if (
+                /[A-Z]/.test(value)
+                &&
+                /[a-z]/.test(value)
+            ) {
+                score++;
+            }
+
+
+            if (/\d/.test(value)) {
+                score++;
+            }
+
+
+            if (
+                /[^A-Za-z0-9]/.test(
+                    value
+                )
+            ) {
+                score++;
+            }
+
+
+            strength.className =
+                'tb-password-strength';
+
+
+            if (score > 0) {
+
+                strength.classList.add(
+                    'level-' + score
+                );
+
+            }
+
         }
 
-        .auth-brand-panel {
-            min-height: 360px !important;
-            padding: 38px 34px !important;
+
+        function updateMatch() {
+
+            if (
+                !password
+                ||
+                !confirmation
+                ||
+                !match
+            ) {
+                return;
+            }
+
+
+            if (
+                confirmation.value
+                ===
+                ''
+            ) {
+
+                match.className =
+                    'tb-password-match';
+
+                match.textContent =
+                    '';
+
+                return;
+
+            }
+
+
+            if (
+                password.value
+                ===
+                confirmation.value
+            ) {
+
+                match.className =
+                    'tb-password-match show ok';
+
+                match.textContent =
+                    '✓ Mật khẩu xác nhận trùng khớp.';
+
+            } else {
+
+                match.className =
+                    'tb-password-match show error';
+
+                match.textContent =
+                    '✕ Mật khẩu xác nhận chưa trùng khớp.';
+
+            }
+
         }
 
-        .auth-form-panel {
-            padding: 42px 36px !important;
+
+        if (password) {
+
+            password.addEventListener(
+                'input',
+                function () {
+
+                    updateStrength();
+                    updateMatch();
+
+                }
+            );
+
         }
 
-        .auth-brand-content::before {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 18px;
+
+        if (confirmation) {
+
+            confirmation.addEventListener(
+                'input',
+                updateMatch
+            );
+
         }
+
     }
-
-    @media (max-width: 575.98px) {
-        .auth-premium-page {
-            padding-top: 32px !important;
-            padding-bottom: 64px !important;
-        }
-
-        .auth-shell {
-            border-radius: 24px !important;
-        }
-
-        .auth-brand-panel {
-            min-height: 325px !important;
-            padding: 30px 24px !important;
-        }
-
-        .auth-brand-panel h1 {
-            font-size: 36px !important;
-        }
-
-        .auth-form-panel {
-            padding: 32px 22px !important;
-        }
-
-        .auth-form-head h2 {
-            font-size: 30px !important;
-        }
-
-        .auth-input {
-            min-height: 52px !important;
-        }
-    }
-</style>
-
+);
+</script>
 
 @endsection
