@@ -57,7 +57,7 @@
     }
 
     .customer-detail-hero::after {
-        content: "🌿";
+        content: "•";
         position: absolute;
         right: 30px;
         bottom: -28px;
@@ -402,7 +402,7 @@
     }
 
     .latest-shipping-box::after {
-        content: "🚚";
+        content: "•";
         position: absolute;
         right: 16px;
         bottom: -13px;
@@ -435,7 +435,7 @@
     }
 
     .address-card-admin::after {
-        content: "📍";
+        content: "•";
         position: absolute;
         right: 13px;
         bottom: -12px;
@@ -544,13 +544,13 @@
             @endif
 
             <div>
-                <div class="detail-kicker">👤 KHÁCH HÀNG #{{ $customer->id }}</div>
+                <div class="detail-kicker">• KHÁCH HÀNG #{{ $customer->id }}</div>
                 <h1 class="fw-bold mb-2">{{ $customer->name }}</h1>
                 <div class="sub">
                     {{ $customer->email }}
                     ·
                     @if($customer->email_verified_at)
-                        ✓ Đã xác thực email
+                        • Đã xác thực email
                     @else
                         Chưa xác thực email
                     @endif
@@ -566,28 +566,28 @@
     <div class="row g-3 mb-4">
         <div class="col-md-3 col-6">
             <div class="customer-mini-stat">
-                <div class="text-muted small">📦 Tổng đơn</div>
+                <div class="text-muted small">• Tổng đơn</div>
                 <div class="value">{{ $totalOrders }}</div>
             </div>
         </div>
 
         <div class="col-md-3 col-6">
             <div class="customer-mini-stat">
-                <div class="text-muted small">⏳ Đang xử lý</div>
+                <div class="text-muted small">• Đang xử lý</div>
                 <div class="value">{{ $pendingOrders }}</div>
             </div>
         </div>
 
         <div class="col-md-3 col-6">
             <div class="customer-mini-stat">
-                <div class="text-muted small">✅ Đã giao</div>
+                <div class="text-muted small">• Đã giao</div>
                 <div class="value">{{ $deliveredOrders }}</div>
             </div>
         </div>
 
         <div class="col-md-3 col-6">
             <div class="customer-mini-stat">
-                <div class="text-muted small">💰 Đã chi tiêu</div>
+                <div class="text-muted small">• Đã chi tiêu</div>
                 <div class="value" style="color:#a83b2d;font-size:22px;">
                     {{ number_format((float) $totalSpent, 0, ',', '.') }} đ
                 </div>
@@ -599,7 +599,7 @@
         <div class="col-xl-5">
             <div class="customer-detail-card h-100">
                 <div class="card-header">
-                    <h5 class="fw-bold mb-1">👤 Thông tin tài khoản</h5>
+                    <h5 class="fw-bold mb-1">• Thông tin tài khoản</h5>
                     <div class="text-muted small">
                         Dữ liệu khách hàng cung cấp khi tạo và sử dụng tài khoản.
                     </div>
@@ -620,7 +620,7 @@
                         <span class="info-label">Trạng thái email</span>
                         <span class="info-value">
                             @if($customer->email_verified_at)
-                                <span class="text-success">✓ Đã xác thực</span>
+                                <span class="text-success">• Đã xác thực</span>
                             @else
                                 <span class="text-warning">Chưa xác thực</span>
                             @endif
@@ -647,7 +647,7 @@
         <div class="col-xl-7">
             <div class="customer-detail-card h-100">
                 <div class="card-header">
-                    <h5 class="fw-bold mb-1">🚚 Thông tin giao hàng gần nhất</h5>
+                    <h5 class="fw-bold mb-1">• Thông tin giao hàng gần nhất</h5>
                     <div class="text-muted small">
                         Thông tin khách hàng nhập khi đặt đơn gần đây nhất.
                     </div>
@@ -690,14 +690,14 @@
                                         href="{{ route('admin.orders.show', $latestOrder) }}"
                                         class="btn btn-sm btn-outline-dark"
                                     >
-                                        🧾 Mở đơn hàng gần nhất
+                                        • Mở đơn hàng gần nhất
                                     </a>
                                 </div>
                             </div>
                         </div>
                     @else
                         <div class="text-center py-4">
-                            <div style="font-size:48px;">📭</div>
+                            <div style="font-size:48px;">•</div>
                             <div class="fw-bold mt-2">Khách hàng chưa đặt đơn nào</div>
                         </div>
                     @endif
@@ -708,7 +708,7 @@
 
     <div class="customer-detail-card mb-4">
         <div class="card-header">
-            <h5 class="fw-bold mb-1">📍 Địa chỉ khách hàng đã lưu</h5>
+            <h5 class="fw-bold mb-1">• Địa chỉ khách hàng đã lưu</h5>
             <div class="text-muted small">
                 Đây là các địa chỉ do chính khách hàng thêm trong mục “Địa chỉ của tôi”.
             </div>
@@ -717,7 +717,7 @@
         <div class="card-body">
             @if($addresses->isEmpty())
                 <div class="text-center py-4">
-                    <div style="font-size:48px;">📍</div>
+                    <div style="font-size:48px;">•</div>
                     <div class="fw-bold mt-2">Khách hàng chưa lưu địa chỉ</div>
                 </div>
             @else
@@ -740,7 +740,7 @@
                                     </span>
 
                                     @if(data_get($address, 'is_default'))
-                                        <span class="badge bg-success rounded-pill">✓ Mặc định</span>
+                                        <span class="badge bg-success rounded-pill">• Mặc định</span>
                                     @endif
                                 </div>
 
@@ -749,11 +749,11 @@
                                 </div>
 
                                 <div class="mt-1">
-                                    📞 {{ data_get($address, 'phone', 'Chưa có số điện thoại') }}
+                                    • {{ data_get($address, 'phone', 'Chưa có số điện thoại') }}
                                 </div>
 
                                 <div class="text-muted mt-2">
-                                    📍 {{ $fullAddress ?: 'Chưa có địa chỉ chi tiết' }}
+                                    • {{ $fullAddress ?: 'Chưa có địa chỉ chi tiết' }}
                                 </div>
                             </div>
                         </div>
@@ -766,7 +766,7 @@
     <div class="customer-detail-card">
         <div class="card-header d-flex justify-content-between align-items-center gap-3 flex-wrap">
             <div>
-                <h5 class="fw-bold mb-1">🧾 Lịch sử đơn hàng</h5>
+                <h5 class="fw-bold mb-1">• Lịch sử đơn hàng</h5>
                 <div class="text-muted small">
                     Bấm mã đơn để xem toàn bộ chi tiết đơn hàng.
                 </div>
@@ -779,7 +779,7 @@
 
         @if($orders->isEmpty())
             <div class="text-center py-5">
-                <div style="font-size:52px;">📦</div>
+                <div style="font-size:52px;">•</div>
                 <h5 class="fw-bold mt-2">Chưa có đơn hàng</h5>
             </div>
         @else
@@ -837,7 +837,7 @@
                                 </td>
 
                                 <td>
-                                    {{ $order->payment_method === 'bank' ? '🏦 Chuyển khoản' : '💵 COD' }}
+                                    {{ $order->payment_method === 'bank' ? '• Chuyển khoản' : '• COD' }}
                                 </td>
 
                                 <td>

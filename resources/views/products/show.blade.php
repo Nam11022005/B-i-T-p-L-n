@@ -152,22 +152,10 @@ foreach ($product->images as $galleryImage) {
     |--------------------------------------------------------------------------
     */
 
-    $minQty =
-        (float)
-        (
-            $product->min_quantity
-            ??
-            1
-        );
+    $minQty = $product->minimumOrderQuantity();
 
 
-    $stepQty =
-        (float)
-        (
-            $product->quantity_step
-            ??
-            1
-        );
+    $stepQty = $product->orderQuantityStep();
 
 
     $stockQty =
@@ -2755,8 +2743,8 @@ foreach ($product->images as $galleryImage) {
                                 <=
                                 round($averageRating)
 
-                                ? '★'
-                                : '☆'
+                                            ? '★'
+                                            : '☆'
                             }}
 
                         @endfor

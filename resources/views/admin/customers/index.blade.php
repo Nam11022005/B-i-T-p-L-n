@@ -57,7 +57,7 @@
     }
 
     .customers-hero::after {
-        content: "👥";
+        content: "•";
         position: absolute;
         right: 55px;
         bottom: -18px;
@@ -322,7 +322,7 @@
     }
 
     .customer-filter::before {
-        content: "🔎 Bộ lọc khách hàng";
+        content: "• Bộ lọc khách hàng";
         display: block;
         margin-bottom: 18px;
         color: var(--tb-brown-dark);
@@ -483,8 +483,8 @@
 
     <section class="customers-hero mb-4">
         <div>
-            <div class="customers-kicker">⚙️ KHU VỰC QUẢN TRỊ</div>
-            <h1 class="fw-bold mb-2">👥 Khách hàng</h1>
+            <div class="customers-kicker">• KHU VỰC QUẢN TRỊ</div>
+            <h1 class="fw-bold mb-2">• Khách hàng</h1>
             <p class="mb-0">
                 Xem tài khoản, thông tin khách hàng đã cung cấp và lịch sử mua hàng.
             </p>
@@ -499,7 +499,7 @@
         <div class="col-md-4">
             <div class="customer-stat p-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="icon">👥</div>
+                    <div class="icon">•</div>
                     <div>
                         <div class="text-muted small">Tổng khách hàng</div>
                         <h3 class="fw-bold mb-0">{{ $totalCustomers }}</h3>
@@ -511,7 +511,7 @@
         <div class="col-md-4">
             <div class="customer-stat p-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="icon">✅</div>
+                    <div class="icon">•</div>
                     <div>
                         <div class="text-muted small">Đã xác thực email</div>
                         <h3 class="fw-bold mb-0">{{ $verifiedCustomers }}</h3>
@@ -523,7 +523,7 @@
         <div class="col-md-4">
             <div class="customer-stat p-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="icon">📦</div>
+                    <div class="icon">•</div>
                     <div>
                         <div class="text-muted small">Đã từng đặt hàng</div>
                         <h3 class="fw-bold mb-0">{{ $customersWithOrders }}</h3>
@@ -571,7 +571,7 @@
             </div>
 
             <div class="col-lg-2 d-grid">
-                <button class="btn btn-dark">🔎 Lọc</button>
+                <button class="btn btn-dark">• Lọc</button>
             </div>
         </div>
     </form>
@@ -592,7 +592,7 @@
 
         @if($customers->isEmpty())
             <div class="text-center py-5">
-                <div style="font-size:58px;">👤</div>
+                <div style="font-size:58px;">•</div>
                 <h5 class="fw-bold mt-3">Không tìm thấy khách hàng</h5>
                 <p class="text-muted mb-0">Thử thay đổi điều kiện tìm kiếm.</p>
             </div>
@@ -644,7 +644,7 @@
 
                                 <td class="text-center">
                                     @if($customer->email_verified_at)
-                                        <span class="badge bg-success rounded-pill">✓ Đã xác thực</span>
+                                        <span class="badge bg-success rounded-pill">• Đã xác thực</span>
                                     @else
                                         <span class="badge bg-warning text-dark rounded-pill">Chưa xác thực</span>
                                     @endif

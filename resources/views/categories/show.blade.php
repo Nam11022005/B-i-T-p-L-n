@@ -696,7 +696,7 @@
                         ) }}"
                         class="btn btn-primary"
                     >
-                        🌿 Xem đặc sản khác
+                        Xem đặc sản khác
                     </a>
 
                 @endif
@@ -790,7 +790,7 @@
                                         font-size:65px;
                                     "
                                 >
-                                    🧺
+                                    <span class="tb-neutral-marker" aria-hidden="true"></span>
                                 </div>
 
                             @else
@@ -804,7 +804,7 @@
                                     "
                                     style="font-size:65px;"
                                 >
-                                    🧺
+                                        <span class="tb-neutral-marker" aria-hidden="true"></span>
                                 </div>
 
                             @endif
@@ -968,7 +968,7 @@
                                                     w-100
                                                 "
                                             >
-                                                🧺 Thêm vào giỏ hàng
+                                                Thêm vào giỏ hàng
                                             </button>
 
                                         </form>
@@ -1006,7 +1006,7 @@
                                         ) }}"
                                         class="btn btn-primary"
                                     >
-                                        🔐 Đăng nhập để mua
+                                        Đăng nhập để mua
                                     </a>
 
                                 </div>

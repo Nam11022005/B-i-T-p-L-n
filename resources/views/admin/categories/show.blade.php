@@ -62,7 +62,7 @@
         <div>
 
             <h2 class="fw-bold mb-1">
-                🏷️ Chi tiết danh mục
+                • Chi tiết danh mục
             </h2>
 
             <p class="text-muted mb-0">
@@ -89,7 +89,7 @@
         <div class="card-header bg-dark text-white p-3">
 
             <h5 class="mb-0">
-                📂 Thông tin danh mục
+                • Thông tin danh mục
             </h5>
 
         </div>
@@ -178,7 +178,7 @@
                     ) }}"
                     class="btn btn-warning"
                 >
-                    ✏️ Chỉnh sửa danh mục
+                    • Chỉnh sửa danh mục
                 </a>
 
 
@@ -200,7 +200,7 @@
                         class="btn btn-danger"
                         {{ $category->products->count() > 0 ? 'disabled' : '' }}
                     >
-                        🗑️ Xóa danh mục
+                        • Xóa danh mục
                     </button>
 
                 </form>
@@ -212,7 +212,7 @@
 
                 <div class="alert alert-warning mt-3 mb-0">
 
-                    ⚠️ Danh mục đang có
+                    • Danh mục đang có
                     <strong>{{ $category->products->count() }}</strong>
                     sản phẩm nên không thể xóa.
 
@@ -236,7 +236,7 @@
             <div class="d-flex justify-content-between align-items-center">
 
                 <h5 class="mb-0">
-                    📦 Sản phẩm thuộc danh mục
+                    • Sản phẩm thuộc danh mục
                 </h5>
 
                 <span class="badge bg-light text-dark fs-6">
@@ -258,7 +258,7 @@
                 <div class="text-center py-5">
 
                     <div style="font-size: 60px;">
-                        📭
+                        •
                     </div>
 
                     <h5 class="text-muted mt-3">
@@ -269,7 +269,7 @@
                         href="{{ route('admin.products.create') }}"
                         class="btn btn-primary mt-2"
                     >
-                        ➕ Thêm sản phẩm
+                        • Thêm sản phẩm
                     </a>
 
                 </div>
@@ -457,7 +457,7 @@
                                                 class="btn btn-warning btn-sm"
                                                 title="Chỉnh sửa"
                                             >
-                                                ✏️
+                                                •
                                             </a>
 
 
@@ -481,7 +481,7 @@
                                                     class="btn btn-danger btn-sm"
                                                     title="Xóa"
                                                 >
-                                                    🗑️
+                                                    •
                                                 </button>
 
                                             </form>

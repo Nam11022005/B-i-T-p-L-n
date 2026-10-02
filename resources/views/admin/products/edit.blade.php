@@ -140,7 +140,7 @@
     }
 
     .admin-product-form-page .product-form-header::after {
-        content: "🌿";
+        content: "•";
         position: absolute;
         right: 38px;
         top: 16px;
@@ -276,7 +276,7 @@
     }
 
     .admin-product-form-page .unit-help::after {
-        content: "💡";
+        content: "•";
         position: absolute;
         right: 14px;
         bottom: -8px;
@@ -485,7 +485,7 @@
 <div class="admin-product-form-page"><div class="card product-form-card">
 
     <div class="product-form-header">
-        <h2 class="mb-0">✏️ Cập nhật Sản phẩm</h2>
+        <h2 class="mb-0">• Cập nhật Sản phẩm</h2>
     </div>
 
     <div class="card-body p-4">
@@ -493,7 +493,7 @@
         @if ($errors->any())
             <div class="alert alert-danger mb-4">
                 <strong class="d-block mb-1">
-                    ⚠️ Vui lòng kiểm tra lại dữ liệu:
+                    • Vui lòng kiểm tra lại dữ liệu:
                 </strong>
 
                 <ul class="mb-0 ps-3">
@@ -749,7 +749,7 @@
                     </div>
 
                     <div class="unit-help">
-                        <strong>💡 Quy cách bán:</strong>
+                        <strong>• Quy cách bán:</strong>
                         <span id="unitHelpText"></span>
                     </div>
 
@@ -792,7 +792,7 @@
                                     class="d-flex align-items-center justify-content-center rounded-3 fw-bold"
                                     style="min-height:180px;color:#5f341d;"
                                 >
-                                    🧺 Chưa có ảnh sản phẩm
+                                    • Chưa có ảnh sản phẩm
                                 </div>
                             @endif
                         </div>
@@ -813,7 +813,7 @@
                     type="submit"
                     class="btn btn-tb"
                 >
-                    💾 Cập nhật
+                    • Cập nhật
                 </button>
 
                 <a
@@ -843,7 +843,7 @@
                     type="submit"
                     class="btn btn-outline-danger"
                 >
-                    🗑️ Xóa sản phẩm
+                    • Xóa sản phẩm
                 </button>
             </form>
         </div>

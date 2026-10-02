@@ -968,7 +968,7 @@
                     <div class="tb-footer-contact-item">
 
                         <div class="tb-footer-contact-icon">
-                            ☎
+                            •
                         </div>
 
                         <div class="tb-footer-contact-content">
@@ -989,7 +989,7 @@
                     <div class="tb-footer-contact-item">
 
                         <div class="tb-footer-contact-icon">
-                            🕘
+                            •
                         </div>
 
                         <div class="tb-footer-contact-content">
@@ -1035,7 +1035,7 @@
                         title="TikTok"
                         aria-label="TikTok"
                     >
-                        ♪
+                        •
                     </a>
 
 

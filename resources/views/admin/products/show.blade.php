@@ -93,7 +93,7 @@
     >
 
         <h2 class="mb-0">
-            📦 Chi tiết sản phẩm:
+            • Chi tiết sản phẩm:
             {{ $product->name }}
         </h2>
 
@@ -138,7 +138,7 @@
                 @else
 
                     <div class="no-image">
-                        🧺
+                        •
                     </div>
 
                 @endif
@@ -480,7 +480,7 @@
                 ) }}"
                 class="btn btn-warning"
             >
-                ✏️ Sửa sản phẩm
+                • Sửa sản phẩm
             </a>
 
 
@@ -505,7 +505,7 @@
                     type="submit"
                     class="btn btn-danger"
                 >
-                    🗑️ Xóa sản phẩm
+                    • Xóa sản phẩm
                 </button>
 
             </form>

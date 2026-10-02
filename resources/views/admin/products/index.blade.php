@@ -453,7 +453,7 @@
 
     <div>
         <h2 class="fw-bold mb-1">
-            📦 Danh sách Sản phẩm
+            • Danh sách Sản phẩm
         </h2>
 
         <div class="text-muted">
@@ -465,7 +465,7 @@
         href="{{ route('admin.products.create') }}"
         class="btn btn-success px-4"
     >
-        ➕ Thêm Sản phẩm
+        • Thêm Sản phẩm
     </a>
 
 </div>
@@ -484,7 +484,7 @@
             <div class="col-lg-4 col-md-6">
 
                 <label class="filter-label">
-                    🔎 ID / Tên sản phẩm
+                    • ID / Tên sản phẩm
                 </label>
 
                 <input
@@ -501,7 +501,7 @@
             <div class="col-lg-2 col-md-6">
 
                 <label class="filter-label">
-                    🧺 Danh mục
+                    • Danh mục
                 </label>
 
                 <select
@@ -532,7 +532,7 @@
             <div class="col-lg-2 col-md-6">
 
                 <label class="filter-label">
-                    📦 Tồn kho
+                    • Tồn kho
                 </label>
 
                 <select
@@ -562,7 +562,7 @@
             <div class="col-lg-2 col-md-6">
 
                 <label class="filter-label">
-                    💰 Giá từ
+                    • Giá từ
                 </label>
 
                 <input
@@ -579,7 +579,7 @@
             <div class="col-lg-2 col-md-6">
 
                 <label class="filter-label">
-                    💰 Giá đến
+                    • Giá đến
                 </label>
 
                 <input
@@ -596,7 +596,7 @@
             <div class="col-lg-2 col-md-6">
 
                 <label class="filter-label">
-                    ⭐ Nổi bật
+                    • Nổi bật
                 </label>
 
                 <select
@@ -626,7 +626,7 @@
             <div class="col-lg-2 col-md-6">
 
                 <label class="filter-label">
-                    ↕️ Sắp xếp
+                    ↕ Sắp xếp
                 </label>
 
                 <select
@@ -687,7 +687,7 @@
                     type="submit"
                     class="btn btn-primary px-4"
                 >
-                    🔎 Tìm kiếm & lọc
+                    • Tìm kiếm & lọc
                 </button>
 
                 <a
@@ -761,7 +761,7 @@
                             @else
 
                                 <div class="product-fallback">
-                                    🧺
+                                    •
                                 </div>
 
                             @endif
@@ -784,7 +784,7 @@
                                         class="quick-feature-btn {{ $product->is_featured ? 'is-featured' : '' }}"
                                         title="{{ $product->is_featured ? 'Bấm để bỏ ghim sản phẩm' : 'Bấm để ghim sản phẩm nổi bật' }}"
                                     >
-                                        {{ $product->is_featured ? '★ Đã ghim' : '☆ Ghim nổi bật' }}
+                                        {{ $product->is_featured ? '• Đã ghim' : '• Ghim nổi bật' }}
                                     </button>
                                 </form>
                             </div>
@@ -858,13 +858,13 @@
                         @if($product->is_featured)
 
                             <span class="badge featured-badge">
-                                ⭐ Đã ghim
+                                • Đã ghim
                             </span>
 
                         @else
 
                             <span class="badge bg-light text-dark border">
-                                ☆ Chưa ghim
+                                • Chưa ghim
                             </span>
 
                         @endif
@@ -889,7 +889,7 @@
                                     class="btn btn-sm {{ $product->is_featured ? 'btn-warning' : 'btn-featured' }}"
                                     title="{{ $product->is_featured ? 'Bỏ ghim sản phẩm nổi bật' : 'Ghim lên trang chủ' }}"
                                 >
-                                    {{ $product->is_featured ? '★ Bỏ ghim' : '☆ Ghim' }}
+                                    {{ $product->is_featured ? '• Bỏ ghim' : '• Ghim' }}
                                 </button>
                             </form>
 
@@ -902,7 +902,7 @@
                                     data-bs-target="#promotionModal{{ $product->id }}"
                                     title="Chỉnh sửa chương trình khuyến mãi"
                                 >
-                                    🔥 Đang sale
+                                    • Đang sale
                                 </button>
 
                                 <form
@@ -918,7 +918,7 @@
                                         type="submit"
                                         class="btn btn-outline-danger btn-sm"
                                     >
-                                        ✖ Gỡ sale
+                                        • Gỡ sale
                                     </button>
                                 </form>
 
@@ -930,7 +930,7 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#promotionModal{{ $product->id }}"
                                 >
-                                    🔥 Đưa lên sale
+                                    • Đưa lên sale
                                 </button>
 
                             @endif
@@ -947,7 +947,7 @@
                                 href="{{ route('admin.products.edit', $product->id) }}"
                                 class="btn btn-warning btn-sm"
                             >
-                                ✏️ Sửa
+                                • Sửa
                             </a>
 
                             <form
@@ -962,7 +962,7 @@
                                     type="submit"
                                     class="btn btn-danger btn-sm"
                                 >
-                                    🗑️ Xóa
+                                    • Xóa
                                 </button>
                             </form>
 
@@ -983,7 +983,7 @@
                     >
 
                         <div style="font-size:46px;">
-                            🔎
+                            •
                         </div>
 
                         <div class="fw-bold mt-2">
@@ -1024,7 +1024,7 @@
 ========================================================= --}}
 @foreach($products as $product)
                 {{-- ==========================================
-                    🔥 MODAL THIẾT LẬP KHUYẾN MÃI
+                    • MODAL THIẾT LẬP KHUYẾN MÃI
                 =========================================== --}}
                 <div
                     class="modal fade promotion-modal"
@@ -1055,7 +1055,7 @@
                                         class="modal-title fw-bold"
                                         id="promotionModalLabel{{ $product->id }}"
                                     >
-                                        🔥 Thiết lập khuyến mãi
+                                        • Thiết lập khuyến mãi
                                     </h5>
 
                                     <button
@@ -1086,7 +1086,7 @@
                                             for="sale_price_{{ $product->id }}"
                                             class="form-label fw-bold"
                                         >
-                                            💰 Giá khuyến mãi
+                                            • Giá khuyến mãi
                                         </label>
 
                                         <input
@@ -1113,7 +1113,7 @@
                                             for="sale_start_{{ $product->id }}"
                                             class="form-label fw-bold"
                                         >
-                                            🕐 Bắt đầu
+                                            • Bắt đầu
                                         </label>
 
                                         <input
@@ -1131,7 +1131,7 @@
                                             for="sale_end_{{ $product->id }}"
                                             class="form-label fw-bold"
                                         >
-                                            🕐 Kết thúc
+                                            • Kết thúc
                                         </label>
 
                                         <input
@@ -1159,7 +1159,7 @@
                                         type="submit"
                                         class="btn btn-danger"
                                     >
-                                        🔥 Áp dụng khuyến mãi
+                                        • Áp dụng khuyến mãi
                                     </button>
                                 </div>
 

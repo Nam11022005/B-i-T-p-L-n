@@ -90,7 +90,7 @@
     }
 
     .voucher-premium-hero::after {
-        content: "🎟️";
+        content: "•";
         position: absolute;
         right: 46px;
         top: 20px;
@@ -384,7 +384,7 @@
 </style>
  
 
-<div class="voucher-premium-page"><section class="voucher-premium-hero"><div><div class="voucher-premium-kicker">⚙️ QUẢN TRỊ VOUCHER</div><h2 class="mb-2">✏️ Sửa Voucher</h2><p class="mb-0">Cập nhật chương trình ưu đãi hiện có.</p></div></section><div class="card voucher-form-shell"> 
+<div class="voucher-premium-page"><section class="voucher-premium-hero"><div><div class="voucher-premium-kicker">• QUẢN TRỊ VOUCHER</div><h2 class="mb-2">• Sửa Voucher</h2><p class="mb-0">Cập nhật chương trình ưu đãi hiện có.</p></div></section><div class="card voucher-form-shell"> 
 
     <div class="card-body p-4 p-md-5 voucher-form-content"> 
 
@@ -429,7 +429,7 @@
                     type="submit" 
                     class="btn voucher-main-btn" 
                 > 
-                    💾 Cập nhật 
+                    • Cập nhật 
                 </button> 
 
                 <a 

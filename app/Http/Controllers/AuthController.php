@@ -571,9 +571,12 @@ public function verifyEmailCode(Request $request)
             Auth::user();
 
 
+        $addresses = \App\Models\UserAddress::where('user_id', $user->id)
+            ->orderByDesc('is_default')->latest()->get();
+
         return view(
             'user.profile',
-            compact('user')
+            compact('user', 'addresses')
         );
     }
 

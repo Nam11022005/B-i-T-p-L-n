@@ -2,6 +2,8 @@
 
 @section('title', 'Đăng nhập | Tinh Hoa Tây Bắc')
 
+@section('hide-store-header', '1')
+
 @section('content')
 
 <style>
@@ -210,7 +212,7 @@
 
 
     .tb-login-brand::after {
-        content: "✦";
+        content: "•";
 
         position: absolute;
 
@@ -1322,10 +1324,50 @@
         }
 
     }
+
+    .tb-login-return {
+        width: min(1100px, 100%);
+        margin: 0 auto 16px;
+    }
+    .tb-login-home-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+        padding: 10px 18px;
+        border: 1px solid #bdaa88;
+        background: #fffaf0;
+        color: #35562f;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .tb-login-home-link:hover {
+        background: #35562f;
+        border-color: #35562f;
+        color: #fff;
+    }
+    .tb-login-home-link:focus-visible {
+        outline: 3px solid #e5ad42;
+        outline-offset: 3px;
+    }
+    .tb-login-logo {
+        border-color: #d1a64d;
+        background: linear-gradient(145deg, #fff6d5, #e9bd61);
+    }
+    .tb-login-logo .tb-brand-mark { width: 38px; height: 38px; }
+    @media (max-width: 991.98px) {
+        .tb-login-return { max-width: 680px; }
+    }
 </style>
 
 
 <div class="tb-login-page">
+    <nav class="tb-login-return" aria-label="Quay lại trang chủ">
+        <a class="tb-login-home-link" href="{{ url('/') }}">
+            <span aria-hidden="true">←</span> Quay lại trang chủ
+        </a>
+    </nav>
 
     <div class="tb-login-shell">
 
@@ -1338,7 +1380,7 @@
             <div class="tb-login-brand-top">
 
                 <div class="tb-login-logo">
-                    🌿
+                    @include('layouts.partials.brand-mark', ['variant' => 'header'])
                 </div>
 
 
@@ -1371,7 +1413,7 @@
                 <div class="tb-login-benefit">
 
                     <span class="tb-login-benefit-icon">
-                        🌿
+                        •
                     </span>
 
                     <span>
@@ -1384,7 +1426,7 @@
                 <div class="tb-login-benefit">
 
                     <span class="tb-login-benefit-icon">
-                        📦
+                        •
                     </span>
 
                     <span>
@@ -1397,7 +1439,7 @@
                 <div class="tb-login-benefit">
 
                     <span class="tb-login-benefit-icon">
-                        🎟️
+                        •
                     </span>
 
                     <span>
@@ -1420,7 +1462,7 @@
             <div class="tb-login-form-head">
 
                 <div class="tb-login-form-icon">
-                    👤
+                    •
                 </div>
 
 
@@ -1440,11 +1482,11 @@
             <div class="tb-login-trust">
 
                 <span>
-                    ✓ Đặc sản chọn lọc
+                    • Đặc sản chọn lọc
                 </span>
 
                 <span>
-                    🔒 Bảo mật tài khoản
+                    • Bảo mật tài khoản
                 </span>
 
             </div>
@@ -1476,7 +1518,7 @@
                     <div class="tb-login-input-wrap">
 
                         <span class="tb-login-input-icon">
-                            ✉️
+                            •
                         </span>
 
 
@@ -1537,7 +1579,7 @@
                     <div class="tb-login-input-wrap">
 
                         <span class="tb-login-input-icon">
-                            🔐
+                            •
                         </span>
 
 
@@ -1588,7 +1630,7 @@
                     class="tb-login-submit"
                 >
                     <span>
-                        🔐
+                        •
                     </span>
 
                     <span>
@@ -1621,7 +1663,7 @@
             <div class="tb-login-security">
 
                 <span>
-                    🛡️
+                    •
                 </span>
 
                 <span>

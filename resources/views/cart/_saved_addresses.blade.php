@@ -11,11 +11,11 @@
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <h5 class="fw-bold mb-0">
-                    📍 Chọn địa chỉ giao hàng
+                    • Chọn địa chỉ giao hàng
                 </h5>
 
                 <a
-                    href="{{ route('addresses.index') }}"
+                    href="{{ route('profile') . '#shipping-addresses' }}"
                     class="btn btn-sm btn-outline-secondary"
                 >
                     Quản lý địa chỉ

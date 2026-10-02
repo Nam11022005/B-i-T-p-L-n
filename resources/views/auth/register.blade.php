@@ -196,7 +196,7 @@
 
 
     .tb-register-brand::after {
-        content: "✦";
+        content: "•";
 
         position: absolute;
 
@@ -1158,7 +1158,7 @@
             <div class="tb-register-brand-top">
 
                 <div class="tb-register-logo">
-                    🌿
+                    •
                 </div>
 
 
@@ -1190,7 +1190,7 @@
                 <div class="tb-register-benefit">
 
                     <span class="tb-register-benefit-icon">
-                        ✉️
+                        •
                     </span>
 
                     <span>
@@ -1203,7 +1203,7 @@
                 <div class="tb-register-benefit">
 
                     <span class="tb-register-benefit-icon">
-                        📍
+                        •
                     </span>
 
                     <span>
@@ -1216,7 +1216,7 @@
                 <div class="tb-register-benefit">
 
                     <span class="tb-register-benefit-icon">
-                        🎁
+                        •
                     </span>
 
                     <span>
@@ -1239,7 +1239,7 @@
             <div class="tb-register-form-head">
 
                 <div class="tb-register-form-icon">
-                    ✨
+                    •
                 </div>
 
 
@@ -1261,15 +1261,15 @@
             <div class="tb-register-trust">
 
                 <span>
-                    ✓ Đăng ký nhanh
+                    • Đăng ký nhanh
                 </span>
 
                 <span>
-                    ✉️ OTP qua email
+                    • OTP qua email
                 </span>
 
                 <span>
-                    🔒 Bảo mật tài khoản
+                    • Bảo mật tài khoản
                 </span>
 
             </div>
@@ -1298,7 +1298,7 @@
                     <div class="tb-register-input-wrap">
 
                         <span class="tb-register-input-icon">
-                            👤
+                            •
                         </span>
 
 
@@ -1347,7 +1347,7 @@
                     <div class="tb-register-input-wrap">
 
                         <span class="tb-register-input-icon">
-                            ✉️
+                            •
                         </span>
 
 
@@ -1395,7 +1395,7 @@
                     <div class="tb-register-input-wrap">
 
                         <span class="tb-register-input-icon">
-                            🔐
+                            •
                         </span>
 
 
@@ -1471,7 +1471,7 @@
                     <div class="tb-register-input-wrap">
 
                         <span class="tb-register-input-icon">
-                            🛡️
+                            •
                         </span>
 
 
@@ -1515,7 +1515,7 @@
                 <div class="tb-register-note">
 
                     <span>
-                        ✉️
+                        •
                     </span>
 
                     <span>
@@ -1533,7 +1533,7 @@
                     class="tb-register-submit"
                 >
                     <span>
-                        ✨
+                        •
                     </span>
 
                     <span>
@@ -1774,7 +1774,7 @@ document.addEventListener(
                     'tb-password-match show ok';
 
                 match.textContent =
-                    '✓ Mật khẩu xác nhận trùng khớp.';
+                    '• Mật khẩu xác nhận trùng khớp.';
 
             } else {
 
@@ -1782,7 +1782,7 @@ document.addEventListener(
                     'tb-password-match show error';
 
                 match.textContent =
-                    '✕ Mật khẩu xác nhận chưa trùng khớp.';
+                    '• Mật khẩu xác nhận chưa trùng khớp.';
 
             }
 

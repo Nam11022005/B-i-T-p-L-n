@@ -45,6 +45,41 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * Minimum order quantity enforced by the shopping flow.
+     * Weight-based products cannot be ordered in impractical tiny amounts.
+     */
+    public function minimumOrderQuantity(): float
+    {
+        $configured = max(0.01, (float) ($this->min_quantity ?? 1));
+
+        return max(
+            $configured,
+            match (mb_strtolower(trim((string) $this->unit), 'UTF-8')) {
+                'kg' => 0.5,
+                'g' => 100.0,
+                default => 0.01,
+            }
+        );
+    }
+
+    /**
+     * Minimum increment enforced by the shopping flow.
+     */
+    public function orderQuantityStep(): float
+    {
+        $configured = max(0.01, (float) ($this->quantity_step ?? 1));
+
+        return max(
+            $configured,
+            match (mb_strtolower(trim((string) $this->unit), 'UTF-8')) {
+                'kg' => 0.25,
+                'g' => 50.0,
+                default => 0.01,
+            }
+        );
+    }
+
     /*
     |--------------------------------------------------------------------------
     | THƯ VIỆN ẢNH CHI TIẾT

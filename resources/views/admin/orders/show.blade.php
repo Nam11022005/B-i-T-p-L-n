@@ -1840,7 +1840,7 @@
         <div class="aod-hero-copy">
 
             <div class="aod-kicker">
-                👑 Admin · Quản lý đơn hàng
+                • Admin · Quản lý đơn hàng
             </div>
 
 
@@ -1920,7 +1920,7 @@
         <div class="aod-stat">
 
             <div class="aod-stat-icon">
-                👤
+                •
             </div>
 
             <div>
@@ -1947,7 +1947,7 @@
         <div class="aod-stat">
 
             <div class="aod-stat-icon">
-                📦
+                •
             </div>
 
             <div>
@@ -1974,7 +1974,7 @@
         <div class="aod-stat">
 
             <div class="aod-stat-icon">
-                💳
+                •
             </div>
 
             <div>
@@ -1995,7 +1995,7 @@
         <div class="aod-stat">
 
             <div class="aod-stat-icon">
-                💰
+                •
             </div>
 
             <div>
@@ -2047,7 +2047,7 @@
                     <div>
 
                         <h2 class="aod-card-title">
-                            👤 Thông tin khách hàng
+                            • Thông tin khách hàng
                         </h2>
 
                         <div class="aod-card-subtitle">
@@ -2067,7 +2067,7 @@
                         <div class="aod-info-box">
 
                             <div class="aod-info-heading">
-                                👤 Tài khoản đặt hàng
+                                • Tài khoản đặt hàng
                             </div>
 
 
@@ -2114,7 +2114,7 @@
                         <div class="aod-info-box">
 
                             <div class="aod-info-heading">
-                                📦 Người nhận
+                                • Người nhận
                             </div>
 
 
@@ -2161,7 +2161,7 @@
                         <div class="aod-info-box full">
 
                             <div class="aod-info-heading">
-                                📍 Giao hàng
+                                • Giao hàng
                             </div>
 
 
@@ -2202,7 +2202,7 @@
                                 <div class="aod-note">
 
                                     <strong>
-                                        📝 Ghi chú khách hàng:
+                                        • Ghi chú khách hàng:
                                     </strong>
 
                                     <br>
@@ -2232,7 +2232,7 @@
                     <div>
 
                         <h2 class="aod-card-title">
-                            🚚 Tiến trình đơn hàng
+                            • Tiến trình đơn hàng
                         </h2>
 
                         <div class="aod-card-subtitle">
@@ -2252,7 +2252,7 @@
                         <div class="aod-cancelled">
 
                             <div style="font-size:26px;">
-                                ❌
+                                •
                             </div>
 
                             <div>
@@ -2308,7 +2308,7 @@
                                         }}
                                     "
                                 >
-                                    🛒
+                                    •
                                 </div>
 
                                 <div
@@ -2353,7 +2353,7 @@
                                         }}
                                     "
                                 >
-                                    ✓
+                                    •
                                 </div>
 
                                 <div
@@ -2398,7 +2398,7 @@
                                         }}
                                     "
                                 >
-                                    🚚
+                                    •
                                 </div>
 
                                 <div
@@ -2437,7 +2437,7 @@
                                         }}
                                     "
                                 >
-                                    ✅
+                                    •
                                 </div>
 
                                 <div
@@ -2475,7 +2475,7 @@
                     <div>
 
                         <h2 class="aod-card-title">
-                            📦 Sản phẩm trong đơn
+                            • Sản phẩm trong đơn
                         </h2>
 
                         <div class="aod-card-subtitle">
@@ -2613,13 +2613,13 @@
                                             class="aod-product-fallback"
                                             style="display:none;"
                                         >
-                                            🧺
+                                            •
                                         </div>
 
                                     @else
 
                                         <div class="aod-product-fallback">
-                                            🧺
+                                            •
                                         </div>
 
                                     @endif
@@ -2778,7 +2778,7 @@
                     <div>
 
                         <h2 class="aod-card-title">
-                            🕐 Lịch sử xử lý
+                            • Lịch sử xử lý
                         </h2>
 
                         <div class="aod-card-subtitle">
@@ -2804,7 +2804,7 @@
                                     ]
                                     ??
                                     [
-                                        'icon' => '📦',
+                                        'icon' => '•',
                                     ];
                             @endphp
 
@@ -2921,7 +2921,7 @@
                     <div>
 
                         <h2 class="aod-card-title">
-                            🚚 Cập nhật trạng thái
+                            • Cập nhật trạng thái
                         </h2>
 
                         <div class="aod-card-subtitle">
@@ -2974,10 +2974,10 @@
                     @if(in_array($order->status, ['shipped', 'delivered'], true))
                         <div class="aod-delivery-notice {{ $order->status === 'delivered' ? 'is-delivered' : '' }}" role="status">
                             @if($order->status === 'delivered')
-                                <strong>✅ Đã giao hàng · Đã khóa trạng thái</strong>
+                                <strong>• Đã giao hàng · Đã khóa trạng thái</strong>
                                 <p>Đơn hàng đã hoàn tất giao hàng. Không thể chuyển sang trạng thái khác.</p>
                             @else
-                                <strong>🚚 Đang giao hàng</strong>
+                                <strong>• Đang giao hàng</strong>
                                 <p>Đơn hàng đang trong quá trình vận chuyển. Chỉ xác nhận đã giao khi khách đã nhận hàng.</p>
                             @endif
                             <div class="aod-delivery-time">
@@ -3042,7 +3042,7 @@
                                     : ''
                                 }}
                             >
-                                ⏳ Chờ xác nhận
+                                • Chờ xác nhận
                             </option>
 
 
@@ -3054,7 +3054,7 @@
                                     : ''
                                 }}
                             >
-                                ✓ Đã xác nhận
+                                • Đã xác nhận
                             </option>
 
 
@@ -3066,7 +3066,7 @@
                                     : ''
                                 }}
                             >
-                                🚚 Đang giao hàng
+                                • Đang giao hàng
                             </option>
 
 
@@ -3078,7 +3078,7 @@
                                     : ''
                                 }}
                             >
-                                ✅ Đã giao hàng
+                                • Đã giao hàng
                             </option>
 
 
@@ -3090,7 +3090,7 @@
                                     : ''
                                 }}
                             >
-                                ❌ Đã hủy
+                                • Đã hủy
                             </option>
 
                         </select>
@@ -3100,7 +3100,7 @@
                             type="submit"
                             class="aod-status-button"
                         >
-                            💾 Lưu trạng thái
+                            • Lưu trạng thái
                         </button>
 
                     </form>
@@ -3109,7 +3109,7 @@
                     <div class="aod-stock-warning">
 
                         <strong>
-                            ⚠ Lưu ý tồn kho
+                            • Lưu ý tồn kho
                         </strong>
 
                         <br>
@@ -3140,7 +3140,7 @@
                     <div>
 
                         <h2 class="aod-card-title">
-                            💳 Thanh toán
+                            • Thanh toán
                         </h2>
 
                         <div class="aod-card-subtitle">
@@ -3237,7 +3237,7 @@
                                 type="submit"
                                 class="aod-confirm-payment"
                             >
-                                ✅ Xác nhận đã thanh toán
+                                • Xác nhận đã thanh toán
                             </button>
 
                         </form>
@@ -3248,7 +3248,7 @@
 
                         <div class="aod-stock-warning">
 
-                            💵 Đơn COD sẽ được
+                            • Đơn COD sẽ được
                             khách hàng thanh toán
                             khi nhận hàng.
 
@@ -3271,7 +3271,7 @@
                     <div>
 
                         <h2 class="aod-card-title">
-                            🧾 Tổng đơn hàng
+                            • Tổng đơn hàng
                         </h2>
 
                         <div class="aod-card-subtitle">
@@ -3390,7 +3390,7 @@
                             </span>
 
                             <strong>
-                                🎟 {{ $order->voucher_code }}
+                                • {{ $order->voucher_code }}
                             </strong>
 
                         </div>

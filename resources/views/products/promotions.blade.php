@@ -194,7 +194,7 @@
 
 /* Họa tiết nhẹ bên phải */
 .promotions-hero::after {
-    content: "🌿";
+    content: "•";
 
     position: absolute;
 
@@ -1457,7 +1457,7 @@
         <div class="promo-info-item">
 
             <div class="promo-info-icon">
-                ⏰
+                ⏱️
             </div>
 
             <div>
@@ -1620,7 +1620,7 @@
                             @if($discountPercent > 0)
 
                                 <span class="promo-sale-badge">
-                                    🔥 -{{ $discountPercent }}%
+                                    🏷️ -{{ $discountPercent }}%
                                 </span>
 
                             @endif
@@ -1639,8 +1639,8 @@
 
                                 {{
                                     $product->quantity > 0
-                                    ? '✓ Còn hàng'
-                                    : '✕ Hết hàng'
+                                    ? '✅ Còn hàng'
+                                    : '❌ Hết hàng'
                                 }}
 
                             </span>
@@ -1657,7 +1657,7 @@
                             @else
 
                                 <div class="promo-placeholder">
-                                    🥩
+                                    🧺
                                 </div>
 
                             @endif
@@ -1671,7 +1671,7 @@
 
                             <div class="promo-category">
 
-                                📂 {{
+                                🌿 {{
                                     $product->category->name
                                     ??
                                     'Chưa phân loại'
@@ -1741,7 +1741,7 @@
 
                                 <div class="promo-saving">
 
-                                    💰 Tiết kiệm
+                                    💸 Tiết kiệm
 
                                     {{
                                         number_format(
@@ -1762,7 +1762,7 @@
 
                                 <div>
 
-                                    🕐
+                                    🕒
                                     <strong>
                                         Bắt đầu:
                                     </strong>
@@ -1784,7 +1784,7 @@
 
                                 <div class="mt-1">
 
-                                    ⏳
+                                    ⏰
                                     <strong>
                                         Kết thúc:
                                     </strong>
@@ -1924,7 +1924,7 @@
         <div class="promo-empty">
 
             <div class="promo-empty-icon">
-                🎟️
+                🏷️
             </div>
 
 
@@ -1947,7 +1947,7 @@
                 href="{{ route('products.index') }}"
                 class="btn btn-promo-main px-4"
             >
-                🛍️ Xem sản phẩm
+                🛍 Xem sản phẩm
             </a>
 
         </div>

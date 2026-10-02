@@ -1402,7 +1402,7 @@
         <div class="orders-hero-copy">
 
             <div class="orders-kicker">
-                🌿 Tinh Hoa Tây Bắc
+                • Tinh Hoa Tây Bắc
             </div>
 
 
@@ -1427,7 +1427,7 @@
             class="orders-hero-art"
             aria-hidden="true"
         >
-            📦
+            •
         </div>
 
     </section>
@@ -1442,7 +1442,7 @@
         <div class="orders-stat">
 
             <div class="orders-stat-icon">
-                📋
+                •
             </div>
 
 
@@ -1465,7 +1465,7 @@
         <div class="orders-stat shipped">
 
             <div class="orders-stat-icon">
-                🚚
+                •
             </div>
 
 
@@ -1488,7 +1488,7 @@
         <div class="orders-stat delivered">
 
             <div class="orders-stat-icon">
-                ✅
+                •
             </div>
 
 
@@ -1534,7 +1534,7 @@
                     }}
                 "
             >
-                📋 Tất cả
+                • Tất cả
             </a>
 
 
@@ -1560,7 +1560,7 @@
                     }}
                 "
             >
-                ⏳ Chờ xác nhận
+                • Chờ xác nhận
             </a>
 
 
@@ -1586,7 +1586,7 @@
                     }}
                 "
             >
-                ✓ Đã xác nhận
+                • Đã xác nhận
             </a>
 
 
@@ -1612,7 +1612,7 @@
                     }}
                 "
             >
-                🚚 Đang giao
+                • Đang giao
             </a>
 
 
@@ -1638,7 +1638,7 @@
                     }}
                 "
             >
-                ✅ Đã giao
+                • Đã giao
             </a>
 
 
@@ -1664,7 +1664,7 @@
                     }}
                 "
             >
-                ✕ Đã hủy
+                • Đã hủy
             </a>
 
         </div>
@@ -1685,8 +1685,8 @@
 
                     {{
                         $currentStatus
-                        ? '🔎'
-                        : '📦'
+                        ? '•'
+                        : '•'
                     }}
 
                 </div>
@@ -1729,7 +1729,7 @@
                         href="{{ route('orders.index') }}"
                         class="orders-shop-btn"
                     >
-                        📋 Xem tất cả đơn hàng
+                        • Xem tất cả đơn hàng
                     </a>
 
                 @else
@@ -1738,7 +1738,7 @@
                         href="{{ route('products.index') }}"
                         class="orders-shop-btn"
                     >
-                        🌿 Mua sắm ngay →
+                        • Mua sắm ngay →
                     </a>
 
                 @endif
@@ -1771,7 +1771,7 @@
 
                             'icon'
                                 =>
-                                '📦',
+                                '•',
 
                             'class'
                                 =>
@@ -1880,7 +1880,7 @@
                                         }}
                                     "
                                 >
-                                    💳
+                                    •
                                     {{ $paymentStatus['label'] }}
                                 </span>
 
@@ -1889,7 +1889,7 @@
 
                             <div class="order-date">
 
-                                🕐 Đặt lúc
+                                • Đặt lúc
 
                                 {{
                                     $order
@@ -2009,13 +2009,13 @@
                                                 class="order-product-fallback"
                                                 style="display:none;"
                                             >
-                                                🧺
+                                                •
                                             </div>
 
                                         @else
 
                                             <div class="order-product-fallback">
-                                                🧺
+                                                •
                                             </div>
 
                                         @endif
@@ -2116,7 +2116,7 @@
                             <div class="order-info-item">
 
                                 <div class="order-info-label">
-                                    🚚 Vận chuyển
+                                    • Vận chuyển
                                 </div>
 
                                 <div class="order-info-value">
@@ -2129,7 +2129,7 @@
                             <div class="order-info-item">
 
                                 <div class="order-info-label">
-                                    💳 Thanh toán
+                                    • Thanh toán
                                 </div>
 
                                 <div class="order-info-value">
@@ -2142,7 +2142,7 @@
                             <div class="order-info-item">
 
                                 <div class="order-info-label">
-                                    📦 Số dòng sản phẩm
+                                    • Số dòng sản phẩm
                                 </div>
 
                                 <div class="order-info-value">
@@ -2190,7 +2190,7 @@
 
                                 <br>
 
-                                🎟 Voucher:
+                                • Voucher:
 
                                 <strong>
                                     {{ $order->voucher_code }}

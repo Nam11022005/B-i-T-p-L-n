@@ -2095,7 +2095,7 @@
         <div class="checkout-progress-item done">
 
             <span class="checkout-progress-number">
-                ✓
+                •
             </span>
 
             <span>
@@ -2141,7 +2141,7 @@
         <div class="checkout-heading-copy">
 
             <div class="checkout-eyebrow">
-                🔒 Checkout an toàn
+                • Checkout an toàn
             </div>
 
 
@@ -2163,7 +2163,7 @@
 
 
         <div class="checkout-safe">
-            🔐 Thông tin đơn hàng được bảo vệ
+            • Thông tin đơn hàng được bảo vệ
         </div>
 
     </section>
@@ -2200,7 +2200,7 @@
                         <div class="checkout-card-title-wrap">
 
                             <div class="checkout-card-icon">
-                                📍
+                                •
                             </div>
 
 
@@ -2223,7 +2223,7 @@
                             href="{{ route('addresses.index') }}"
                             class="checkout-manage-link"
                         >
-                            ⚙ Quản lý địa chỉ
+                            • Quản lý địa chỉ
                         </a>
 
                     </div>
@@ -2400,7 +2400,7 @@
                             <div class="checkout-help-note mb-3">
 
                                 <span>
-                                    💡
+                                    •
                                 </span>
 
                                 <span>
@@ -2447,7 +2447,7 @@
                                 <div class="checkout-input-wrap">
 
                                     <span class="checkout-input-icon">
-                                        👤
+                                        •
                                     </span>
 
 
@@ -2492,7 +2492,7 @@
                                 <div class="checkout-input-wrap">
 
                                     <span class="checkout-input-icon">
-                                        ☎
+                                        •
                                     </span>
 
 
@@ -2572,7 +2572,7 @@
                         <div class="checkout-help-note">
 
                             <span>
-                                💡
+                                •
                             </span>
 
                             <span>
@@ -2602,7 +2602,7 @@
                         <div class="checkout-card-title-wrap">
 
                             <div class="checkout-card-icon">
-                                🚚
+                                •
                             </div>
 
 
@@ -2727,7 +2727,7 @@
                         <div class="checkout-card-title-wrap">
 
                             <div class="checkout-card-icon">
-                                🎟
+                                •
                             </div>
 
 
@@ -2998,7 +2998,7 @@
                             <div class="checkout-help-note">
 
                                 <span>
-                                    🎟
+                                    •
                                 </span>
 
                                 <span>
@@ -3024,7 +3024,7 @@
                         <div class="checkout-card-title-wrap">
 
                             <div class="checkout-card-icon">
-                                💳
+                                •
                             </div>
 
 
@@ -3075,7 +3075,7 @@
                                 >
 
                                     <span class="checkout-payment-icon">
-                                        💵
+                                        •
                                     </span>
 
 
@@ -3121,7 +3121,7 @@
                                 >
 
                                     <span class="checkout-payment-icon">
-                                        🏦
+                                        •
                                     </span>
 
 
@@ -3153,7 +3153,7 @@
 
                             <div class="checkout-bank-info-title">
 
-                                🏦 Thanh toán QR tự động
+                                • Thanh toán QR tự động
 
                             </div>
 
@@ -3203,7 +3203,7 @@
                         <div class="checkout-card-title-wrap">
 
                             <div class="checkout-card-icon">
-                                📝
+                                •
                             </div>
 
 
@@ -3234,7 +3234,7 @@
                         >
 
                             <span class="checkout-input-icon">
-                                ✍
+                                •
                             </span>
 
 
@@ -3264,7 +3264,7 @@
                 <div class="checkout-summary-head">
 
                     <div class="checkout-summary-title">
-                        🧾 Đơn hàng của bạn
+                        • Đơn hàng của bạn
                     </div>
 
                     <div class="checkout-summary-subtitle">
@@ -3366,13 +3366,13 @@
                                         class="checkout-product-fallback"
                                         style="display:none;"
                                     >
-                                        🧺
+                                        •
                                     </div>
 
                                 @else
 
                                     <div class="checkout-product-fallback">
-                                        🧺
+                                        •
                                     </div>
 
                                 @endif
@@ -3549,7 +3549,7 @@
                         id="orderButton"
                         class="checkout-order-button"
                     >
-                        🛍 Đặt hàng COD
+                        • Đặt hàng COD
                     </button>
 
 
@@ -3564,19 +3564,19 @@
                     <div class="checkout-trust">
 
                         <div class="checkout-trust-item">
-                            🔒 Đặt hàng an toàn
+                            • Đặt hàng an toàn
                         </div>
 
                         <div class="checkout-trust-item">
-                            📦 Theo dõi đơn hàng
+                            • Theo dõi đơn hàng
                         </div>
 
                         <div class="checkout-trust-item">
-                            💳 Thanh toán linh hoạt
+                            • Thanh toán linh hoạt
                         </div>
 
                         <div class="checkout-trust-item">
-                            ☎ Hỗ trợ khi cần
+                            • Hỗ trợ khi cần
                         </div>
 
                     </div>
@@ -3839,7 +3839,7 @@ document.addEventListener(
                 if (showMessage) {
 
                     voucherMessage.innerHTML =
-                        '<span style="color:#b43e2e;">✕ Voucher không tồn tại hoặc hiện không khả dụng.</span>';
+                        '<span style="color:#b43e2e;">• Voucher không tồn tại hoặc hiện không khả dụng.</span>';
 
                 }
 
@@ -3863,7 +3863,7 @@ document.addEventListener(
                 if (showMessage) {
 
                     voucherMessage.innerHTML =
-                        '<span style="color:#b43e2e;">✕ Đơn hàng phải đạt tối thiểu '
+                        '<span style="color:#b43e2e;">• Đơn hàng phải đạt tối thiểu '
                         +
                         formatMoney(
                             voucher
@@ -3978,7 +3978,7 @@ document.addEventListener(
             if (showMessage) {
 
                 voucherMessage.innerHTML =
-                    '<span style="color:#35562f;font-weight:800;">✓ Đã áp dụng voucher '
+                    '<span style="color:#35562f;font-weight:800;">• Đã áp dụng voucher '
                     +
                     normalizedCode
                     +
@@ -4158,7 +4158,7 @@ document.addEventListener(
             if (bankSelected) {
 
                 orderButton.textContent =
-                    '🏦 Tạo đơn & thanh toán QR';
+                    '• Tạo đơn & thanh toán QR';
 
 
                 orderButton
@@ -4171,7 +4171,7 @@ document.addEventListener(
             else {
 
                 orderButton.textContent =
-                    '🛍 Đặt hàng COD';
+                    '• Đặt hàng COD';
 
 
                 orderButton

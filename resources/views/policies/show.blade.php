@@ -879,7 +879,7 @@
             <div>
 
                 <div class="tb-policy-kicker">
-                    🌿 TINH HOA TÂY BẮC
+                    • TINH HOA TÂY BẮC
                 </div>
 
 
@@ -975,7 +975,7 @@
                             "
                         >
                             <span>
-                                🚚 Giao hàng
+                                • Giao hàng
                             </span>
 
                             <span>
@@ -992,7 +992,7 @@
                             "
                         >
                             <span>
-                                🔄 Đổi trả
+                                • Đổi trả
                             </span>
 
                             <span>
@@ -1009,7 +1009,7 @@
                             "
                         >
                             <span>
-                                🔒 Bảo mật
+                                • Bảo mật
                             </span>
 
                             <span>
@@ -1026,7 +1026,7 @@
                             "
                         >
                             <span>
-                                📜 Điều khoản dịch vụ
+                                • Điều khoản dịch vụ
                             </span>
 
                             <span>
@@ -1043,7 +1043,7 @@
                             "
                         >
                             <span>
-                                💳 Thanh toán
+                                • Thanh toán
                             </span>
 
                             <span>
@@ -1061,7 +1061,7 @@
                 <div class="tb-policy-contact">
 
                     <div class="tb-policy-contact-icon">
-                        ☎
+                        •
                     </div>
 
 
@@ -1088,7 +1088,7 @@
                                 tb-policy-btn-primary
                             "
                         >
-                            ☎ 0385 742 505
+                            • 0385 742 505
                         </a>
 
 

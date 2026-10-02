@@ -1458,13 +1458,13 @@
         <div class="pf-hero-copy">
 
             <div class="pf-kicker">
-                👤 Tài khoản khách hàng
+                • Tài khoản khách hàng
             </div>
 
 
             <h1 class="pf-title">
                 Hồ sơ của tôi
-            </h1>
+                                       •
 
 
             <div class="pf-description">
@@ -1482,7 +1482,7 @@
 
         <div class="pf-hero-badge">
 
-            🌿 {{ $roleLabel }}
+            • {{ $roleLabel }}
 
         </div>
 
@@ -1496,7 +1496,7 @@
 
         <div class="pf-alert success">
 
-            ✓ {{ session('success') }}
+            • {{ session('success') }}
 
         </div>
 
@@ -1508,7 +1508,7 @@
         <div class="pf-alert error">
 
             <strong>
-                ⚠ Vui lòng kiểm tra lại:
+                • Vui lòng kiểm tra lại:
             </strong>
 
 
@@ -1538,7 +1538,7 @@
         <div class="pf-stat">
 
             <div class="pf-stat-icon">
-                📋
+                •
             </div>
 
 
@@ -1560,7 +1560,7 @@
         <div class="pf-stat">
 
             <div class="pf-stat-icon">
-                🚚
+                •
             </div>
 
 
@@ -1582,7 +1582,7 @@
         <div class="pf-stat">
 
             <div class="pf-stat-icon">
-                ✅
+                •
             </div>
 
 
@@ -1657,7 +1657,7 @@
 
 
                         <div class="pf-avatar-camera">
-                            📷
+                            •
                         </div>
 
                     </div>
@@ -1676,7 +1676,7 @@
                     <div class="pf-user-badges">
 
                         <span class="pf-user-badge">
-                            👤 {{ $roleLabel }}
+                            • {{ $roleLabel }}
                         </span>
 
 
@@ -1690,11 +1690,11 @@
 
                             @if($emailVerified)
 
-                                ✓ Email đã xác thực
+                                • Email đã xác thực
 
                             @else
 
-                                ⚠ Email chưa xác thực
+                                • Email chưa xác thực
 
                             @endif
 
@@ -1745,7 +1745,7 @@
                                 type="submit"
                                 class="pf-primary-btn"
                             >
-                                📷 Cập nhật ảnh
+                                • Cập nhật ảnh
                             </button>
 
                         </div>
@@ -1774,7 +1774,7 @@
                                 type="submit"
                                 class="pf-danger-btn"
                             >
-                                🗑 Xóa ảnh đại diện
+                                • Xóa ảnh đại diện
                             </button>
 
                         </form>
@@ -1821,7 +1821,7 @@
                             <span class="pf-link-left">
 
                                 <span class="pf-link-icon">
-                                    📊
+                                    •
                                 </span>
 
                                 <span>
@@ -1853,7 +1853,7 @@
                             <span class="pf-link-left">
 
                                 <span class="pf-link-icon">
-                                    📦
+                                    •
                                 </span>
 
                                 <span>
@@ -1878,14 +1878,14 @@
 
 
                         <a
-                            href="{{ route('addresses.index') }}"
+                            href="#shipping-addresses"
                             class="pf-link"
                         >
 
                             <span class="pf-link-left">
 
                                 <span class="pf-link-icon">
-                                    📍
+                                    •
                                 </span>
 
                                 <span>
@@ -1917,7 +1917,7 @@
                             <span class="pf-link-left">
 
                                 <span class="pf-link-icon">
-                                    🧺
+                                    •
                                 </span>
 
                                 <span>
@@ -1965,7 +1965,7 @@
                     <div>
 
                         <h2 class="pf-card-title">
-                            👤 Thông tin cá nhân
+                            • Thông tin cá nhân
                         </h2>
 
                         <div class="pf-card-subtitle">
@@ -2006,7 +2006,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        👤
+                                        •
                                     </span>
 
 
@@ -2037,7 +2037,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        ✉
+                                        •
                                     </span>
 
 
@@ -2141,8 +2141,8 @@
 
                                         {{
                                             $emailVerified
-                                            ? '✓ Đã xác thực'
-                                            : '⚠ Chưa xác thực'
+                                            ? '• Đã xác thực'
+                                            : '• Chưa xác thực'
                                         }}
 
                                     </span>
@@ -2190,7 +2190,7 @@
                                     type="submit"
                                     class="pf-primary-btn"
                                 >
-                                    💾 Lưu thay đổi
+                                    • Lưu thay đổi
                                 </button>
 
                             </div>
@@ -2204,6 +2204,8 @@
             </section>
 
 
+            @include('user.partials.shipping-addresses')
+
             {{-- =============================================
                 PASSWORD
             ============================================== --}}
@@ -2214,7 +2216,7 @@
                     <div>
 
                         <h2 class="pf-card-title">
-                            🔐 Đổi mật khẩu
+                            • Đổi mật khẩu
                         </h2>
 
                         <div class="pf-card-subtitle">
@@ -2232,7 +2234,7 @@
                     <div class="pf-password-note">
 
                         <span>
-                            🛡
+                            •
                         </span>
 
                         <span>
@@ -2275,7 +2277,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        🔑
+                                        •
                                     </span>
 
 
@@ -2317,7 +2319,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        🔒
+                                        •
                                     </span>
 
 
@@ -2360,7 +2362,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        🔐
+                                        •
                                     </span>
 
 
@@ -2395,7 +2397,7 @@
                                     type="submit"
                                     class="pf-primary-btn"
                                 >
-                                    🔒 Cập nhật mật khẩu
+                                    • Cập nhật mật khẩu
                                 </button>
 
                             </div>
@@ -2410,7 +2412,7 @@
                         <div class="pf-security-item">
 
                             <strong>
-                                🔐 Mật khẩu
+                                • Mật khẩu
                             </strong>
 
                             Tối thiểu 8 ký tự.
@@ -2421,7 +2423,7 @@
                         <div class="pf-security-item">
 
                             <strong>
-                                ✉ Email
+                                • Email
                             </strong>
 
                             Được sử dụng cho đăng nhập
@@ -2433,7 +2435,7 @@
                         <div class="pf-security-item">
 
                             <strong>
-                                🛡 Bảo mật
+                                • Bảo mật
                             </strong>
 
                             Không chia sẻ mật khẩu

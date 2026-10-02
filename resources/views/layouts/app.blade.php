@@ -191,6 +191,17 @@
         }
 
 
+        /* Một dấu hiệu hình học dùng chung cho các thông tin phụ. */
+        .tb-neutral-marker {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            flex: 0 0 10px;
+            background: var(--store-gold);
+            vertical-align: middle;
+        }
+
+
         a {
             text-decoration: none;
         }
@@ -1884,6 +1895,7 @@
 <body>
 
 
+@unless(View::hasSection('hide-store-header'))
 <header class="store-header">
 
 
@@ -2522,16 +2534,7 @@
                             </li>
 
 
-                            <li>
-
-                                <a
-                                    class="dropdown-item"
-                                    href="{{ route('addresses.index') }}"
-                                >
-                                    📍 Địa chỉ của tôi
-                                </a>
-
-                            </li>
+                            
 
 
                             <li>
@@ -2855,7 +2858,7 @@
                                                     @else
 
                                                         <span style="font-size:30px;">
-                                                            🧺
+                                                                            🧺
                                                         </span>
 
                                                     @endif
@@ -3100,27 +3103,7 @@
                 </a>
 
 
-                @auth
 
-                    <a
-                        href="{{ route('dashboard') }}"
-                        class="
-                            store-nav-link
-                            {{
-                                request()
-                                    ->routeIs(
-                                        'dashboard'
-                                    )
-                                ? 'active'
-                                : ''
-                            }}
-                        "
-                    >
-                        📊 Tổng quan
-                    </a>
-
-
-                @endauth
 
 
                 <span class="store-nav-spacer">
@@ -3282,12 +3265,7 @@
                 </a>
 
 
-                <a
-                    href="{{ route('addresses.index') }}"
-                    class="store-mobile-link"
-                >
-                    📍 Địa chỉ
-                </a>
+                
 
 
             @else
@@ -3366,6 +3344,7 @@
     </div>
 
 </header>
+@endunless
 
 
 {{-- =========================================================

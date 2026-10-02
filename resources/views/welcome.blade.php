@@ -2783,7 +2783,7 @@
                             </a>
 
 
-                            <div class="commerce-rating">
+                                <div class="commerce-rating">
 
                                 ★★★★★
 
@@ -2930,7 +2930,7 @@
                                             class="commerce-cart-btn"
                                             {{ $product->quantity <= 0 ? 'disabled' : '' }}
                                         >
-                                            🛒 Thêm vào giỏ
+                                                🛒 Thêm vào giỏ
                                         </button>
 
                                     </form>
@@ -3099,7 +3099,7 @@
                             @else
 
                                 <div class="commerce-no-image">
-                                    🧺
+                                        🧺
                                 </div>
 
                             @endif

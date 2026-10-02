@@ -168,7 +168,7 @@
     }
 
     .tb-reset-otp-brand::after {
-        content: "🔢";
+        content: "•";
         position: absolute;
 
         top: 28px;
@@ -948,7 +948,7 @@
             <div class="tb-reset-otp-brand-top">
 
                 <div class="tb-reset-otp-logo">
-                    🔢
+                    •
                 </div>
 
                 <div class="tb-reset-otp-kicker">
@@ -977,7 +977,7 @@
                 <div class="tb-reset-otp-step done">
 
                     <span class="tb-reset-otp-step-number">
-                        ✓
+                        •
                     </span>
 
                     <span>
@@ -1022,7 +1022,7 @@
 
 
             <div class="tb-reset-otp-icon">
-                🔢
+                •
             </div>
 
 
@@ -1047,7 +1047,7 @@
                 <div class="tb-reset-otp-alert success">
 
                     <span>
-                        ✅
+                        •
                     </span>
 
                     <span>
@@ -1064,7 +1064,7 @@
                 <div class="tb-reset-otp-alert error">
 
                     <span>
-                        ❌
+                        •
                     </span>
 
                     <span>
@@ -1143,7 +1143,7 @@
                 <div class="tb-reset-otp-note">
 
                     <span>
-                        💡
+                        •
                     </span>
 
                     <span>
@@ -1162,7 +1162,7 @@
                     id="resetOtpSubmit"
                 >
                     <span>
-                        ✅
+                        •
                     </span>
 
                     <span>
@@ -1294,7 +1294,7 @@ document.addEventListener(
 
 
                     submitButton.innerHTML =
-                        '<span>⏳</span>'
+                        '<span>•</span>'
                         +
                         '<span>Đang xác nhận...</span>';
 

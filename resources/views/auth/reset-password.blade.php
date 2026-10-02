@@ -173,7 +173,7 @@
     }
 
     .tb-new-password-brand::after {
-        content: "🛡️";
+        content: "•";
 
         position: absolute;
 
@@ -1016,7 +1016,7 @@
             <div class="tb-new-password-brand-top">
 
                 <div class="tb-new-password-logo">
-                    🔐
+                    •
                 </div>
 
 
@@ -1048,7 +1048,7 @@
                 <div class="tb-new-password-step done">
 
                     <span class="tb-new-password-step-number">
-                        ✓
+                        •
                     </span>
 
                     <span>
@@ -1061,7 +1061,7 @@
                 <div class="tb-new-password-step done">
 
                     <span class="tb-new-password-step-number">
-                        ✓
+                        •
                     </span>
 
                     <span>
@@ -1095,7 +1095,7 @@
 
 
             <div class="tb-new-password-icon">
-                🔐
+                •
             </div>
 
 
@@ -1120,7 +1120,7 @@
                 <div class="tb-new-password-alert success">
 
                     <span>
-                        ✅
+                        •
                     </span>
 
                     <span>
@@ -1137,7 +1137,7 @@
                 <div class="tb-new-password-alert error">
 
                     <span>
-                        ❌
+                        •
                     </span>
 
                     <span>
@@ -1172,7 +1172,7 @@
                     <div class="tb-new-password-input-wrap">
 
                         <span class="tb-new-password-input-icon">
-                            🔐
+                            •
                         </span>
 
 
@@ -1249,7 +1249,7 @@
                     <div class="tb-new-password-input-wrap">
 
                         <span class="tb-new-password-input-icon">
-                            🛡️
+                            •
                         </span>
 
 
@@ -1289,7 +1289,7 @@
                 <div class="tb-new-password-note">
 
                     <span>
-                        ✓
+                        •
                     </span>
 
                     <span>
@@ -1309,7 +1309,7 @@
                     id="newPasswordSubmit"
                 >
                     <span>
-                        ✅
+                        •
                     </span>
 
                     <span>
@@ -1542,7 +1542,7 @@ document.addEventListener(
 
 
                 match.textContent =
-                    '✓ Hai mật khẩu trùng khớp.';
+                    '• Hai mật khẩu trùng khớp.';
 
 
                 return true;
@@ -1555,7 +1555,7 @@ document.addEventListener(
 
 
             match.textContent =
-                '✕ Hai mật khẩu chưa trùng nhau.';
+                '• Hai mật khẩu chưa trùng nhau.';
 
 
             return false;
@@ -1628,7 +1628,7 @@ document.addEventListener(
 
 
                     submitButton.innerHTML =
-                        '<span>⏳</span>'
+                        '<span>•</span>'
                         +
                         '<span>Đang cập nhật...</span>';
 

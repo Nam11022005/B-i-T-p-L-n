@@ -63,7 +63,7 @@ class AddressFlowTest extends TestCase
 
         $response
             ->assertRedirect(
-                route('addresses.index')
+                route('profile') . '#shipping-addresses'
             )
             ->assertSessionHas('success');
 
@@ -147,7 +147,7 @@ class AddressFlowTest extends TestCase
 
         $response
             ->assertRedirect(
-                route('addresses.index')
+                route('profile') . '#shipping-addresses'
             );
 
 
@@ -187,7 +187,7 @@ class AddressFlowTest extends TestCase
 
         $response
             ->assertRedirect(
-                route('addresses.index')
+                route('profile') . '#shipping-addresses'
             )
             ->assertSessionHas('success');
 
@@ -246,7 +246,7 @@ class AddressFlowTest extends TestCase
 
         $response
             ->assertRedirect(
-                route('addresses.index')
+                route('profile') . '#shipping-addresses'
             )
             ->assertSessionHas('success');
 
@@ -291,7 +291,7 @@ class AddressFlowTest extends TestCase
 
         $response
             ->assertRedirect(
-                route('addresses.index')
+                route('profile') . '#shipping-addresses'
             )
             ->assertSessionHas('success');
 
@@ -499,5 +499,36 @@ class AddressFlowTest extends TestCase
                     'verification.notice'
                 )
             );
+    }
+
+    public function test_profile_contains_only_own_addresses_and_old_url_redirects(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer', 'email_verified_at' => now()]);
+        $other = User::factory()->create(['role' => 'customer', 'email_verified_at' => now()]);
+        foreach ([$customer, $other] as $owner) {
+            UserAddress::create([
+                'user_id' => $owner->id, 'label' => 'Nhà', 'receiver_name' => $owner->name,
+                'phone' => '0912345678', 'address_detail' => 'Unique address for user '.$owner->id,
+                'is_default' => true,
+            ]);
+        }
+        $this->actingAs($customer)->get(route('profile'))->assertOk()
+            ->assertSee('id="shipping-addresses"', false)
+            ->assertSee('Unique address for user '.$customer->id)
+            ->assertDontSee('Unique address for user '.$other->id)
+            ->assertSee('Thêm địa chỉ mới')->assertSee('Sửa địa chỉ')
+            ->assertDontSee('Địa chỉ của tôi');
+        $this->get(route('addresses.index'))->assertRedirect(route('profile').'#shipping-addresses');
+    }
+
+    public function test_address_errors_are_kept_separate_on_profile(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer', 'email_verified_at' => now()]);
+        $this->actingAs($customer)->from(route('profile'))->post(route('addresses.store'), [
+            'address_form' => 'new', 'label' => 'Nhà thử', 'phone' => 'invalid',
+        ])->assertRedirect(route('profile').'#shipping-addresses')->assertSessionHasErrors(['phone', 'receiver_name'], null, 'addresses');
+        $this->get(route('profile'))->assertOk()->assertSee('Số điện thoại không hợp lệ.')
+            ->assertSee('value="Nhà thử"', false);
+        $this->assertDatabaseCount('user_addresses', 0);
     }
 }

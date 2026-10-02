@@ -46,6 +46,23 @@ class CartController extends Controller
         return round($quantity, 2);
     }
 
+    private function minimumQuantity(Product $product): float
+    {
+        return $product->minimumOrderQuantity();
+    }
+
+    private function quantityStep(Product $product): float
+    {
+        return $product->orderQuantityStep();
+    }
+
+    private function quantityRuleMessage(Product $product, float $minQuantity, float $step): string
+    {
+        return 'Sản phẩm "' . $product->name . '" phải mua tối thiểu '
+            . $minQuantity . ' ' . ($product->unit ?? 'sản phẩm')
+            . ' và tăng theo bước ' . $step . '.';
+    }
+
     // ==========================================
     // GIỎ HÀNG
     // ==========================================
@@ -63,8 +80,8 @@ class CartController extends Controller
 
     public function add(Request $request, Product $product)
     {
-        $minQuantity = (float) ($product->min_quantity ?? 1);
-        $step = (float) ($product->quantity_step ?? 1);
+        $minQuantity = $this->minimumQuantity($product);
+        $step = $this->quantityStep($product);
         $stock = (float) $product->quantity;
 
         $requestedQuantity = $request->input(
@@ -90,11 +107,7 @@ class CartController extends Controller
         )) {
             return back()->with(
                 'error',
-                'Số lượng phải từ ' .
-                $minQuantity . ' ' .
-                ($product->unit ?? 'sản phẩm') .
-                ' và tăng theo bước ' .
-                $step . '.'
+                $this->quantityRuleMessage($product, $minQuantity, $step)
             );
         }
 
@@ -112,6 +125,13 @@ class CartController extends Controller
                 (float) $cart[$product->id]['quantity']
                 + $requestedQuantity
             );
+
+            if (!$this->isValidStep($newQuantity, $minQuantity, $step)) {
+                return back()->with(
+                    'error',
+                    $this->quantityRuleMessage($product, $minQuantity, $step)
+                );
+            }
 
             if ($newQuantity > $stock) {
                 return back()->with(
@@ -188,8 +208,8 @@ class CartController extends Controller
             (float) $request->quantity
         );
 
-        $minQuantity = (float) ($product->min_quantity ?? 1);
-        $step = (float) ($product->quantity_step ?? 1);
+        $minQuantity = $this->minimumQuantity($product);
+        $step = $this->quantityStep($product);
         $stock = (float) $product->quantity;
 
         if (!$this->isValidStep(
@@ -199,11 +219,7 @@ class CartController extends Controller
         )) {
             return back()->with(
                 'error',
-                'Số lượng phải từ ' .
-                $minQuantity . ' ' .
-                ($product->unit ?? 'sản phẩm') .
-                ' và tăng theo bước ' .
-                $step . '.'
+                $this->quantityRuleMessage($product, $minQuantity, $step)
             );
         }
 
@@ -291,7 +307,15 @@ class CartController extends Controller
                     );
             }
 
-            $quantity = (float) $item['quantity'];
+            $quantity = $this->normalizeQuantity((float) $item['quantity']);
+            $minQuantity = $this->minimumQuantity($product);
+            $step = $this->quantityStep($product);
+
+            if (!$this->isValidStep($quantity, $minQuantity, $step)) {
+                return redirect()
+                    ->route('cart.index')
+                    ->with('error', $this->quantityRuleMessage($product, $minQuantity, $step));
+            }
 
             if ($quantity > (float) $product->quantity) {
                 return redirect()
@@ -304,12 +328,11 @@ class CartController extends Controller
                     );
             }
 
+            $item['quantity'] = $quantity;
             $item['price'] = $product->getCurrentPrice();
             $item['unit'] = $product->unit ?? 'sản phẩm';
-            $item['min_quantity'] =
-                (float) ($product->min_quantity ?? 1);
-            $item['quantity_step'] =
-                (float) ($product->quantity_step ?? 1);
+            $item['min_quantity'] = $minQuantity;
+            $item['quantity_step'] = $step;
 
             $subtotal +=
                 $product->getCurrentPrice() * $quantity;
@@ -454,11 +477,8 @@ class CartController extends Controller
                 (float) $item['quantity']
             );
 
-            $minQuantity =
-                (float) ($product->min_quantity ?? 1);
-
-            $step =
-                (float) ($product->quantity_step ?? 1);
+            $minQuantity = $this->minimumQuantity($product);
+            $step = $this->quantityStep($product);
 
             if (!$this->isValidStep(
                 $quantity,
@@ -467,9 +487,7 @@ class CartController extends Controller
             )) {
                 return back()->with(
                     'error',
-                    'Số lượng của "' .
-                    $product->name .
-                    '" không hợp lệ.'
+                    $this->quantityRuleMessage($product, $minQuantity, $step)
                 );
             }
 
@@ -841,7 +859,7 @@ OrderStatusHistory::create([
             DB::commit();
 
             // ==========================================
-            // 🔔 THÔNG BÁO ĐƠN HÀNG MỚI CHO ADMIN
+            // • THÔNG BÁO ĐƠN HÀNG MỚI CHO ADMIN
             // ==========================================
             $admins = User::where('role', 'admin')->get();
 
@@ -853,7 +871,7 @@ OrderStatusHistory::create([
 
 
             // ==========================================
-            // ⚠️ CẢNH BÁO SẢN PHẨM SẮP HẾT / HẾT HÀNG
+            // • CẢNH BÁO SẢN PHẨM SẮP HẾT / HẾT HÀNG
             // ==========================================
             foreach ($orderedProductIds as $productId) {
 
@@ -866,8 +884,7 @@ OrderStatusHistory::create([
                 $currentStock =
                     (float) $stockProduct->quantity;
 
-                $minQuantity =
-                    (float) ($stockProduct->min_quantity ?? 1);
+                $minQuantity = $this->minimumQuantity($stockProduct);
 
                 /*
                  * Quy tắc cảnh báo:

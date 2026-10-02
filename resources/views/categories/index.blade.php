@@ -513,13 +513,13 @@
                         letter-spacing:1px;
                     "
                 >
-                    🌿 TINH HOA TÂY BẮC
+                    TINH HOA TÂY BẮC
                 </div>
 
 
                 <h1 class="fw-bold display-5 mb-3">
 
-                    🧺 Danh mục đặc sản
+                    Danh mục đặc sản
 
                 </h1>
 
@@ -583,7 +583,7 @@
                             fw-bold
                         "
                     >
-                        🥩 Xem tất cả đặc sản
+                        Xem tất cả đặc sản
                     </a>
 
                 @endif
@@ -618,7 +618,7 @@
                         >
 
                             <div class="info-icon">
-                                🧺
+                                <span class="tb-neutral-marker" aria-hidden="true"></span>
                             </div>
 
 
@@ -674,7 +674,7 @@
                         >
 
                             <div class="info-icon">
-                                🌿
+                                <span class="tb-neutral-marker" aria-hidden="true"></span>
                             </div>
 
 
@@ -721,7 +721,7 @@
                         >
 
                             <div class="info-icon">
-                                🚚
+                                <span class="tb-neutral-marker" aria-hidden="true"></span>
                             </div>
 
 
@@ -1040,7 +1040,7 @@
                                         w-100
                                     "
                                 >
-                                    🌿 Xem đặc sản
+                                    Xem đặc sản
                                 </a>
 
                             @endif

@@ -150,7 +150,7 @@
     }
 
     .admin-product-form-page .product-form-header::after {
-        content: "🌿";
+        content: "•";
         position: absolute;
         right: 38px;
         top: 16px;
@@ -286,7 +286,7 @@
     }
 
     .admin-product-form-page .unit-help::after {
-        content: "💡";
+        content: "•";
         position: absolute;
         right: 14px;
         bottom: -8px;
@@ -494,14 +494,14 @@
 
 <div class="admin-product-form-page"><div class="card product-form-card">
     <div class="product-form-header">
-        <h2 class="mb-0">➕ Thêm Sản phẩm Mới</h2>
+        <h2 class="mb-0">• Thêm Sản phẩm Mới</h2>
     </div>
 
     <div class="card-body p-4">
 
         @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show mb-4">
-                <strong class="d-block mb-2">⚠️ Lỗi xảy ra:</strong>
+                <strong class="d-block mb-2">• Lỗi xảy ra:</strong>
 
                 <ul class="mb-0 ps-3">
                     @foreach ($errors->all() as $error)
@@ -762,7 +762,7 @@
                     </div>
 
                     <div class="unit-help">
-                        <strong>💡 Gợi ý:</strong>
+                        <strong>• Gợi ý:</strong>
                         <span id="unitHelpText">
                             Với sản phẩm bán theo kg, có thể đặt tối thiểu 0.25 kg
                             và bước tăng 0.25 kg.
@@ -783,7 +783,7 @@
                             id="image-drop-area"
                         >
                             <div id="image-placeholder">
-                                <div class="fs-3 mb-2">🖼️</div>
+                                <div class="fs-3 mb-2">•</div>
                                 <p class="text-muted mb-0">
                                     Click hoặc kéo ảnh vào đây
                                 </p>
@@ -823,7 +823,7 @@
                 </a>
 
                 <button type="submit" class="btn btn-tb">
-                    💾 Thêm sản phẩm
+                    • Thêm sản phẩm
                 </button>
             </div>
 

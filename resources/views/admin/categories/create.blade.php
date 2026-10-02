@@ -21,7 +21,7 @@ box-shadow:0 28px 70px rgba(72,43,27,.12),0 5px 18px rgba(72,43,27,.05)}
 justify-content:space-between;gap:28px;padding:34px 38px;color:#fff;
 background:radial-gradient(circle at 87% 13%,rgba(242,193,92,.24),transparent 28%),
 linear-gradient(135deg,#28150d 0%,#5f341d 53%,#48633b 100%)}
-.category-form-hero:after{content:"🧺";position:absolute;right:42px;top:18px;font-size:92px;opacity:.07}
+.category-form-hero:after{content:"•";position:absolute;right:42px;top:18px;font-size:92px;opacity:.07}
 .category-form-hero>*{position:relative;z-index:2}
 .category-kicker{display:inline-flex;padding:6px 11px;margin-bottom:9px;border:1px solid rgba(242,193,92,.3);
 border-radius:999px;color:#f5d98e;background:rgba(255,255,255,.055);font-size:11px;font-weight:900;letter-spacing:.09em}
@@ -61,8 +61,8 @@ box-shadow:0 10px 22px rgba(95,52,29,.17)}
     <div class="category-form-shell">
         <section class="category-form-hero">
             <div>
-                <div class="category-kicker">⚙️ QUẢN TRỊ DANH MỤC</div>
-                <h1 class="mb-2">➕ Thêm danh mục mới</h1>
+                <div class="category-kicker">• QUẢN TRỊ DANH MỤC</div>
+                <h1 class="mb-2">• Thêm danh mục mới</h1>
                 <p class="mb-0">Tạo nhóm sản phẩm mới để sắp xếp đặc sản Tây Bắc rõ ràng và dễ quản lý hơn.</p>
             </div>
             <a href="{{ route('admin.categories.index') }}" class="category-back">← Quay lại danh mục</a>
@@ -71,7 +71,7 @@ box-shadow:0 10px 22px rgba(95,52,29,.17)}
         <div class="category-form-body">
             @if ($errors->any())
                 <div class="alert alert-danger mb-4">
-                    <strong class="d-block mb-2">⚠️ Vui lòng kiểm tra lại:</strong>
+                    <strong class="d-block mb-2">• Vui lòng kiểm tra lại:</strong>
                     <ul class="mb-0 ps-3">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -93,20 +93,20 @@ box-shadow:0 10px 22px rgba(95,52,29,.17)}
                         @enderror
 
                         <div class="category-help">
-                            💡 Nên đặt tên ngắn gọn và rõ nhóm sản phẩm, ví dụ:
+                            • Nên đặt tên ngắn gọn và rõ nhóm sản phẩm, ví dụ:
                             <strong>Thịt gác bếp</strong>, <strong>Gia vị Tây Bắc</strong>,
                             <strong>Trà & thảo mộc</strong>.
                         </div>
 
                         <div class="category-actions">
                             <a href="{{ route('admin.categories.index') }}" class="btn category-cancel">Hủy</a>
-                            <button type="submit" class="btn category-save">✓ Lưu danh mục</button>
+                            <button type="submit" class="btn category-save">• Lưu danh mục</button>
                         </div>
                     </form>
                 </div>
 
                 <aside class="category-card category-preview">
-                    <div class="category-preview-icon">🧺</div>
+                    <div class="category-preview-icon">•</div>
                     <div class="small fw-bold mb-2" style="color:#48633b;">DANH MỤC ĐẶC SẢN</div>
                     <h4 class="fw-bold mb-2">Tinh Hoa Tây Bắc</h4>
                     <p class="text-muted mb-0">

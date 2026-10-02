@@ -17,16 +17,7 @@ class AddressController extends Controller
 
     public function index()
     {
-        $addresses = UserAddress::query()
-            ->where('user_id', Auth::id())
-            ->orderByDesc('is_default')
-            ->latest()
-            ->get();
-
-        return view(
-            'addresses.index',
-            compact('addresses')
-        );
+        return redirect()->to(route('profile') . '#shipping-addresses');
     }
 
 
@@ -99,7 +90,7 @@ class AddressController extends Controller
 
 
         return redirect()
-            ->route('addresses.index')
+            ->to(route('profile') . '#shipping-addresses')
             ->with(
                 'success',
                 'Đã thêm địa chỉ giao hàng.'
@@ -172,7 +163,7 @@ class AddressController extends Controller
 
 
         return redirect()
-            ->route('addresses.index')
+            ->to(route('profile') . '#shipping-addresses')
             ->with(
                 'success',
                 'Đã cập nhật địa chỉ.'
@@ -240,7 +231,7 @@ class AddressController extends Controller
 
 
         return redirect()
-            ->route('addresses.index')
+            ->to(route('profile') . '#shipping-addresses')
             ->with(
                 'success',
                 'Đã xóa địa chỉ.'
@@ -284,7 +275,7 @@ class AddressController extends Controller
 
 
         return redirect()
-            ->route('addresses.index')
+            ->to(route('profile') . '#shipping-addresses')
             ->with(
                 'success',
                 'Đã đặt làm địa chỉ mặc định.'
@@ -319,67 +310,71 @@ class AddressController extends Controller
     private function validateAddress(
         Request $request
     ): array {
-        return $request->validate(
-            [
-                'label' => [
-                    'required',
-                    'string',
-                    'max:50',
+        try {
+            return $request->validateWithBag('addresses',
+                [
+                    'label' => [
+                        'required',
+                        'string',
+                        'max:50',
+                    ],
+    
+                    'receiver_name' => [
+                        'required',
+                        'string',
+                        'max:255',
+                    ],
+    
+                    'phone' => [
+                        'required',
+                        'string',
+                        'max:20',
+                        'regex:/^[0-9+\-\s]{9,20}$/',
+                    ],
+    
+                    'province' => [
+                        'nullable',
+                        'string',
+                        'max:100',
+                    ],
+    
+                    'district' => [
+                        'nullable',
+                        'string',
+                        'max:100',
+                    ],
+    
+                    'ward' => [
+                        'nullable',
+                        'string',
+                        'max:100',
+                    ],
+    
+                    'address_detail' => [
+                        'required',
+                        'string',
+                        'max:500',
+                    ],
                 ],
-
-                'receiver_name' => [
-                    'required',
-                    'string',
-                    'max:255',
-                ],
-
-                'phone' => [
-                    'required',
-                    'string',
-                    'max:20',
-                    'regex:/^[0-9+\-\s]{9,20}$/',
-                ],
-
-                'province' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
-
-                'district' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
-
-                'ward' => [
-                    'nullable',
-                    'string',
-                    'max:100',
-                ],
-
-                'address_detail' => [
-                    'required',
-                    'string',
-                    'max:500',
-                ],
-            ],
-            [
-                'label.required' =>
-                    'Vui lòng nhập tên gợi nhớ cho địa chỉ.',
-
-                'receiver_name.required' =>
-                    'Vui lòng nhập tên người nhận.',
-
-                'phone.required' =>
-                    'Vui lòng nhập số điện thoại.',
-
-                'phone.regex' =>
-                    'Số điện thoại không hợp lệ.',
-
-                'address_detail.required' =>
-                    'Vui lòng nhập địa chỉ chi tiết.',
-            ]
-        );
+                [
+                    'label.required' =>
+                        'Vui lòng nhập tên gợi nhớ cho địa chỉ.',
+    
+                    'receiver_name.required' =>
+                        'Vui lòng nhập tên người nhận.',
+    
+                    'phone.required' =>
+                        'Vui lòng nhập số điện thoại.',
+    
+                    'phone.regex' =>
+                        'Số điện thoại không hợp lệ.',
+    
+                    'address_detail.required' =>
+                        'Vui lòng nhập địa chỉ chi tiết.',
+                ]
+            );
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception->redirectTo(route('profile') . '#shipping-addresses');
+        }
     }
 }

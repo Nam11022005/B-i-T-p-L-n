@@ -193,7 +193,7 @@
                 color:#2c1810;
             "
         >
-            🕒 Lịch sử trạng thái đơn hàng
+            • Lịch sử trạng thái đơn hàng
         </h5>
 
     </div>
@@ -238,11 +238,11 @@
 
                                 'pending'
                                 =>
-                                '🕒',
+                                '⏳',
 
                                 'confirmed'
                                 =>
-                                '✅',
+                                '✓',
 
                                 'shipped'
                                 =>
@@ -250,7 +250,7 @@
 
                                 'delivered'
                                 =>
-                                '🎉',
+                                '✅',
 
                                 'cancelled'
                                 =>
@@ -258,7 +258,7 @@
 
                                 default
                                 =>
-                                '📌',
+                                '📦',
 
                             };
 
@@ -412,7 +412,7 @@
                                 "
                             >
 
-                                👤
+                                •
 
                                 @if(
                                     $history->user
@@ -459,7 +459,7 @@
                     "
                 >
 
-                    🕒
+                    •
 
                 </div>
 

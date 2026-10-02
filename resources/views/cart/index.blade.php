@@ -1499,7 +1499,7 @@
         <div class="tb-cart-heading-copy">
 
             <div class="tb-cart-eyebrow">
-                🛒 Giỏ hàng của bạn
+                • Giỏ hàng của bạn
             </div>
 
 
@@ -1597,20 +1597,20 @@
                                 'sản phẩm';
 
 
-                            $minQty =
-                                (float) (
-                                    $details['min_quantity']
-                                    ??
-                                    1
+                            $product =
+                                $cartProducts->get(
+                                    (int) $id
                                 );
 
 
-                            $stepQty =
-                                (float) (
-                                    $details['quantity_step']
-                                    ??
-                                    1
-                                );
+                            $minQty = $product
+                                ? $product->minimumOrderQuantity()
+                                : (float) ($details['min_quantity'] ?? 1);
+
+
+                            $stepQty = $product
+                                ? $product->orderQuantityStep()
+                                : (float) ($details['quantity_step'] ?? 1);
 
 
                             $subtotal =
@@ -1634,12 +1634,6 @@
                             $displayStepQty =
                                 $formatQuantity(
                                     $stepQty
-                                );
-
-
-                            $product =
-                                $cartProducts->get(
-                                    (int) $id
                                 );
 
 
@@ -1737,13 +1731,13 @@
                                             class="tb-cart-no-image"
                                             style="display:none;"
                                         >
-                                            🧺
+                                            •
                                         </div>
 
                                     @else
 
                                         <div class="tb-cart-no-image">
-                                            🧺
+                                            •
                                         </div>
 
                                     @endif
@@ -1836,7 +1830,7 @@
                                             class="tb-cart-remove"
                                             title="Xóa khỏi giỏ"
                                         >
-                                            🗑 Xóa
+                                            • Xóa
                                         </button>
 
                                     </form>
@@ -1982,7 +1976,10 @@
 
                                             <div class="tb-cart-step">
 
-                                                Bước tăng:
+                                                Tối thiểu:
+                                                {{ $displayMinQty }}
+                                                {{ $unit }}
+                                                · Bước tăng:
                                                 {{ $displayStepQty }}
                                                 {{ $unit }}
 
@@ -2049,7 +2046,7 @@
                 <div class="tb-cart-summary-head">
 
                     <strong>
-                        🧾 Tóm tắt đơn hàng
+                        • Tóm tắt đơn hàng
                     </strong>
 
                     <span>
@@ -2174,7 +2171,7 @@
                         <div class="tb-cart-security-item">
 
                             <strong>
-                                🔒 Đặt hàng an toàn
+                                • Đặt hàng an toàn
                             </strong>
 
                             Thông tin đơn hàng
@@ -2186,7 +2183,7 @@
                         <div class="tb-cart-security-item">
 
                             <strong>
-                                💳 Thanh toán
+                                • Thanh toán
                             </strong>
 
                             COD hoặc
@@ -2198,7 +2195,7 @@
                         <div class="tb-cart-security-item">
 
                             <strong>
-                                🚚 Vận chuyển
+                                • Vận chuyển
                             </strong>
 
                             Lựa chọn phương thức
@@ -2210,7 +2207,7 @@
                         <div class="tb-cart-security-item">
 
                             <strong>
-                                📦 Theo dõi đơn
+                                • Theo dõi đơn
                             </strong>
 
                             Kiểm tra trạng thái
@@ -2254,7 +2251,7 @@
             <div>
 
                 <div class="tb-cart-empty-icon">
-                    🛒
+                    •
                 </div>
 
 
@@ -2276,7 +2273,7 @@
                     href="{{ route('products.index') }}"
                     class="tb-cart-empty-btn"
                 >
-                    🌿 Khám phá sản phẩm →
+                    • Khám phá sản phẩm →
                 </a>
 
             </div>

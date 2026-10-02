@@ -48,7 +48,7 @@
     }
 
     .product-form-hero::after {
-        content: "🌿";
+        content: "•";
 
         position: absolute;
 
@@ -493,7 +493,7 @@
                 <div class="alert alert-danger mb-4">
 
                     <strong class="d-block mb-2">
-                        ⚠️ Vui lòng kiểm tra lại:
+                        • Vui lòng kiểm tra lại:
                     </strong>
 
                     <ul class="mb-0 ps-3">
@@ -1026,7 +1026,7 @@
                             <div class="unit-help mt-3">
 
                                 <strong>
-                                    💡 Quy cách bán:
+                                    • Quy cách bán:
                                 </strong>
 
                                 <span id="unitHelpText">
@@ -1105,7 +1105,7 @@
                                     <div class="main-preview-placeholder">
 
                                         <div style="font-size:42px;">
-                                            🖼️
+                                            •
                                         </div>
 
                                         <strong>
@@ -1236,7 +1236,7 @@
                             btn-save-product
                         "
                     >
-                        💾 Lưu sản phẩm
+                        • Lưu sản phẩm
                     </button>
 
 
@@ -1431,7 +1431,7 @@ document.addEventListener(
                         <div class="main-preview-placeholder">
 
                             <div style="font-size:42px;">
-                                🖼️
+                                •
                             </div>
 
                             <strong>
