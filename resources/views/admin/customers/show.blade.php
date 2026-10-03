@@ -57,7 +57,7 @@
     }
 
     .customer-detail-hero::after {
-        content: "•";
+        content: "✦";
         position: absolute;
         right: 30px;
         bottom: -28px;
@@ -402,7 +402,7 @@
     }
 
     .latest-shipping-box::after {
-        content: "•";
+        content: "✦";
         position: absolute;
         right: 16px;
         bottom: -13px;
@@ -435,7 +435,7 @@
     }
 
     .address-card-admin::after {
-        content: "•";
+        content: "✦";
         position: absolute;
         right: 13px;
         bottom: -12px;
@@ -525,6 +525,39 @@
         }
     }
 
+    /* Sổ ví của riêng khách hàng này */
+    .wallet-ledger-card { overflow:hidden; }
+    .wallet-ledger-card .card-header { background:linear-gradient(100deg,#fffaf1,#f7efe0); }
+    .wallet-ledger-top { display:grid; grid-template-columns:minmax(290px,.95fr) minmax(360px,1.25fr); gap:18px; padding:22px; background:linear-gradient(180deg,#fffdfa,#fff); }
+    .wallet-balance-plate { position:relative; min-height:212px; overflow:hidden; padding:26px; border-radius:19px; color:#fff; background:linear-gradient(145deg,#223b2b,#3f6141 58%,#7f7041); box-shadow:0 16px 30px rgba(37,63,43,.18); }
+    .wallet-balance-plate::before { content:""; position:absolute; right:-36px; bottom:-62px; width:205px; height:205px; border:1px solid rgba(255,255,255,.18); border-radius:50%; box-shadow:0 0 0 25px rgba(255,255,255,.045),0 0 0 52px rgba(255,255,255,.035); }
+    .wallet-balance-plate::after { content:"✦"; position:absolute; right:25px; top:13px; color:#f5d889; font-size:36px; opacity:.72; }
+    .wallet-balance-plate > * { position:relative; z-index:1; }
+    .wallet-balance-label { color:rgba(255,255,255,.74); font-size:12px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+    .wallet-balance-value { margin:9px 0 17px; font-size:clamp(31px,3.2vw,43px); font-weight:900; letter-spacing:-1.4px; }
+    .wallet-balance-meta { display:flex; gap:9px; flex-wrap:wrap; }
+    .wallet-balance-meta span { padding:6px 9px; border:1px solid rgba(255,255,255,.15); border-radius:999px; background:rgba(0,0,0,.12); color:rgba(255,255,255,.9); font-size:12px; }
+    .wallet-adjustment { padding:4px 3px; }
+    .wallet-adjustment h6 { margin:0 0 5px; color:var(--tb-brown-dark); font-size:18px; font-weight:900; }
+    .wallet-adjustment p { margin-bottom:16px; color:#7c6a5c; font-size:13px; }
+    .wallet-adjustment-grid { display:grid; grid-template-columns:145px 1fr; gap:10px; }
+    .wallet-adjustment input,.wallet-adjustment select { width:100%; min-height:43px; padding:9px 12px; border:1px solid #ddc7a7; border-radius:10px; outline:0; background:#fffefa; }
+    .wallet-adjustment input:focus,.wallet-adjustment select:focus { border-color:#55764a; box-shadow:0 0 0 3px rgba(85,118,74,.12); }
+    .wallet-adjustment .wallet-note { grid-column:1 / -1; }
+    .wallet-save { grid-column:1 / -1; min-height:43px; border:0; border-radius:10px; color:#fff; background:linear-gradient(135deg,#a83b2d,#6b3c21 53%,#48633b); font-weight:850; box-shadow:0 9px 18px rgba(95,52,29,.16); }
+    .wallet-ledger-list { border-top:1px solid #eddfcb; }
+    .wallet-ledger-row { display:grid; grid-template-columns:145px minmax(180px,1fr) 145px 150px; gap:15px; align-items:center; padding:15px 22px; border-bottom:1px solid #f1e7d8; }
+    .wallet-ledger-row:last-child { border-bottom:0; }
+    .wallet-ledger-date { color:#7d6a5b; font-size:13px; }
+    .wallet-ledger-title { color:#35251e; font-weight:900; }
+    .wallet-ledger-sub { margin-top:2px; color:#8a796c; font-size:12px; }
+    .wallet-ledger-amount { font-weight:900; text-align:right; } .wallet-ledger-amount.in { color:#1c7444; } .wallet-ledger-amount.out { color:#b13e2c; }
+    .wallet-ledger-balance { color:#645448; font-size:13px; text-align:right; }
+    .wallet-transaction-status { display:inline-block; margin-left:7px; padding:3px 7px; border-radius:999px; color:#7a5508; background:#fff0c5; font-size:10px; font-weight:900; vertical-align:middle; }
+    .wallet-transaction-status.done { color:#176d3d; background:#dff5e5; }
+    @media (max-width: 991px) { .wallet-ledger-top{grid-template-columns:1fr}.wallet-ledger-row{grid-template-columns:115px 1fr 120px}.wallet-ledger-balance{display:none} }
+    @media (max-width: 575px) { .wallet-ledger-top{padding:15px}.wallet-adjustment-grid{grid-template-columns:1fr}.wallet-ledger-row{grid-template-columns:1fr auto;gap:5px;padding:14px 16px}.wallet-ledger-date{grid-column:1/-1}.wallet-ledger-amount{grid-column:2;grid-row:2}.wallet-ledger-title{grid-column:1;grid-row:2}.wallet-balance-plate{min-height:190px} }
+
 </style>
 
 <div class="container-fluid customer-detail-page">
@@ -544,13 +577,13 @@
             @endif
 
             <div>
-                <div class="detail-kicker">• KHÁCH HÀNG #{{ $customer->id }}</div>
+                <div class="detail-kicker">👤 KHÁCH HÀNG #{{ $customer->id }}</div>
                 <h1 class="fw-bold mb-2">{{ $customer->name }}</h1>
                 <div class="sub">
                     {{ $customer->email }}
                     ·
                     @if($customer->email_verified_at)
-                        • Đã xác thực email
+                        ✓ Đã xác thực email
                     @else
                         Chưa xác thực email
                     @endif
@@ -566,28 +599,28 @@
     <div class="row g-3 mb-4">
         <div class="col-md-3 col-6">
             <div class="customer-mini-stat">
-                <div class="text-muted small">• Tổng đơn</div>
+                <div class="text-muted small">📦 Tổng đơn</div>
                 <div class="value">{{ $totalOrders }}</div>
             </div>
         </div>
 
         <div class="col-md-3 col-6">
             <div class="customer-mini-stat">
-                <div class="text-muted small">• Đang xử lý</div>
+                <div class="text-muted small">⏳ Đang xử lý</div>
                 <div class="value">{{ $pendingOrders }}</div>
             </div>
         </div>
 
         <div class="col-md-3 col-6">
             <div class="customer-mini-stat">
-                <div class="text-muted small">• Đã giao</div>
+                <div class="text-muted small">✅ Đã giao</div>
                 <div class="value">{{ $deliveredOrders }}</div>
             </div>
         </div>
 
         <div class="col-md-3 col-6">
             <div class="customer-mini-stat">
-                <div class="text-muted small">• Đã chi tiêu</div>
+                <div class="text-muted small">💰 Đã chi tiêu</div>
                 <div class="value" style="color:#a83b2d;font-size:22px;">
                     {{ number_format((float) $totalSpent, 0, ',', '.') }} đ
                 </div>
@@ -595,11 +628,89 @@
         </div>
     </div>
 
+    @php
+        $walletLabels = [
+            'topup' => 'Nạp tiền qua ngân hàng',
+            'payment' => 'Thanh toán đơn hàng',
+            'refund' => 'Hoàn tiền đơn hàng',
+            'admin_credit' => 'Điều chỉnh cộng tiền',
+            'admin_debit' => 'Điều chỉnh trừ tiền',
+        ];
+    @endphp
+
+    <section class="customer-detail-card wallet-ledger-card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center gap-3 flex-wrap">
+            <div>
+                <h5 class="fw-bold mb-1">💳 Ví Tinh Hoa</h5>
+                <div class="text-muted small">Số dư và lịch sử giao dịch của riêng khách hàng này.</div>
+            </div>
+            <span class="address-label-admin">{{ $walletTransactions->total() }} giao dịch</span>
+        </div>
+
+        <div class="wallet-ledger-top">
+            <div class="wallet-balance-plate">
+                <div class="wallet-balance-label">Số dư khả dụng</div>
+                <div class="wallet-balance-value">{{ number_format((float) $customer->wallet_balance, 0, ',', '.') }}đ</div>
+                <div class="wallet-balance-meta">
+                    <span>✦ {{ number_format($pendingWalletTopUps) }} yêu cầu nạp chờ</span>
+                    <span>↗ Đã nạp {{ number_format($completedWalletTopUps, 0, ',', '.') }}đ</span>
+                </div>
+            </div>
+
+            <div class="wallet-adjustment">
+                <h6>Điều chỉnh có lưu vết</h6>
+                <p>Chỉ dùng khi cần xử lý đối soát. Mỗi lần điều chỉnh sẽ hiện trong lịch sử ví của khách hàng.</p>
+                <form action="{{ route('admin.customers.wallet.adjust', $customer) }}" method="POST" class="wallet-adjustment-grid">
+                    @csrf
+                    <select name="direction">
+                        <option value="credit">Cộng tiền</option>
+                        <option value="debit">Trừ tiền</option>
+                    </select>
+                    <input type="number" name="amount" min="1000" max="50000000" step="1000" placeholder="Số tiền cần điều chỉnh" required>
+                    <input class="wallet-note" type="text" name="note" maxlength="500" placeholder="Lý do điều chỉnh" required>
+                    <button class="wallet-save" type="submit">Lưu điều chỉnh vào sổ ví</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="wallet-ledger-list">
+            @forelse($walletTransactions as $transaction)
+                @php
+                    $isDebit = in_array($transaction->type, ['payment', 'admin_debit'], true);
+                @endphp
+                <div class="wallet-ledger-row">
+                    <div class="wallet-ledger-date">{{ $transaction->created_at->format('d/m/Y · H:i') }}</div>
+                    <div>
+                        <div class="wallet-ledger-title">
+                            {{ $walletLabels[$transaction->type] ?? 'Giao dịch ví' }}
+                            @if($transaction->status === 'pending')
+                                <span class="wallet-transaction-status">Đang chờ</span>
+                            @else
+                                <span class="wallet-transaction-status done">Hoàn tất</span>
+                            @endif
+                        </div>
+                        <div class="wallet-ledger-sub">
+                            {{ $transaction->reference_code ?: $transaction->description ?: 'Không có mã giao dịch' }}
+                            @if($transaction->order)
+                                · Đơn #{{ $transaction->order->id }}
+                            @endif
+                        </div>
+                    </div>
+                    <div class="wallet-ledger-amount {{ $isDebit ? 'out' : 'in' }}">{{ $isDebit ? '−' : '+' }}{{ number_format((float) $transaction->amount, 0, ',', '.') }}đ</div>
+                    <div class="wallet-ledger-balance">Số dư sau GD<br><strong>{{ $transaction->balance_after === null ? '—' : number_format((float) $transaction->balance_after, 0, ',', '.') . 'đ' }}</strong></div>
+                </div>
+            @empty
+                <div class="text-center py-5"><div style="font-size:42px;">💳</div><div class="fw-bold mt-2">Khách hàng chưa có giao dịch ví</div><div class="text-muted small mt-1">Khi nạp tiền hoặc thanh toán bằng ví, dữ liệu sẽ hiện tại đây.</div></div>
+            @endforelse
+        </div>
+        @if($walletTransactions->hasPages())<div class="p-3 border-top d-flex justify-content-center">{{ $walletTransactions->links() }}</div>@endif
+    </section>
+
     <div class="row g-4 mb-4">
         <div class="col-xl-5">
             <div class="customer-detail-card h-100">
                 <div class="card-header">
-                    <h5 class="fw-bold mb-1">• Thông tin tài khoản</h5>
+                    <h5 class="fw-bold mb-1">👤 Thông tin tài khoản</h5>
                     <div class="text-muted small">
                         Dữ liệu khách hàng cung cấp khi tạo và sử dụng tài khoản.
                     </div>
@@ -620,7 +731,7 @@
                         <span class="info-label">Trạng thái email</span>
                         <span class="info-value">
                             @if($customer->email_verified_at)
-                                <span class="text-success">• Đã xác thực</span>
+                                <span class="text-success">✓ Đã xác thực</span>
                             @else
                                 <span class="text-warning">Chưa xác thực</span>
                             @endif
@@ -647,7 +758,7 @@
         <div class="col-xl-7">
             <div class="customer-detail-card h-100">
                 <div class="card-header">
-                    <h5 class="fw-bold mb-1">• Thông tin giao hàng gần nhất</h5>
+                    <h5 class="fw-bold mb-1">🚚 Thông tin giao hàng gần nhất</h5>
                     <div class="text-muted small">
                         Thông tin khách hàng nhập khi đặt đơn gần đây nhất.
                     </div>
@@ -690,14 +801,14 @@
                                         href="{{ route('admin.orders.show', $latestOrder) }}"
                                         class="btn btn-sm btn-outline-dark"
                                     >
-                                        • Mở đơn hàng gần nhất
+                                        📦 Mở đơn hàng gần nhất
                                     </a>
                                 </div>
                             </div>
                         </div>
                     @else
                         <div class="text-center py-4">
-                            <div style="font-size:48px;">•</div>
+                            <div style="font-size:48px;">📦</div>
                             <div class="fw-bold mt-2">Khách hàng chưa đặt đơn nào</div>
                         </div>
                     @endif
@@ -708,7 +819,7 @@
 
     <div class="customer-detail-card mb-4">
         <div class="card-header">
-            <h5 class="fw-bold mb-1">• Địa chỉ khách hàng đã lưu</h5>
+            <h5 class="fw-bold mb-1">📍 Địa chỉ khách hàng đã lưu</h5>
             <div class="text-muted small">
                 Đây là các địa chỉ do chính khách hàng thêm trong mục “Địa chỉ của tôi”.
             </div>
@@ -717,7 +828,7 @@
         <div class="card-body">
             @if($addresses->isEmpty())
                 <div class="text-center py-4">
-                    <div style="font-size:48px;">•</div>
+                    <div style="font-size:48px;">📍</div>
                     <div class="fw-bold mt-2">Khách hàng chưa lưu địa chỉ</div>
                 </div>
             @else
@@ -740,7 +851,7 @@
                                     </span>
 
                                     @if(data_get($address, 'is_default'))
-                                        <span class="badge bg-success rounded-pill">• Mặc định</span>
+                                        <span class="badge bg-success rounded-pill">✓ Mặc định</span>
                                     @endif
                                 </div>
 
@@ -749,11 +860,11 @@
                                 </div>
 
                                 <div class="mt-1">
-                                    • {{ data_get($address, 'phone', 'Chưa có số điện thoại') }}
+                                    ☎ {{ data_get($address, 'phone', 'Chưa có số điện thoại') }}
                                 </div>
 
                                 <div class="text-muted mt-2">
-                                    • {{ $fullAddress ?: 'Chưa có địa chỉ chi tiết' }}
+                                    📍 {{ $fullAddress ?: 'Chưa có địa chỉ chi tiết' }}
                                 </div>
                             </div>
                         </div>
@@ -766,7 +877,7 @@
     <div class="customer-detail-card">
         <div class="card-header d-flex justify-content-between align-items-center gap-3 flex-wrap">
             <div>
-                <h5 class="fw-bold mb-1">• Lịch sử đơn hàng</h5>
+                <h5 class="fw-bold mb-1">🕒 Lịch sử đơn hàng</h5>
                 <div class="text-muted small">
                     Bấm mã đơn để xem toàn bộ chi tiết đơn hàng.
                 </div>
@@ -779,7 +890,7 @@
 
         @if($orders->isEmpty())
             <div class="text-center py-5">
-                <div style="font-size:52px;">•</div>
+                <div style="font-size:52px;">📦</div>
                 <h5 class="fw-bold mt-2">Chưa có đơn hàng</h5>
             </div>
         @else
@@ -837,7 +948,7 @@
                                 </td>
 
                                 <td>
-                                    {{ $order->payment_method === 'bank' ? '• Chuyển khoản' : '• COD' }}
+                                    {{ $order->payment_method === 'bank' ? '💳 Chuyển khoản' : '💵 COD' }}
                                 </td>
 
                                 <td>

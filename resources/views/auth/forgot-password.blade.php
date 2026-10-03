@@ -196,7 +196,7 @@
 
 
     .tb-forgot-brand::after {
-        content: "•";
+        content: "✦";
 
         position: absolute;
 
@@ -1084,7 +1084,7 @@
             <div class="tb-forgot-brand-top">
 
                 <div class="tb-forgot-logo">
-                    •
+                    🔐
                 </div>
 
 
@@ -1163,7 +1163,7 @@
 
 
             <div class="tb-forgot-icon">
-                •
+                ✉
             </div>
 
 
@@ -1190,7 +1190,7 @@
                 <div class="tb-forgot-alert success">
 
                     <span>
-                        •
+                        ✅
                     </span>
 
                     <span>
@@ -1208,7 +1208,7 @@
                 <div class="tb-forgot-alert error">
 
                     <span>
-                        •
+                        ❌
                     </span>
 
                     <span>
@@ -1242,7 +1242,7 @@
                     <div class="tb-forgot-input-wrap">
 
                         <span class="tb-forgot-input-icon">
-                            •
+                            ✉
                         </span>
 
 
@@ -1286,7 +1286,7 @@
                 <div class="tb-forgot-note">
 
                     <span>
-                        •
+                        🔒
                     </span>
 
                     <span>
@@ -1304,7 +1304,7 @@
                     id="forgotPasswordSubmit"
                 >
                     <span>
-                        •
+                        📩
                     </span>
 
                     <span>
@@ -1369,7 +1369,7 @@ document.addEventListener(
 
 
                 submitButton.innerHTML =
-                    '<span>•</span>'
+                    '<span>📩</span>'
                     +
                     '<span>Đang gửi mã OTP...</span>';
 

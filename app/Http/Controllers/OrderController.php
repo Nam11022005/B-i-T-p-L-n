@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Voucher;
 use App\Models\OrderStatusHistory;
+use App\Models\User;
+use App\Models\WalletTransaction;
 use App\Notifications\OrderStatusChangedNotification;
 
 use Illuminate\Http\Request;
@@ -195,6 +197,7 @@ class OrderController extends Controller
         $order->load([
             'items.product',
             'statusHistories.user',
+            'serviceRequests.processor',
         ]);
 
 
@@ -447,6 +450,8 @@ class OrderController extends Controller
             'items.product',
             'user',
             'statusHistories.user',
+            'serviceRequests.user',
+            'serviceRequests.processor',
         ]);
 
 
@@ -653,6 +658,36 @@ class OrderController extends Controller
                     $lockedOrder->payment_expires_at =
                         null;
                 }
+
+                if (
+                    $lockedOrder->payment_method === 'wallet'
+                    && $lockedOrder->payment_status === 'paid'
+                    && !WalletTransaction::where('order_id', $lockedOrder->id)
+                        ->where('type', 'refund')
+                        ->exists()
+                ) {
+                    $walletUser = User::whereKey($lockedOrder->user_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($walletUser) {
+                        $walletUser->wallet_balance = round(
+                            (float) $walletUser->wallet_balance + (float) $lockedOrder->total_price,
+                            2
+                        );
+                        $walletUser->save();
+
+                        WalletTransaction::create([
+                            'user_id' => $walletUser->id,
+                            'order_id' => $lockedOrder->id,
+                            'type' => 'refund',
+                            'status' => 'completed',
+                            'amount' => $lockedOrder->total_price,
+                            'balance_after' => $walletUser->wallet_balance,
+                            'description' => 'Hoàn tiền đơn hàng #' . $lockedOrder->id . ' bị hủy.',
+                        ]);
+                    }
+                }
             }
 
 
@@ -779,6 +814,37 @@ class OrderController extends Controller
                                 5
                             )
                         );
+                }
+
+                if (
+                    $lockedOrder->payment_method === 'wallet'
+                    && $lockedOrder->payment_status === 'paid'
+                ) {
+                    $walletUser = User::whereKey($lockedOrder->user_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (!$walletUser || (float) $walletUser->wallet_balance < (float) $lockedOrder->total_price) {
+                        throw new \Exception(
+                            'Số dư ví của khách hàng không đủ để khôi phục đơn hàng này.'
+                        );
+                    }
+
+                    $walletUser->wallet_balance = round(
+                        (float) $walletUser->wallet_balance - (float) $lockedOrder->total_price,
+                        2
+                    );
+                    $walletUser->save();
+
+                    WalletTransaction::create([
+                        'user_id' => $walletUser->id,
+                        'order_id' => $lockedOrder->id,
+                        'type' => 'payment',
+                        'status' => 'completed',
+                        'amount' => $lockedOrder->total_price,
+                        'balance_after' => $walletUser->wallet_balance,
+                        'description' => 'Thanh toán lại đơn hàng #' . $lockedOrder->id . ' khi đơn được khôi phục.',
+                    ]);
                 }
             }
 

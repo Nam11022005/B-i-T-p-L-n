@@ -570,13 +570,30 @@ public function verifyEmailCode(Request $request)
         $user =
             Auth::user();
 
+        $walletTransactions = $user
+            ->walletTransactions()
+            ->latest()
+            ->take(8)
+            ->get();
+
+        $walletTopUp = $user
+            ->walletTransactions()
+            ->where('type', 'topup')
+            ->where('status', 'pending')
+            ->when(
+                request()->filled('wallet_topup'),
+                fn ($query) => $query->whereKey(request('wallet_topup')),
+                fn ($query) => $query->latest()
+            )
+            ->first();
+
 
         $addresses = \App\Models\UserAddress::where('user_id', $user->id)
             ->orderByDesc('is_default')->latest()->get();
 
         return view(
             'user.profile',
-            compact('user', 'addresses')
+            compact('user', 'addresses', 'walletTransactions', 'walletTopUp')
         );
     }
 

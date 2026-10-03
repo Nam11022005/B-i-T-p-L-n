@@ -869,11 +869,11 @@
                                 <div class="price">
 
                                     {{ number_format(
-                                        $product->price,
+                                        $product->getCurrentPrice(),
                                         0,
                                         ',',
                                         '.'
-                                    ) }} đ
+                                    ) }} đ/{{ $product->unit ?: 'sản phẩm' }}
 
                                 </div>
 
@@ -882,7 +882,7 @@
 
                                     Kho:
                                     {{ $product->quantity }}
-                                    sản phẩm
+                                    {{ $product->unit ?: 'sản phẩm' }}
 
                                 </small>
 

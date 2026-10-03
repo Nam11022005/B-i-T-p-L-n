@@ -502,6 +502,17 @@
                 </li>
 
 
+                {{-- KHUYẾN MẠI --}}
+                <li class="nav-item">
+                    <a
+                        class="nav-link {{ request()->routeIs('admin.promotions.*') ? 'active' : '' }}"
+                        href="{{ route('admin.promotions.index') }}"
+                    >
+                        🔥&nbsp; Khuyến mại
+                    </a>
+                </li>
+
+
                 {{-- ĐƠN HÀNG --}}
                 <li class="nav-item">
                     <a

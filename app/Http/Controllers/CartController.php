@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
+use App\Models\WalletTransaction;
 use App\Notifications\NewOrderNotification;
 use App\Notifications\LowStockNotification;
 
@@ -421,7 +422,7 @@ class CartController extends Controller
                 'required|in:standard,fast,express',
 
             'payment_method' =>
-                'required|in:cod,bank',
+                'required|in:cod,bank,wallet',
 
             'voucher_code' =>
                 'nullable|string|max:50',
@@ -709,6 +710,18 @@ if ($request->filled('voucher_code')) {
                 $totalPrice = 0;
             }
 
+            $walletUser = null;
+
+            if ($request->payment_method === 'wallet') {
+                $walletUser = User::whereKey(Auth::id())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ((float) $walletUser->wallet_balance < $totalPrice) {
+                    throw new \Exception('Số dư ví không đủ để thanh toán đơn hàng này.');
+                }
+            }
+
             $order = Order::create([
 
     'user_id' =>
@@ -753,7 +766,7 @@ if ($request->filled('voucher_code')) {
     'payment_status' =>
         $request->payment_method === 'bank'
             ? 'pending_confirmation'
-            : 'unpaid',
+            : ($request->payment_method === 'wallet' ? 'paid' : 'unpaid'),
 
     /*
     |--------------------------------------------------------------------------
@@ -794,6 +807,24 @@ if ($request->filled('voucher_code')) {
         $voucherCode,
 
 ]);
+
+            if ($walletUser) {
+                $walletUser->wallet_balance = round(
+                    (float) $walletUser->wallet_balance - $totalPrice,
+                    2
+                );
+                $walletUser->save();
+
+                WalletTransaction::create([
+                    'user_id' => $walletUser->id,
+                    'order_id' => $order->id,
+                    'type' => 'payment',
+                    'status' => 'completed',
+                    'amount' => $totalPrice,
+                    'balance_after' => $walletUser->wallet_balance,
+                    'description' => 'Thanh toán đơn hàng #' . $order->id . ' bằng ví.',
+                ]);
+            }
             // ==========================================
 // TIMELINE - ĐƠN HÀNG ĐƯỢC TẠO
 // ==========================================

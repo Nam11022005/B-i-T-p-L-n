@@ -196,7 +196,7 @@
 
 
     .tb-verify-brand::after {
-        content: "•";
+        content: "✦";
 
         position: absolute;
 
@@ -1145,7 +1145,7 @@
             <div class="tb-verify-brand-top">
 
                 <div class="tb-verify-logo">
-                    •
+                    🔒
                 </div>
 
 
@@ -1178,7 +1178,7 @@
                 <div class="tb-verify-benefit">
 
                     <span class="tb-verify-benefit-icon">
-                        •
+                        ✉
                     </span>
 
                     <span>
@@ -1191,7 +1191,7 @@
                 <div class="tb-verify-benefit">
 
                     <span class="tb-verify-benefit-icon">
-                        •
+                        🛡️
                     </span>
 
                     <span>
@@ -1204,7 +1204,7 @@
                 <div class="tb-verify-benefit">
 
                     <span class="tb-verify-benefit-icon">
-                        •
+                        🛍
                     </span>
 
                     <span>
@@ -1225,7 +1225,7 @@
 
 
             <div class="tb-verify-mail-icon">
-                •
+                ✉
             </div>
 
 
@@ -1242,7 +1242,7 @@
 
 
                 <div class="tb-verify-email">
-                    • {{ $user->email }}
+                    ✉ {{ $user->email }}
                 </div>
 
             </div>
@@ -1292,11 +1292,11 @@
             <div class="tb-verify-badges">
 
                 <span>
-                    • OTP 6 số
+                    🔢 OTP 6 số
                 </span>
 
                 <span>
-                    • Xác thực email
+                    ✅ Xác thực email
                 </span>
 
             </div>
@@ -1373,7 +1373,7 @@
                     id="verifySubmit"
                 >
                     <span>
-                        •
+                        ✅
                     </span>
 
                     <span>
@@ -1404,7 +1404,7 @@
                     class="tb-verify-resend"
                     id="resendOtpButton"
                 >
-                    • Gửi lại mã xác thực
+                    🔄 Gửi lại mã xác thực
                 </button>
 
             </form>
@@ -1413,7 +1413,7 @@
             <div class="tb-verify-note">
 
                 <span>
-                    •
+                    ℹ️
                 </span>
 
                 <span>
@@ -1556,7 +1556,7 @@ document.addEventListener(
 
 
                     verifySubmit.innerHTML =
-                        '<span>•</span>'
+                        '<span>✅</span>'
                         +
                         '<span>Đang xác thực...</span>';
 
@@ -1585,7 +1585,7 @@ document.addEventListener(
 
 
                     resendButton.textContent =
-                        '• Đang gửi mã...';
+                        '📩 Đang gửi mã...';
 
                 }
             );

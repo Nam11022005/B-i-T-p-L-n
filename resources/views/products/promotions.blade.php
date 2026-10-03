@@ -194,7 +194,7 @@
 
 /* Họa tiết nhẹ bên phải */
 .promotions-hero::after {
-    content: "•";
+    content: "✦";
 
     position: absolute;
 
@@ -948,13 +948,6 @@
     }
 
 
-    .promo-unit {
-        color: #7d6c61;
-
-        font-size: 12px;
-
-        font-weight: 700;
-    }
 
 
     .promo-saving {
@@ -1706,7 +1699,7 @@
                                             ',',
                                             '.'
                                         )
-                                    }}đ
+                                    }}đ/{{ $product->unit ?: 'sản phẩm' }}
 
                                 </div>
 
@@ -1720,18 +1713,11 @@
                                             ',',
                                             '.'
                                         )
-                                    }}đ
+                                    }}đ/{{ $product->unit ?: 'sản phẩm' }}
 
                                 </div>
 
 
-                                @if($product->unit)
-
-                                    <div class="promo-unit">
-                                        / {{ $product->unit }}
-                                    </div>
-
-                                @endif
 
                             </div>
 
@@ -1750,7 +1736,7 @@
                                             ',',
                                             '.'
                                         )
-                                    }}đ
+                                    }}đ/{{ $product->unit ?: 'sản phẩm' }}
 
                                 </div>
 

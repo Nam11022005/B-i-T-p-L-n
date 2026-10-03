@@ -1771,7 +1771,7 @@
         <div class="catalog-heading-copy">
 
             <div class="catalog-eyebrow">
-                • Gian hàng đặc sản Tây Bắc
+                🌿 Gian hàng đặc sản Tây Bắc
             </div>
 
 
@@ -1852,7 +1852,7 @@
             <div class="catalog-filter-header">
 
                 <strong>
-                    • Bộ lọc sản phẩm
+                    ⚙️ Bộ lọc sản phẩm
                 </strong>
 
 
@@ -1882,7 +1882,7 @@
                             for="catalogSearch"
                             class="filter-heading"
                         >
-                            • Tìm sản phẩm
+                            🔍 Tìm sản phẩm
                         </label>
 
 
@@ -1905,7 +1905,7 @@
                             for="catalogCategory"
                             class="filter-heading"
                         >
-                            • Danh mục
+                            📂 Danh mục
                         </label>
 
 
@@ -1940,7 +1940,7 @@
                     <div class="filter-group">
 
                         <span class="filter-heading">
-                            • Khoảng giá
+                            💰 Khoảng giá
                         </span>
 
 
@@ -1985,7 +1985,7 @@
                     <div class="filter-group">
 
                         <span class="filter-heading">
-                            • Tình trạng hàng
+                            📦 Tình trạng hàng
                         </span>
 
 
@@ -2078,7 +2078,7 @@
                         type="submit"
                         class="filter-submit"
                     >
-                        • Áp dụng bộ lọc
+                        🔍 Áp dụng bộ lọc
                     </button>
 
 
@@ -2145,7 +2145,7 @@
                         class="catalog-filter-toggle"
                         id="catalogFilterToggle"
                     >
-                        • Bộ lọc
+                        ⚙️ Bộ lọc
 
                         @if($activeFilterCount > 0)
 
@@ -2306,7 +2306,7 @@
                     @if(request('search'))
 
                         <span class="filter-chip">
-                            • {{ request('search') }}
+                            🔍 {{ request('search') }}
                         </span>
 
                     @endif
@@ -2315,7 +2315,7 @@
                     @if($selectedCategory)
 
                         <span class="filter-chip">
-                            • {{ $selectedCategory->name }}
+                            📂 {{ $selectedCategory->name }}
                         </span>
 
                     @endif
@@ -2362,13 +2362,13 @@
                     @if(request('stock') === 'in_stock')
 
                         <span class="filter-chip">
-                            ● Còn hàng
+                            ✅ Còn hàng
                         </span>
 
                     @elseif(request('stock') === 'out_of_stock')
 
                         <span class="filter-chip">
-                            ● Hết hàng
+                            ⛔ Hết hàng
                         </span>
 
                     @endif
@@ -2627,7 +2627,7 @@
                                                     ',',
                                                     '.'
                                                 )
-                                            }}đ
+                                            }}đ/{{ $product->unit ?: 'sản phẩm' }}
 
                                         @endif
 
@@ -3103,7 +3103,7 @@
                                                             me-auto
                                                         "
                                                     >
-                                                        • Gỡ sale
+                                                        🗑️ Gỡ sale
                                                     </button>
 
                                                 @endif
@@ -3128,7 +3128,7 @@
                                                         btn-danger
                                                     "
                                                 >
-                                                    • Lưu khuyến mãi
+                                                    💾 Lưu khuyến mãi
                                                 </button>
 
                                             </div>
@@ -3228,7 +3228,7 @@ document.addEventListener(
                     toggle.innerHTML =
                         opened
                         ? '× Đóng bộ lọc'
-                        : '• Bộ lọc';
+                        : '⚙️ Bộ lọc';
 
                 }
             );

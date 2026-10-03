@@ -90,7 +90,7 @@
     }
 
     .admin-profile-hero::after {
-        content: "•";
+        content: "✦";
         position: absolute;
         right: 42px;
         top: 14px;
@@ -369,7 +369,7 @@
 
             <section class="admin-profile-hero">
                 <div>
-                    <div class="admin-profile-kicker">• TÀI KHOẢN QUẢN TRỊ</div>
+                    <div class="admin-profile-kicker">👑 TÀI KHOẢN QUẢN TRỊ</div>
 
                     <h1>{{ $user->name }}</h1>
 
@@ -386,7 +386,7 @@
                             alt="{{ $user->name }}"
                         >
                     @else
-                        <div class="admin-avatar-fallback">•</div>
+                        <div class="admin-avatar-fallback">👤</div>
                     @endif
                 </div>
             </section>
@@ -396,7 +396,7 @@
                 <section class="admin-profile-card">
                     <div class="admin-profile-card-body">
                         <h2 class="admin-profile-card-title">
-                            • Thông tin tài khoản
+                            👤 Thông tin tài khoản
                         </h2>
 
                         <div class="admin-info-row">
@@ -413,7 +413,7 @@
                             <div class="admin-info-label">Vai trò</div>
                             <div class="admin-info-value">
                                 <span class="admin-role-pill">
-                                    • {{ ucfirst($user->role) }}
+                                    👑 {{ ucfirst($user->role) }}
                                 </span>
                             </div>
                         </div>
@@ -422,7 +422,7 @@
                             <div class="admin-info-label">Trạng thái</div>
                             <div class="admin-info-value">
                                 <span class="admin-active-pill">
-                                    ● Đang hoạt động
+                                    ✅ Đang hoạt động
                                 </span>
                             </div>
                         </div>
@@ -439,7 +439,7 @@
                 <section class="admin-profile-card">
                     <div class="admin-profile-card-body">
                         <h2 class="admin-profile-card-title">
-                            • Khu vực quản trị nhanh
+                            ⚡ Khu vực quản trị nhanh
                         </h2>
 
                         <div class="admin-profile-summary">
@@ -456,7 +456,7 @@
                                 href="{{ route('admin.dashboard') }}"
                                 class="admin-quick-link"
                             >
-                                <span class="admin-quick-link-icon">•</span>
+                                <span class="admin-quick-link-icon">📊</span>
                                 <span>
                                     <strong>Dashboard</strong>
                                     <small>Tổng quan hoạt động cửa hàng</small>
@@ -467,7 +467,7 @@
                                 href="{{ route('admin.products.index') }}"
                                 class="admin-quick-link"
                             >
-                                <span class="admin-quick-link-icon">•</span>
+                                <span class="admin-quick-link-icon">🥩</span>
                                 <span>
                                     <strong>Sản phẩm</strong>
                                     <small>Quản lý sản phẩm và khuyến mãi</small>
@@ -478,7 +478,7 @@
                                 href="{{ route('admin.customers.index') }}"
                                 class="admin-quick-link"
                             >
-                                <span class="admin-quick-link-icon">•</span>
+                                <span class="admin-quick-link-icon">👥</span>
                                 <span>
                                     <strong>Khách hàng</strong>
                                     <small>Xem tài khoản và lịch sử mua hàng</small>
@@ -489,7 +489,7 @@
                                 href="{{ route('admin.orders.index') }}"
                                 class="admin-quick-link"
                             >
-                                <span class="admin-quick-link-icon">•</span>
+                                <span class="admin-quick-link-icon">📦</span>
                                 <span>
                                     <strong>Đơn hàng</strong>
                                     <small>Kiểm tra và xử lý đơn hàng</small>
@@ -500,7 +500,7 @@
                                 href="{{ route('admin.categories.index') }}"
                                 class="admin-quick-link"
                             >
-                                <span class="admin-quick-link-icon">•</span>
+                                <span class="admin-quick-link-icon">📂</span>
                                 <span>
                                     <strong>Danh mục</strong>
                                     <small>Phân loại sản phẩm cửa hàng</small>
@@ -511,7 +511,7 @@
                                 href="{{ route('admin.vouchers.index') }}"
                                 class="admin-quick-link"
                             >
-                                <span class="admin-quick-link-icon">•</span>
+                                <span class="admin-quick-link-icon">🎟️</span>
                                 <span>
                                     <strong>Voucher</strong>
                                     <small>Quản lý chương trình ưu đãi</small>

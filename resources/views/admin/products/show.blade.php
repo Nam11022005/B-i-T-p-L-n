@@ -4,6 +4,32 @@
 
 @section('content')
 
+@php
+    $adminGallery = collect();
+
+    if (
+        $product->image
+        && Storage::disk('public')->exists($product->image)
+    ) {
+        $adminGallery->push([
+            'url' => Storage::disk('public')->url($product->image),
+            'alt' => $product->name . ' - ảnh đại diện',
+        ]);
+    }
+
+    foreach ($product->images as $galleryImage) {
+        if (
+            $galleryImage->path
+            && Storage::disk('public')->exists($galleryImage->path)
+        ) {
+            $adminGallery->push([
+                'url' => Storage::disk('public')->url($galleryImage->path),
+                'alt' => $product->name . ' - ảnh chi tiết',
+            ]);
+        }
+    }
+@endphp
+
 <style>
     .product-detail-card {
         border: 1px solid #ead8bf;
@@ -59,7 +85,7 @@
 
     .product-image {
         width: 100%;
-        max-height: 430px;
+        height: 430px;
         object-fit: contain;
         border-radius: 18px;
         background: #fffaf0;
@@ -81,6 +107,86 @@
         justify-content: center;
         font-size: 60px;
     }
+
+    .admin-product-gallery {
+        position: relative;
+    }
+
+    .admin-gallery-main {
+        position: relative;
+    }
+
+    .admin-gallery-nav {
+        position: absolute;
+        top: 50%;
+        z-index: 2;
+        display: grid;
+        width: 40px;
+        height: 40px;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        color: #fff;
+        background: rgba(72, 99, 59, .9);
+        font-size: 28px;
+        line-height: 1;
+        transform: translateY(-50%);
+    }
+
+    .admin-gallery-nav:hover,
+    .admin-gallery-nav:focus-visible {
+        background: #5f341d;
+    }
+
+    .admin-gallery-nav--prev { left: 18px; }
+    .admin-gallery-nav--next { right: 18px; }
+
+    .admin-gallery-counter {
+        position: absolute;
+        right: 18px;
+        bottom: 18px;
+        padding: 6px 11px;
+        border-radius: 999px;
+        color: #fff;
+        background: rgba(48, 39, 28, .78);
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .admin-gallery-thumbnails {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .admin-gallery-thumbnail {
+        overflow: hidden;
+        aspect-ratio: 1;
+        padding: 0;
+        border: 2px solid transparent;
+        border-radius: 11px;
+        background: #fffaf0;
+    }
+
+    .admin-gallery-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .admin-gallery-thumbnail:hover,
+    .admin-gallery-thumbnail:focus-visible,
+    .admin-gallery-thumbnail.is-active {
+        border-color: #48633b;
+        outline: none;
+    }
+
+    @media (max-width: 575.98px) {
+        .product-image { height: 300px; }
+        .admin-gallery-nav--prev { left: 10px; }
+        .admin-gallery-nav--next { right: 10px; }
+    }
 </style>
 
 <div class="card product-detail-card">
@@ -93,7 +199,7 @@
     >
 
         <h2 class="mb-0">
-            • Chi tiết sản phẩm:
+            📦 Chi tiết sản phẩm:
             {{ $product->name }}
         </h2>
 
@@ -116,29 +222,65 @@
             ======================================= --}}
             <div class="col-lg-6">
 
-                @if(
-                    $product->image
-                    && Storage::disk('public')->exists(
-                        $product->image
-                    )
-                )
+                @if($adminGallery->isNotEmpty())
 
-                    <div class="text-center">
+                    <div class="admin-product-gallery">
 
-                        <img
-                            src="{{ Storage::disk('public')->url(
-                                $product->image
-                            ) }}"
-                            alt="{{ $product->name }}"
-                            class="product-image"
-                        >
+                        <div class="admin-gallery-main">
+
+                            <img
+                                id="adminProductMainImage"
+                                src="{{ $adminGallery->first()['url'] }}"
+                                alt="{{ $adminGallery->first()['alt'] }}"
+                                class="product-image"
+                            >
+
+                            @if($adminGallery->count() > 1)
+                                <button
+                                    type="button"
+                                    class="admin-gallery-nav admin-gallery-nav--prev"
+                                    id="adminGalleryPrev"
+                                    aria-label="Xem ảnh trước"
+                                >‹</button>
+
+                                <button
+                                    type="button"
+                                    class="admin-gallery-nav admin-gallery-nav--next"
+                                    id="adminGalleryNext"
+                                    aria-label="Xem ảnh tiếp theo"
+                                >›</button>
+                            @endif
+
+                            <span class="admin-gallery-counter" id="adminGalleryCounter">
+                                1 / {{ $adminGallery->count() }}
+                            </span>
+
+                        </div>
+
+                        @if($adminGallery->count() > 1)
+                            <div class="admin-gallery-thumbnails" aria-label="Chọn ảnh sản phẩm">
+                                @foreach($adminGallery as $galleryItem)
+                                    <button
+                                        type="button"
+                                        class="admin-gallery-thumbnail {{ $loop->first ? 'is-active' : '' }}"
+                                        data-admin-gallery-index="{{ $loop->index }}"
+                                        aria-label="Xem ảnh {{ $loop->iteration }}"
+                                    >
+                                        <img
+                                            src="{{ $galleryItem['url'] }}"
+                                            alt="{{ $galleryItem['alt'] }}"
+                                        >
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
 
                     </div>
 
                 @else
 
                     <div class="no-image">
-                        •
+                        🧺
                     </div>
 
                 @endif
@@ -480,7 +622,7 @@
                 ) }}"
                 class="btn btn-warning"
             >
-                • Sửa sản phẩm
+                ✏️ Sửa sản phẩm
             </a>
 
 
@@ -505,7 +647,7 @@
                     type="submit"
                     class="btn btn-danger"
                 >
-                    • Xóa sản phẩm
+                    🗑️ Xóa sản phẩm
                 </button>
 
             </form>
@@ -523,5 +665,47 @@
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const images = @json($adminGallery->pluck('url')->values());
+    const alts = @json($adminGallery->pluck('alt')->values());
+    const mainImage = document.getElementById('adminProductMainImage');
+    const counter = document.getElementById('adminGalleryCounter');
+    const thumbnails = Array.from(document.querySelectorAll('[data-admin-gallery-index]'));
+    const previous = document.getElementById('adminGalleryPrev');
+    const next = document.getElementById('adminGalleryNext');
+    let currentIndex = 0;
+
+    function showImage(index) {
+        if (!mainImage || !images.length) return;
+
+        currentIndex = (index + images.length) % images.length;
+        mainImage.src = images[currentIndex];
+        mainImage.alt = alts[currentIndex] || 'Ảnh sản phẩm';
+        counter.textContent = `${currentIndex + 1} / ${images.length}`;
+
+        thumbnails.forEach(function (thumbnail, thumbnailIndex) {
+            thumbnail.classList.toggle('is-active', thumbnailIndex === currentIndex);
+        });
+    }
+
+    thumbnails.forEach(function (thumbnail) {
+        thumbnail.addEventListener('click', function () {
+            showImage(Number(this.dataset.adminGalleryIndex));
+        });
+    });
+
+    previous?.addEventListener('click', function () {
+        showImage(currentIndex - 1);
+    });
+
+    next?.addEventListener('click', function () {
+        showImage(currentIndex + 1);
+    });
+});
+</script>
+@endpush
 
 @endsection

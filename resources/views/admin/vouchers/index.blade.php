@@ -132,7 +132,7 @@
     }
 
     .voucher-premium-hero::after {
-        content: "•";
+        content: "✦";
         position: absolute;
         right: 46px;
         top: 20px;
@@ -430,8 +430,8 @@
 
 <section class="voucher-premium-hero">
     <div>
-        <div class="voucher-premium-kicker">• KHU VỰC QUẢN TRỊ</div>
-        <h2 class="voucher-title mb-2">• Quản lý Voucher</h2>
+        <div class="voucher-premium-kicker">⚙️ KHU VỰC QUẢN TRỊ</div>
+        <h2 class="voucher-title mb-2">🎟️ Quản lý Voucher</h2>
         <p class="mb-0">Quản lý mã giảm giá và chương trình ưu đãi của Tinh Hoa Tây Bắc.</p>
     </div>
 
@@ -590,9 +590,9 @@
 
                             <a
                                 href="{{ route('admin.vouchers.edit', $voucher) }}"
-                                class="btn btn-outline-primary btn-sm"
+                                class="btn btn-outline-primary btn-sm" aria-label="Sửa voucher" title="Sửa voucher"
                             >
-                                •
+                                ✏️
                             </a>
 
 
@@ -606,10 +606,10 @@
 
                                 <button
                                     type="submit"
-                                    class="btn btn-outline-danger btn-sm"
+                                    class="btn btn-outline-danger btn-sm" aria-label="Xóa voucher" title="Xóa voucher"
                                     onclick="return confirm('Bạn có chắc muốn xóa voucher này?')"
                                 >
-                                    •
+                                    🗑️
                                 </button>
 
                             </form>
@@ -625,7 +625,7 @@
                             colspan="9"
                             class="text-center py-5 text-muted"
                         >
-                            • Chưa có voucher nào.
+                            📭 Chưa có voucher nào.
                         </td>
                     </tr>
 

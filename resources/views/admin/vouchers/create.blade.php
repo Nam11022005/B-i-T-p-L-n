@@ -113,7 +113,7 @@
     }
 
     .voucher-premium-hero::after {
-        content: "•";
+        content: "✦";
         position: absolute;
         right: 46px;
         top: 20px;
@@ -407,12 +407,12 @@
 </style> 
 
 
-<div class="voucher-premium-page"><section class="voucher-premium-hero"><div><div class="voucher-premium-kicker">• QUẢN TRỊ VOUCHER</div><h2 class="mb-2">• Thêm Voucher</h2><p class="mb-0">Tạo chương trình ưu đãi mới cho khách hàng Tinh Hoa Tây Bắc.</p></div></section><div class="card form-card voucher-form-shell"> 
+<div class="voucher-premium-page"><section class="voucher-premium-hero"><div><div class="voucher-premium-kicker">⚙️ QUẢN TRỊ VOUCHER</div><h2 class="mb-2">🎟️ Thêm Voucher</h2><p class="mb-0">Tạo chương trình ưu đãi mới cho khách hàng Tinh Hoa Tây Bắc.</p></div></section><div class="card form-card voucher-form-shell">
 
     <div class="card-body p-4 p-md-5 voucher-form-content"> 
 
         <h2 class="form-title mb-1"> 
-            • Thêm Voucher 
+            🎟️ Thêm Voucher
         </h2> 
 
         <p class="text-muted mb-4"> 
@@ -454,7 +454,7 @@
                     type="submit" 
                     class="btn btn-taybac px-4" 
                 > 
-                    • Lưu voucher 
+                    💾 Lưu voucher
                 </button> 
 
                 <a 

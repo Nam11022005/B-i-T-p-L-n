@@ -1186,7 +1186,7 @@
         <div class="ao-hero-copy">
 
             <div class="ao-kicker">
-                • Khu vực quản trị
+                ⚙️ Khu vực quản trị
             </div>
 
 
@@ -1226,7 +1226,7 @@
         <div class="ao-stat">
 
             <div class="ao-stat-icon">
-                •
+                📦
             </div>
 
 
@@ -1248,7 +1248,7 @@
         <div class="ao-stat revenue">
 
             <div class="ao-stat-icon">
-                •
+                💰
             </div>
 
 
@@ -1279,7 +1279,7 @@
         <div class="ao-stat product">
 
             <div class="ao-stat-icon">
-                •
+                🛍
             </div>
 
 
@@ -1354,7 +1354,7 @@
                 <div>
 
                     <div class="ao-empty-icon">
-                        •
+                        📭
                     </div>
 
 
@@ -1438,7 +1438,7 @@
 
                                         'icon'
                                             =>
-                                            '•',
+                                            '📦',
 
                                         'class'
                                             =>
@@ -1625,7 +1625,7 @@
 
                                     <span class="ao-product-count">
 
-                                        •
+                                        📦
 
                                         {{
                                             $order
@@ -1670,7 +1670,7 @@
                                         "
                                     >
 
-                                        •
+                                        💳
 
                                         {{ $payment['label'] }}
 

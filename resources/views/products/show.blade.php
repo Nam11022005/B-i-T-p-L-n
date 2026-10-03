@@ -1215,6 +1215,38 @@ foreach ($product->images as $galleryImage) {
         padding: 14px;
     }
 
+    .product-reviews-compact .review-form-shop h5 {
+        margin-bottom: 10px !important;
+        font-size: 18px;
+    }
+
+    .product-reviews-compact .review-form-layout {
+        display: grid;
+        grid-template-columns: 150px minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 12px;
+    }
+
+    .product-reviews-compact .review-form-layout .mb-3 {
+        margin-bottom: 0 !important;
+    }
+
+    .product-reviews-compact .review-form-layout .form-label {
+        margin-bottom: 5px;
+        font-size: 13px;
+    }
+
+    .product-reviews-compact .review-form-layout textarea {
+        min-height: 72px;
+        max-height: 130px;
+        resize: vertical;
+    }
+
+    .product-reviews-compact .review-submit-btn {
+        min-height: 42px;
+        white-space: nowrap;
+    }
+
     .product-reviews-compact .star-rating-input label {
         font-size: 26px;
     }
@@ -1226,6 +1258,17 @@ foreach ($product->images as $galleryImage) {
     .product-reviews-compact .review-empty-shop {
         padding: 12px 0 0;
         border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 767.98px) {
+        .product-reviews-compact .review-form-layout {
+            grid-template-columns: 1fr;
+            align-items: stretch;
+        }
+
+        .product-reviews-compact .review-submit-btn {
+            width: fit-content;
+        }
     }
 
     /* =========================================================
@@ -1920,7 +1963,7 @@ foreach ($product->images as $galleryImage) {
                                                         '.'
                                                     )
                                                 }}
-                                                đ
+                                                đ/{{ $product->unit ?: 'sản phẩm' }}
 
                                             </span>
 
@@ -2619,7 +2662,7 @@ foreach ($product->images as $galleryImage) {
                                                     '.'
                                                 )
                                             }}
-                                            đ
+                                            đ/{{ $related->unit ?: 'sản phẩm' }}
                                         </div>
 
                                     @endif
@@ -2796,12 +2839,13 @@ foreach ($product->images as $galleryImage) {
                             )
                         }}"
                         method="POST"
+                        class="review-form-layout"
                     >
 
                         @csrf
 
 
-                        <div class="mb-3">
+                        <div class="mb-3 review-rating-field">
 
                             <label class="form-label fw-bold">
                                 Số sao
@@ -2864,7 +2908,7 @@ foreach ($product->images as $galleryImage) {
                         </div>
 
 
-                        <div class="mb-3">
+                        <div class="mb-3 review-comment-field">
 
                             <label
                                 for="comment"
@@ -2878,7 +2922,7 @@ foreach ($product->images as $galleryImage) {
                                 id="comment"
                                 name="comment"
                                 class="form-control"
-                                rows="3"
+                                rows="2"
                                 maxlength="1000"
                                 placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
                             >{{ old('comment', $myReview?->comment) }}</textarea>
@@ -2901,6 +2945,7 @@ foreach ($product->images as $galleryImage) {
                                 btn
                                 btn-dark
                                 px-4
+                                review-submit-btn
                             "
                         >
                             ⭐

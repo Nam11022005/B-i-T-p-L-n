@@ -1322,7 +1322,7 @@
         <div class="ad-hero-copy">
 
             <div class="ad-kicker">
-                • Sổ địa chỉ
+                📍 Sổ địa chỉ
             </div>
 
 
@@ -1381,7 +1381,7 @@
         <div class="ad-stat">
 
             <div class="ad-stat-icon">
-                •
+                📍
             </div>
 
 
@@ -1403,7 +1403,7 @@
         <div class="ad-stat">
 
             <div class="ad-stat-icon">
-                •
+                ⭐
             </div>
 
 
@@ -1431,7 +1431,7 @@
         <div class="ad-stat">
 
             <div class="ad-stat-icon">
-                •
+                🛒
             </div>
 
 
@@ -1520,7 +1520,7 @@
                             <div class="ad-input-wrap">
 
                                 <span class="ad-input-icon">
-                                    •
+                                    🏷️
                                 </span>
 
 
@@ -1558,7 +1558,7 @@
                             <div class="ad-input-wrap">
 
                                 <span class="ad-input-icon">
-                                    •
+                                    👤
                                 </span>
 
 
@@ -1601,7 +1601,7 @@
                             <div class="ad-input-wrap">
 
                                 <span class="ad-input-icon">
-                                    •
+                                    ☎️
                                 </span>
 
 
@@ -1635,7 +1635,7 @@
                             <div class="ad-input-wrap">
 
                                 <span class="ad-input-icon">
-                                    •
+                                    📍
                                 </span>
 
 
@@ -1668,7 +1668,7 @@
                             <div class="ad-input-wrap">
 
                                 <span class="ad-input-icon">
-                                    •
+                                    📍
                                 </span>
 
 
@@ -1701,7 +1701,7 @@
                             <div class="ad-input-wrap">
 
                                 <span class="ad-input-icon">
-                                    •
+                                    📍
                                 </span>
 
 
@@ -1738,7 +1738,7 @@
                             <div class="ad-input-wrap">
 
                                 <span class="ad-input-icon">
-                                    •
+                                    📍
                                 </span>
 
 
@@ -1790,7 +1790,7 @@
                                 type="submit"
                                 class="ad-save-btn"
                             >
-                                • Lưu địa chỉ
+                                💾 Lưu địa chỉ
                             </button>
 
 
@@ -1859,7 +1859,7 @@
             <div>
 
                 <div class="ad-empty-icon">
-                    •
+                    📭
                 </div>
 
 
@@ -1914,10 +1914,10 @@
                             'công ty / văn phòng',
                             'văn phòng',
                             'office' =>
-                                '•',
+                                '🏢',
 
                             default =>
-                                '•',
+                                '📍',
                         };
                 @endphp
 
@@ -1962,7 +1962,7 @@
                                     @if($address->is_default)
 
                                         <span class="ad-default-badge">
-                                            • Mặc định
+                                            ⭐ Mặc định
                                         </span>
 
                                     @endif
@@ -1977,7 +1977,7 @@
                         <div class="ad-receiver">
 
                             <span>
-                                • {{ $address->receiver_name }}
+                                👤 {{ $address->receiver_name }}
                             </span>
 
                             <span>
@@ -1994,7 +1994,7 @@
                         <div class="ad-address-text">
 
                             <span class="ad-address-text-icon">
-                                •
+                                📍
                             </span>
 
                             <span>
@@ -2050,7 +2050,7 @@
                                         default
                                     "
                                 >
-                                    • Đặt mặc định
+                                    ⭐ Đặt mặc định
                                 </button>
 
                             </form>
@@ -2067,7 +2067,7 @@
                             }}"
                             aria-expanded="false"
                         >
-                            • Sửa
+                            ✏️ Sửa
                         </button>
 
 
@@ -2097,7 +2097,7 @@
                                     delete
                                 "
                             >
-                                • Xóa
+                                🗑️ Xóa
                             </button>
 
                         </form>
@@ -2119,7 +2119,7 @@
 
 
                             <div class="ad-edit-title">
-                                • Chỉnh sửa địa chỉ
+                                ✏️ Chỉnh sửa địa chỉ
                             </div>
 
 
@@ -2151,7 +2151,7 @@
                                         <div class="ad-input-wrap">
 
                                             <span class="ad-input-icon">
-                                                •
+                                                🏷️
                                             </span>
 
 
@@ -2182,7 +2182,7 @@
                                         <div class="ad-input-wrap">
 
                                             <span class="ad-input-icon">
-                                                •
+                                                👤
                                             </span>
 
 
@@ -2214,7 +2214,7 @@
                                         <div class="ad-input-wrap">
 
                                             <span class="ad-input-icon">
-                                                •
+                                                ☎️
                                             </span>
 
 
@@ -2245,7 +2245,7 @@
                                         <div class="ad-input-wrap">
 
                                             <span class="ad-input-icon">
-                                                •
+                                                📍
                                             </span>
 
 
@@ -2275,7 +2275,7 @@
                                         <div class="ad-input-wrap">
 
                                             <span class="ad-input-icon">
-                                                •
+                                                📍
                                             </span>
 
 
@@ -2305,7 +2305,7 @@
                                         <div class="ad-input-wrap">
 
                                             <span class="ad-input-icon">
-                                                •
+                                                📍
                                             </span>
 
 
@@ -2335,7 +2335,7 @@
                                         <div class="ad-input-wrap">
 
                                             <span class="ad-input-icon">
-                                                •
+                                                📍
                                             </span>
 
 
@@ -2388,7 +2388,7 @@
                                             type="submit"
                                             class="ad-save-btn"
                                         >
-                                            • Lưu thay đổi
+                                            💾 Lưu thay đổi
                                         </button>
 
 

@@ -17,8 +17,6 @@
 
     $newProductList =
         $products->take(10);
-
-
 @endphp
 
 
@@ -319,7 +317,7 @@
 
     .market-hero {
         display: grid;
-        grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+        grid-template-columns: minmax(0, 1fr);
         position: relative;
         overflow: hidden;
         min-height: 360px;
@@ -330,6 +328,7 @@
         box-shadow: var(--shop-shadow);
     }
 
+
     .market-hero-copy {
         display: flex;
         flex-direction: column;
@@ -339,6 +338,7 @@
         color: #29432e;
     }
 
+
     .market-hero-eyebrow {
         margin: 0 0 20px;
         color: #7b5939;
@@ -347,6 +347,7 @@
         letter-spacing: .14em;
         text-transform: uppercase;
     }
+
 
     .market-hero-title {
         margin: 0;
@@ -358,6 +359,7 @@
         text-wrap: balance;
     }
 
+
     .market-hero-title span {
         display: block;
         margin-top: 12px;
@@ -368,12 +370,14 @@
         letter-spacing: -.02em;
     }
 
+
     .market-hero-description {
         margin: 20px 0 26px;
         color: #6a6254;
         font-size: 14px;
         line-height: 1.7;
     }
+
 
     .market-hero-cta {
         display: inline-flex;
@@ -390,15 +394,18 @@
         text-decoration: none;
     }
 
+
     .market-hero-cta:hover {
         color: #fff;
         background: #243d27;
     }
 
+
     .market-hero-cta:focus-visible {
         outline: 3px solid #b47032;
         outline-offset: 4px;
     }
+
 
     .market-hero-visual {
         position: relative;
@@ -407,6 +414,7 @@
         overflow: hidden;
         background: #d7c69c;
     }
+
 
     .market-hero-visual img {
         position: absolute;
@@ -418,91 +426,579 @@
         object-position: 52% center;
     }
 
+
+    /* =========================================================
+       HERO SLIDER
+    ========================================================= */
+
+    .market-hero-slide {
+        grid-area: 1 / 1;
+        display: grid;
+        grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+        min-height: 360px;
+        height: 100%;
+
+        pointer-events: none;
+
+        transform:
+            translateX(100%);
+
+        z-index: 1;
+
+        transition:
+            transform
+            .7s
+            cubic-bezier(
+                .22,
+                .61,
+                .36,
+                1
+            );
+
+        will-change:
+            transform;
+    }
+
+
+    .market-hero-slide.is-active {
+        pointer-events: auto;
+
+        transform:
+            translateX(0);
+
+        z-index: 2;
+    }
+
+
+    .market-hero-slide.is-leaving-left {
+        pointer-events: none;
+
+        transform:
+            translateX(-100%);
+
+        z-index: 3;
+    }
+
+
+    .market-hero-slide.is-leaving-right {
+        pointer-events: none;
+
+        transform:
+            translateX(100%);
+
+        z-index: 3;
+    }
+
+
+    .market-hero-slide.is-from-left {
+        transform:
+            translateX(-100%);
+
+        transition:
+            none;
+    }
+
+
+    .market-hero-visual--product {
+        background:
+            linear-gradient(
+                145deg,
+                #ede0bd,
+                #f7f0df 62%,
+                #d5b581
+            );
+    }
+
+
+    .market-hero-visual--product img {
+        padding:
+            clamp(
+                20px,
+                3vw,
+                48px
+            );
+
+        object-fit:
+            contain;
+
+        object-position:
+            center;
+    }
+
+
+    .market-hero-visual-badge {
+        position:
+            absolute;
+
+        z-index:
+            4;
+
+        top:
+            18px;
+
+        right:
+            18px;
+
+        padding:
+            8px 12px;
+
+        border-radius:
+            999px;
+
+        color:
+            #314e34;
+
+        background:
+            rgba(
+                255,
+                249,
+                237,
+                .94
+            );
+
+        font-size:
+            11px;
+
+        font-weight:
+            800;
+
+        box-shadow:
+            0 5px 16px
+            rgba(
+                39,
+                67,
+                35,
+                .12
+            );
+    }
+
+
+    .market-hero-product-title {
+        display:
+            -webkit-box;
+
+        overflow:
+            hidden;
+
+        -webkit-box-orient:
+            vertical;
+
+        -webkit-line-clamp:
+            3;
+    }
+
+
+    .market-hero-product-description {
+        display:
+            -webkit-box;
+
+        overflow:
+            hidden;
+
+        -webkit-box-orient:
+            vertical;
+
+        -webkit-line-clamp:
+            2;
+    }
+
+
+    .market-hero-product-prices {
+        display: flex;
+
+        flex-wrap: wrap;
+
+        align-items:
+            baseline;
+
+        gap:
+            8px 14px;
+
+        margin:
+            0 0 20px;
+    }
+
+
+    .market-hero-product-price {
+        color:
+            #a93627;
+
+        font-size:
+            clamp(
+                21px,
+                2.2vw,
+                32px
+            );
+
+        font-weight:
+            900;
+
+        line-height:
+            1.2;
+    }
+
+
+    .market-hero-product-old-price {
+        color:
+            #8c8274;
+
+        font-size:
+            13px;
+
+        text-decoration:
+            line-through;
+    }
+
+
+    .market-hero-controls {
+        display:
+            none;
+
+        position:
+            absolute;
+
+        z-index:
+            20;
+
+        right:
+            16px;
+
+        bottom:
+            16px;
+
+        align-items:
+            center;
+
+        gap:
+            8px;
+
+        padding:
+            6px;
+
+        border:
+            1px solid
+            rgba(
+                50,
+                70,
+                42,
+                .15
+            );
+
+        border-radius:
+            999px;
+
+        background:
+            rgba(
+                255,
+                251,
+                241,
+                .94
+            );
+
+        box-shadow:
+            0 8px 20px
+            rgba(
+                31,
+                45,
+                27,
+                .16
+            );
+    }
+
+
+    .market-hero.is-ready
+    .market-hero-controls {
+        display:
+            flex;
+    }
+
+
+    .market-hero-control {
+        display:
+            grid;
+
+        place-items:
+            center;
+
+        width:
+            32px;
+
+        height:
+            32px;
+
+        padding:
+            0;
+
+        border:
+            0;
+
+        border-radius:
+            50%;
+
+        color:
+            #29432e;
+
+        background:
+            #f4ead3;
+
+        font-size:
+            22px;
+
+        line-height:
+            1;
+
+        cursor:
+            pointer;
+    }
+
+
+    .market-hero-control:hover,
+    .market-hero-control:focus-visible {
+        color:
+            #fff;
+
+        background:
+            #314e34;
+    }
+
+
+    .market-hero-counter {
+        min-width:
+            36px;
+
+        color:
+            #29432e;
+
+        font-size:
+            11px;
+
+        font-weight:
+            800;
+
+        text-align:
+            center;
+    }
+
+
+    @media (max-width: 767.98px) {
+
+        .market-hero-slide {
+            grid-template-columns:
+                1fr;
+
+            min-height:
+                0;
+
+            height:
+                auto;
+        }
+
+
+        .market-hero-visual--product img {
+            padding:
+                20px;
+        }
+
+    }
+
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .market-hero-slide {
+            transition:
+                none;
+        }
+
+    }
+
+
+    /* =========================================================
+       TAY BAC DISCOVERY
+    ========================================================= */
+
     .taybac-discovery {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
-        align-items: center;
-        overflow: hidden;
-        border: 1px solid #e5d9c3;
-        background: #faf3e6;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1.6fr);
+
+        align-items:
+            center;
+
+        overflow:
+            hidden;
+
+        border:
+            1px solid #e5d9c3;
+
+        background:
+            #faf3e6;
     }
+
 
     .taybac-discovery-copy {
-        padding: clamp(24px, 4vw, 56px);
+        padding:
+            clamp(
+                24px,
+                4vw,
+                56px
+            );
     }
+
 
     .taybac-discovery-label {
-        margin: 0 0 12px;
-        color: #8b5432;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: .12em;
-        text-transform: uppercase;
+        margin:
+            0 0 12px;
+
+        color:
+            #8b5432;
+
+        font-size:
+            11px;
+
+        font-weight:
+            800;
+
+        letter-spacing:
+            .12em;
+
+        text-transform:
+            uppercase;
     }
+
 
     .taybac-discovery h2 {
-        margin: 0 0 14px;
-        color: #29432e;
-        font-size: clamp(24px, 2.4vw, 36px);
-        font-weight: 800;
+        margin:
+            0 0 14px;
+
+        color:
+            #29432e;
+
+        font-size:
+            clamp(
+                24px,
+                2.4vw,
+                36px
+            );
+
+        font-weight:
+            800;
     }
+
 
     .taybac-discovery-description {
-        margin: 0;
-        color: #6a6254;
-        font-size: 14px;
-        line-height: 1.8;
+        margin:
+            0;
+
+        color:
+            #6a6254;
+
+        font-size:
+            14px;
+
+        line-height:
+            1.8;
     }
+
 
     .taybac-discovery-credit {
-        display: inline-block;
-        margin-top: 20px;
-        color: #6a6254;
-        font-size: 11px;
-        text-decoration: underline;
+        display:
+            inline-block;
+
+        margin-top:
+            20px;
+
+        color:
+            #6a6254;
+
+        font-size:
+            11px;
+
+        text-decoration:
+            underline;
     }
+
 
     .taybac-discovery video {
-        display: block;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-        max-height: 390px;
-        background: #18271c;
-        object-fit: contain;
+        display:
+            block;
+
+        width:
+            100%;
+
+        aspect-ratio:
+            16 / 9;
+
+        max-height:
+            390px;
+
+        background:
+            #18271c;
+
+        object-fit:
+            contain;
     }
 
-    html[data-theme="dark"] .market-hero,
-    html[data-theme="dark"] .taybac-discovery {
-        background: #252d25;
-        border-color: #465344;
+
+    html[data-theme="dark"]
+    .market-hero,
+    html[data-theme="dark"]
+    .taybac-discovery {
+        background:
+            #252d25;
+
+        border-color:
+            #465344;
     }
 
-    html[data-theme="dark"] .market-hero-title,
-    html[data-theme="dark"] .taybac-discovery h2 {
-        color: #f1eadb;
+
+    html[data-theme="dark"]
+    .market-hero-title,
+    html[data-theme="dark"]
+    .taybac-discovery h2 {
+        color:
+            #f1eadb;
     }
 
-    html[data-theme="dark"] .market-hero-eyebrow,
-    html[data-theme="dark"] .market-hero-title span,
-    html[data-theme="dark"] .taybac-discovery-label {
-        color: #dec28c;
+
+    html[data-theme="dark"]
+    .market-hero-eyebrow,
+    html[data-theme="dark"]
+    .market-hero-title span,
+    html[data-theme="dark"]
+    .taybac-discovery-label {
+        color:
+            #dec28c;
     }
 
-    html[data-theme="dark"] .market-hero-description,
-    html[data-theme="dark"] .taybac-discovery-description,
-    html[data-theme="dark"] .taybac-discovery-credit {
-        color: #cecbbb;
+
+    html[data-theme="dark"]
+    .market-hero-description,
+    html[data-theme="dark"]
+    .taybac-discovery-description,
+    html[data-theme="dark"]
+    .taybac-discovery-credit {
+        color:
+            #cecbbb;
     }
 
-    html[data-theme="dark"] .market-hero-cta {
-        background: #e0c389;
-        color: #243d27;
+
+    html[data-theme="dark"]
+    .market-hero-cta {
+        background:
+            #e0c389;
+
+        color:
+            #243d27;
     }
 
-    html[data-theme="dark"] .market-hero-cta:hover {
-        background: #eed6a7;
-    }
 
+    html[data-theme="dark"]
+    .market-hero-cta:hover {
+        background:
+            #eed6a7;
+    }
 
 
     /* =========================================================
@@ -510,25 +1006,32 @@
     ========================================================= */
 
     .market-side {
-        display: grid;
+        display:
+            grid;
 
         grid-template-rows:
             auto auto;
 
-        gap: 14px;
+        gap:
+            14px;
     }
 
 
     .side-banner {
-        position: relative;
+        position:
+            relative;
 
-        overflow: hidden;
+        overflow:
+            hidden;
 
-        min-height: 198px;
+        min-height:
+            198px;
 
-        padding: 21px;
+        padding:
+            21px;
 
-        border-radius: 15px;
+        border-radius:
+            15px;
 
         box-shadow:
             var(--shop-shadow);
@@ -536,7 +1039,8 @@
 
 
     .side-banner.sale {
-        color: #fff;
+        color:
+            #fff;
 
         background:
             linear-gradient(
@@ -548,7 +1052,8 @@
 
 
     .side-banner.gift {
-        color: #2f4029;
+        color:
+            #2f4029;
 
         background:
             linear-gradient(
@@ -560,266 +1065,541 @@
 
 
     .side-banner.best-sellers {
-        color: #263b2b;
-        background: linear-gradient(135deg, #f8e5b3, #e9c66e);
+        color:
+            #263b2b;
+
+        background:
+            linear-gradient(
+                135deg,
+                #f8e5b3,
+                #e9c66e
+            );
     }
 
-    .side-banner.best-sellers .side-banner-title {
-        max-width: 230px;
-        font-size: 18px;
+
+    .side-banner.best-sellers
+    .side-banner-title {
+        max-width:
+            230px;
+
+        font-size:
+            18px;
     }
+
 
     .best-seller-side-list {
-        position: relative;
-        z-index: 2;
-        display: grid;
-        gap: 8px;
-        margin-top: 13px;
+        position:
+            relative;
+
+        z-index:
+            2;
+
+        display:
+            grid;
+
+        gap:
+            8px;
+
+        margin-top:
+            13px;
     }
+
 
     .best-seller-side-item {
-        display: grid;
-        grid-template-columns: 22px minmax(0, 1fr);
-        gap: 8px;
-        align-items: center;
-        color: inherit;
-        padding-bottom: 7px;
-        border-bottom: 1px solid rgba(47,64,41,.16);
+        display:
+            grid;
+
+        grid-template-columns:
+            22px
+            minmax(0, 1fr);
+
+        gap:
+            8px;
+
+        align-items:
+            center;
+
+        color:
+            inherit;
+
+        padding-bottom:
+            7px;
+
+        border-bottom:
+            1px solid
+            rgba(
+                47,
+                64,
+                41,
+                .16
+            );
     }
+
 
     .best-seller-side-item:last-child {
-        padding-bottom: 0;
-        border-bottom: 0;
+        padding-bottom:
+            0;
+
+        border-bottom:
+            0;
     }
+
 
     .best-seller-side-rank {
-        width: 22px;
-        height: 22px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        color: #fff;
-        background: #a13a2a;
-        font-size: 11px;
-        font-weight: 950;
+        width:
+            22px;
+
+        height:
+            22px;
+
+        display:
+            grid;
+
+        place-items:
+            center;
+
+        border-radius:
+            50%;
+
+        color:
+            #fff;
+
+        background:
+            #a13a2a;
+
+        font-size:
+            11px;
+
+        font-weight:
+            950;
     }
+
 
     .best-seller-side-info {
-        min-width: 0;
+        min-width:
+            0;
     }
+
 
     .best-seller-side-name {
-        display: block;
-        overflow: hidden;
-        color: inherit;
-        font-size: 11px;
-        font-weight: 850;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        display:
+            block;
+
+        overflow:
+            hidden;
+
+        color:
+            inherit;
+
+        font-size:
+            11px;
+
+        font-weight:
+            850;
+
+        text-overflow:
+            ellipsis;
+
+        white-space:
+            nowrap;
     }
+
 
     .best-seller-side-meta {
-        display: block;
-        margin-top: 2px;
-        color: #a13a2a;
-        font-size: 10px;
-        font-weight: 900;
+        display:
+            block;
+
+        margin-top:
+            2px;
+
+        color:
+            #a13a2a;
+
+        font-size:
+            10px;
+
+        font-weight:
+            900;
     }
 
+
     .best-seller-side-empty {
-        position: relative;
-        z-index: 2;
-        margin: 14px 0 0;
-        font-size: 10px;
-        line-height: 1.5;
-        opacity: .76;
+        position:
+            relative;
+
+        z-index:
+            2;
+
+        margin:
+            14px 0 0;
+
+        font-size:
+            10px;
+
+        line-height:
+            1.5;
+
+        opacity:
+            .76;
     }
 
 
     .side-banner::after {
-        content: "";
+        content:
+            "";
 
-        position: absolute;
+        position:
+            absolute;
 
-        right: -35px;
-        bottom: -35px;
+        right:
+            -35px;
 
-        width: 130px;
-        height: 130px;
+        bottom:
+            -35px;
 
-        border-radius: 50%;
+        width:
+            130px;
+
+        height:
+            130px;
+
+        border-radius:
+            50%;
 
         background:
-            rgba(255,255,255,.10);
+            rgba(
+                255,
+                255,
+                255,
+                .10
+            );
     }
 
 
     .side-banner-label {
-        position: relative;
+        position:
+            relative;
 
-        z-index: 2;
+        z-index:
+            2;
 
-        font-size: 9px;
+        font-size:
+            9px;
 
-        font-weight: 900;
+        font-weight:
+            900;
 
-        letter-spacing: .11em;
+        letter-spacing:
+            .11em;
 
-        text-transform: uppercase;
+        text-transform:
+            uppercase;
     }
 
 
     .side-banner-title {
-        position: relative;
+        position:
+            relative;
 
-        z-index: 2;
+        z-index:
+            2;
 
-        max-width: 160px;
+        max-width:
+            160px;
 
-        margin-top: 8px;
+        margin-top:
+            8px;
 
-        font-size: 22px;
+        font-size:
+            22px;
 
-        line-height: 1.12;
+        line-height:
+            1.12;
 
-        font-weight: 950;
+        font-weight:
+            950;
 
-        letter-spacing: -.03em;
+        letter-spacing:
+            -.03em;
     }
 
 
     .side-banner-text {
-        position: relative;
+        position:
+            relative;
 
-        z-index: 2;
+        z-index:
+            2;
 
-        max-width: 160px;
+        max-width:
+            160px;
 
-        margin-top: 7px;
+        margin-top:
+            7px;
 
-        font-size: 10px;
+        font-size:
+            10px;
 
-        line-height: 1.5;
+        line-height:
+            1.5;
 
-        opacity: .75;
+        opacity:
+            .75;
     }
 
 
     .side-banner-link {
-        position: absolute;
+        position:
+            absolute;
 
-        z-index: 3;
+        z-index:
+            3;
 
-        left: 21px;
-        bottom: 18px;
+        left:
+            21px;
 
-        color: inherit;
+        bottom:
+            18px;
 
-        font-size: 10px;
+        color:
+            inherit;
 
-        font-weight: 900;
+        font-size:
+            10px;
+
+        font-weight:
+            900;
     }
 
 
-    /* Keep side links below their content as the hero becomes more compact. */
-    .market-side .side-banner-link {
-        position: relative;
-        display: inline-flex;
-        left: auto;
-        bottom: auto;
-        margin-top: 12px;
+    .market-side
+    .side-banner-link {
+        position:
+            relative;
+
+        display:
+            inline-flex;
+
+        left:
+            auto;
+
+        bottom:
+            auto;
+
+        margin-top:
+            12px;
     }
 
-    .market-side .side-banner-text {
-        max-width: none;
+
+    .market-side
+    .side-banner-text {
+        max-width:
+            none;
     }
 
-    .shop-home .market-side .side-banner-title {
-        max-width: none;
-        font-size: 20px !important;
-        line-height: 1.22 !important;
+
+    .shop-home
+    .market-side
+    .side-banner-title {
+        max-width:
+            none;
+
+        font-size:
+            20px !important;
+
+        line-height:
+            1.22 !important;
     }
 
-    .shop-home .market-hero h1.market-hero-title {
-        font-size: clamp(27px, 2.6vw, 44px) !important;
-        line-height: 1.18 !important;
+
+    .shop-home
+    .market-hero
+    .market-hero-title {
+        font-size:
+            clamp(
+                27px,
+                2.6vw,
+                44px
+            ) !important;
+
+        line-height:
+            1.18 !important;
     }
+
 
     /* =========================================================
        SERVICE STRIP
     ========================================================= */
 
     .shop-service-strip {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        margin-top: 18px;
-        overflow: hidden;
-        border: 1px solid #d8c6a7;
-        border-top: 3px solid #47643c;
-        border-radius: 14px;
-        background: #fff9ed;
-        box-shadow: 0 8px 22px rgba(73, 58, 32, .09);
+        display:
+            grid;
+
+        grid-template-columns:
+            repeat(
+                4,
+                minmax(0, 1fr)
+            );
+
+        margin-top:
+            18px;
+
+        overflow:
+            hidden;
+
+        border:
+            1px solid
+            #d8c6a7;
+
+        border-top:
+            3px solid
+            #47643c;
+
+        border-radius:
+            14px;
+
+        background:
+            #fff9ed;
+
+        box-shadow:
+            0 8px 22px
+            rgba(
+                73,
+                58,
+                32,
+                .09
+            );
     }
+
 
     .shop-service {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        min-height: 92px;
-        padding: 20px 22px;
+        display:
+            flex;
+
+        align-items:
+            center;
+
+        gap:
+            14px;
+
+        min-height:
+            92px;
+
+        padding:
+            20px 22px;
     }
+
 
     .shop-service:not(:last-child) {
-        border-right: 1px solid #e3d5bf;
+        border-right:
+            1px solid
+            #e3d5bf;
     }
+
 
     .shop-service-icon {
-        display: grid;
-        place-items: center;
-        flex: 0 0 46px;
-        width: 46px;
-        height: 46px;
-        border: 1px solid #efcf8b;
-        border-radius: 10px;
-        background: #ffe9b8;
-        font-size: 23px;
+        display:
+            grid;
+
+        place-items:
+            center;
+
+        flex:
+            0 0 46px;
+
+        width:
+            46px;
+
+        height:
+            46px;
+
+        border:
+            1px solid
+            #efcf8b;
+
+        border-radius:
+            10px;
+
+        background:
+            #ffe9b8;
+
+        font-size:
+            23px;
     }
+
 
     .shop-service strong {
-        display: block;
-        color: #30492e;
-        font-size: 15px;
-        font-weight: 800;
+        display:
+            block;
+
+        color:
+            #30492e;
+
+        font-size:
+            15px;
+
+        font-weight:
+            800;
     }
+
 
     .shop-service span {
-        display: block;
-        margin-top: 5px;
-        color: #70624f;
-        font-size: 12.5px;
+        display:
+            block;
+
+        margin-top:
+            5px;
+
+        color:
+            #70624f;
+
+        font-size:
+            12.5px;
     }
 
-    html[data-theme="dark"] .shop-service-strip {
-        border-color: #4b6045;
-        border-top-color: #c6aa6b;
-        background: #253025;
+
+    html[data-theme="dark"]
+    .shop-service-strip {
+        border-color:
+            #4b6045;
+
+        border-top-color:
+            #c6aa6b;
+
+        background:
+            #253025;
     }
 
-    html[data-theme="dark"] .shop-service-strip .shop-service {
-        border-color: #465440;
+
+    html[data-theme="dark"]
+    .shop-service-strip
+    .shop-service {
+        border-color:
+            #465440;
     }
 
-    html[data-theme="dark"] .shop-service strong {
-        color: #f3e5c7;
+
+    html[data-theme="dark"]
+    .shop-service strong {
+        color:
+            #f3e5c7;
     }
 
-    html[data-theme="dark"] .shop-service span {
-        color: #c9c4b4;
+
+    html[data-theme="dark"]
+    .shop-service span {
+        color:
+            #c9c4b4;
     }
 
-    html[data-theme="dark"] .shop-service-icon {
-        border-color: #897043;
-        background: #574729;
+
+    html[data-theme="dark"]
+    .shop-service-icon {
+        border-color:
+            #897043;
+
+        background:
+            #574729;
     }
 
 
@@ -828,12 +1608,15 @@
     ========================================================= */
 
     .flash-box {
-        overflow: hidden;
+        overflow:
+            hidden;
 
         border:
-            1px solid #efd6d0;
+            1px solid
+            #efd6d0;
 
-        border-radius: 17px;
+        border-radius:
+            17px;
 
         background:
             linear-gradient(
@@ -848,16 +1631,23 @@
 
 
     .flash-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        display:
+            flex;
 
-        gap: 16px;
+        align-items:
+            center;
+
+        justify-content:
+            space-between;
+
+        gap:
+            16px;
 
         padding:
             17px 19px;
 
-        color: #fff;
+        color:
+            #fff;
 
         background:
             linear-gradient(
@@ -869,56 +1659,79 @@
 
 
     .flash-title {
-        display: flex;
-        align-items: center;
+        display:
+            flex;
 
-        gap: 8px;
+        align-items:
+            center;
 
-        font-size: 20px;
+        gap:
+            8px;
 
-        font-weight: 950;
+        font-size:
+            20px;
 
-        letter-spacing: -.025em;
+        font-weight:
+            950;
+
+        letter-spacing:
+            -.025em;
     }
 
 
     .flash-title span {
-        color: #ffd47c;
+        color:
+            #ffd47c;
     }
 
 
     .flash-note {
         color:
-            rgba(255,255,255,.72);
+            rgba(
+                255,
+                255,
+                255,
+                .72
+            );
 
-        font-size: 10px;
+        font-size:
+            10px;
     }
 
 
     .flash-products {
-        display: grid;
+        display:
+            grid;
 
         grid-template-columns:
-            repeat(5, minmax(0, 1fr));
+            repeat(
+                5,
+                minmax(0, 1fr)
+            );
 
-        gap: 0;
+        gap:
+            0;
     }
 
 
     .flash-products
     .commerce-card {
-        border: 0;
+        border:
+            0;
 
-        border-radius: 0;
+        border-radius:
+            0;
 
-        box-shadow: none;
+        box-shadow:
+            none;
     }
 
 
     .flash-products
     .commerce-card:not(:last-child) {
         border-right:
-            1px solid #eee5de;
+            1px solid
+            #eee5de;
     }
 
 
@@ -927,19 +1740,27 @@
     ========================================================= */
 
     .category-grid {
-        display: grid;
+        display:
+            grid;
 
         grid-template-columns:
-            repeat(8, minmax(0, 1fr));
+            repeat(
+                8,
+                minmax(0, 1fr)
+            );
 
-        overflow: hidden;
+        overflow:
+            hidden;
 
         border:
-            1px solid var(--shop-border);
+            1px solid
+            var(--shop-border);
 
-        border-radius: 16px;
+        border-radius:
+            16px;
 
-        background: #fff;
+        background:
+            #fff;
 
         box-shadow:
             var(--shop-shadow);
@@ -947,20 +1768,32 @@
 
 
     .category-tile {
-        min-height: 125px;
+        min-height:
+            125px;
 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
+        display:
+            flex;
 
-        gap: 8px;
+        align-items:
+            center;
 
-        padding: 14px 7px;
+        justify-content:
+            center;
 
-        color: #4d443d;
+        flex-direction:
+            column;
 
-        text-align: center;
+        gap:
+            8px;
+
+        padding:
+            14px 7px;
+
+        color:
+            #4d443d;
+
+        text-align:
+            center;
 
         transition:
             background .17s ease,
@@ -970,12 +1803,14 @@
 
     .category-tile:not(:last-child) {
         border-right:
-            1px solid #eee9e4;
+            1px solid
+            #eee9e4;
     }
 
 
     .category-tile:hover {
-        color: var(--shop-red);
+        color:
+            var(--shop-red);
 
         background:
             #fff9ef;
@@ -983,21 +1818,30 @@
 
 
     .category-tile-icon {
-        width: 53px;
-        height: 53px;
+        width:
+            53px;
 
-        display: grid;
-        place-items: center;
+        height:
+            53px;
+
+        display:
+            grid;
+
+        place-items:
+            center;
 
         border:
-            1px solid #ead1a8;
+            1px solid
+            #ead1a8;
 
-        border-radius: 50%;
+        border-radius:
+            50%;
 
         background:
             #fff1d2;
 
-        font-size: 25px;
+        font-size:
+            25px;
 
         transition:
             transform .18s ease;
@@ -1012,20 +1856,26 @@
 
 
     .category-tile-name {
-        max-width: 120px;
+        max-width:
+            120px;
 
-        font-size: 11px;
+        font-size:
+            11px;
 
-        line-height: 1.25;
+        line-height:
+            1.25;
 
-        font-weight: 900;
+        font-weight:
+            900;
     }
 
 
     .category-tile-count {
-        color: #91867e;
+        color:
+            #91867e;
 
-        font-size: 9px;
+        font-size:
+            9px;
     }
 
 
@@ -1034,29 +1884,42 @@
     ========================================================= */
 
     .commerce-grid {
-        display: grid;
+        display:
+            grid;
 
         grid-template-columns:
-            repeat(5, minmax(0, 1fr));
+            repeat(
+                5,
+                minmax(0, 1fr)
+            );
 
-        gap: 14px;
+        gap:
+            14px;
     }
 
 
     .commerce-card {
-        position: relative;
+        position:
+            relative;
 
-        overflow: hidden;
+        overflow:
+            hidden;
 
-        min-width: 0;
+        min-width:
+            0;
 
-        display: flex;
-        flex-direction: column;
+        display:
+            flex;
+
+        flex-direction:
+            column;
 
         border:
-            1px solid var(--shop-border);
+            1px solid
+            var(--shop-border);
 
-        border-radius: 15px;
+        border-radius:
+            15px;
 
         background:
             var(--shop-card);
@@ -1084,11 +1947,14 @@
 
 
     .commerce-media {
-        position: relative;
+        position:
+            relative;
 
-        height: 210px;
+        height:
+            210px;
 
-        overflow: hidden;
+        overflow:
+            hidden;
 
         background:
             #faf8f5;
@@ -1096,12 +1962,17 @@
 
 
     .commerce-media img {
-        width: 100%;
-        height: 100%;
+        width:
+            100%;
 
-        padding: 10px;
+        height:
+            100%;
 
-        object-fit: contain;
+        padding:
+            10px;
+
+        object-fit:
+            contain;
 
         transition:
             transform .27s ease;
@@ -1116,74 +1987,104 @@
 
 
     .commerce-no-image {
-        height: 100%;
+        height:
+            100%;
 
-        display: grid;
-        place-items: center;
+        display:
+            grid;
 
-        color: #9a8c80;
+        place-items:
+            center;
 
-        font-size: 40px;
+        color:
+            #9a8c80;
+
+        font-size:
+            40px;
     }
 
 
     .commerce-sale {
-        position: absolute;
+        position:
+            absolute;
 
-        z-index: 4;
+        z-index:
+            4;
 
-        top: 9px;
-        left: 9px;
+        top:
+            9px;
 
-        min-width: 42px;
+        left:
+            9px;
+
+        min-width:
+            42px;
 
         padding:
             5px 7px;
 
-        border-radius: 6px;
+        border-radius:
+            6px;
 
-        color: #fff;
+        color:
+            #fff;
 
         background:
             var(--shop-red);
 
-        font-size: 9px;
+        font-size:
+            9px;
 
-        font-weight: 950;
+        font-weight:
+            950;
 
-        text-align: center;
+        text-align:
+            center;
     }
 
 
     .commerce-featured {
-        position: absolute;
+        position:
+            absolute;
 
-        z-index: 4;
+        z-index:
+            4;
 
-        top: 9px;
-        right: 9px;
+        top:
+            9px;
+
+        right:
+            9px;
 
         padding:
             5px 7px;
 
-        border-radius: 999px;
+        border-radius:
+            999px;
 
-        color: #5b3a1d;
+        color:
+            #5b3a1d;
 
         background:
             #f4cd78;
 
-        font-size: 8px;
+        font-size:
+            8px;
 
-        font-weight: 950;
+        font-weight:
+            950;
     }
 
 
     .commerce-body {
-        flex: 1;
+        flex:
+            1;
 
-        display: flex;
-        flex-direction: column;
+        display:
+            flex;
+
+        flex-direction:
+            column;
 
         padding:
             13px;
@@ -1191,75 +2092,104 @@
 
 
     .commerce-category {
-        margin-bottom: 5px;
+        margin-bottom:
+            5px;
 
-        color: #898078;
+        color:
+            #898078;
 
-        font-size: 9px;
+        font-size:
+            9px;
     }
 
 
     .commerce-name {
-        min-height: 39px;
+        min-height:
+            39px;
 
-        color: #332c27;
+        color:
+            #332c27;
 
-        font-size: 13px;
+        font-size:
+            13px;
 
-        line-height: 1.45;
+        line-height:
+            1.45;
 
-        font-weight: 850;
+        font-weight:
+            850;
 
-        display: -webkit-box;
+        display:
+            -webkit-box;
 
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+        -webkit-line-clamp:
+            2;
 
-        overflow: hidden;
+        -webkit-box-orient:
+            vertical;
+
+        overflow:
+            hidden;
     }
 
 
     .commerce-name:hover {
-        color: var(--shop-red);
+        color:
+            var(--shop-red);
     }
 
 
     .commerce-rating {
-        display: flex;
-        align-items: center;
+        display:
+            flex;
 
-        gap: 5px;
+        align-items:
+            center;
 
-        min-height: 24px;
+        gap:
+            5px;
 
-        margin-top: 5px;
+        min-height:
+            24px;
 
-        color: #e59e16;
+        margin-top:
+            5px;
 
-        font-size: 10px;
+        color:
+            #e59e16;
+
+        font-size:
+            10px;
     }
 
 
     .commerce-sold {
-        color: #92867d;
+        color:
+            #92867d;
 
-        font-size: 9px;
+        font-size:
+            9px;
     }
 
 
     .commerce-price-box {
-        margin-top: auto;
+        margin-top:
+            auto;
 
-        padding-top: 7px;
+        padding-top:
+            7px;
     }
 
 
     .commerce-old-price {
-        min-height: 14px;
+        min-height:
+            14px;
 
-        color: #a29a93;
+        color:
+            #a29a93;
 
-        font-size: 9px;
+        font-size:
+            9px;
 
         text-decoration:
             line-through;
@@ -1267,98 +2197,136 @@
 
 
     .commerce-price {
-        color: var(--shop-red);
+        color:
+            var(--shop-red);
 
-        font-size: 17px;
+        font-size:
+            17px;
 
-        font-weight: 950;
+        font-weight:
+            950;
 
-        letter-spacing: -.02em;
+        letter-spacing:
+            -.02em;
     }
 
 
     .commerce-unit {
-        color: #8e8178;
+        color:
+            #8e8178;
 
-        font-size: 8px;
+        font-size:
+            8px;
 
-        font-weight: 700;
+        font-weight:
+            700;
     }
 
 
     .commerce-stock {
-        display: flex;
-        align-items: center;
+        display:
+            flex;
 
-        gap: 4px;
+        align-items:
+            center;
 
-        margin-top: 5px;
+        gap:
+            4px;
 
-        color: #4d7b43;
+        margin-top:
+            5px;
 
-        font-size: 9px;
+        color:
+            #4d7b43;
 
-        font-weight: 850;
+        font-size:
+            9px;
+
+        font-weight:
+            850;
     }
 
 
     .commerce-stock::before {
-        content: "";
+        content:
+            "";
 
-        width: 5px;
-        height: 5px;
+        width:
+            5px;
 
-        border-radius: 50%;
+        height:
+            5px;
 
-        background: #5d8e50;
+        border-radius:
+            50%;
+
+        background:
+            #5d8e50;
     }
 
 
     .commerce-stock.out {
-        color: #ad4b40;
+        color:
+            #ad4b40;
     }
 
 
     .commerce-stock.out::before {
-        background: #c44d42;
+        background:
+            #c44d42;
     }
 
 
     .commerce-actions {
-        display: grid;
+        display:
+            grid;
 
         grid-template-columns:
-            42px 1fr;
+            42px
+            1fr;
 
-        gap: 6px;
+        gap:
+            6px;
 
-        margin-top: 10px;
+        margin-top:
+            10px;
     }
 
 
     .commerce-detail-btn {
-        min-height: 38px;
+        min-height:
+            38px;
 
-        display: grid;
-        place-items: center;
+        display:
+            grid;
+
+        place-items:
+            center;
 
         border:
-            1px solid #ded4ca;
+            1px solid
+            #ded4ca;
 
-        border-radius: 9px;
+        border-radius:
+            9px;
 
-        color: #604733;
+        color:
+            #604733;
 
-        background: #fff;
+        background:
+            #fff;
 
-        font-size: 16px;
+        font-size:
+            16px;
 
-        font-weight: 900;
+        font-weight:
+            900;
     }
 
 
     .commerce-detail-btn:hover {
-        color: #fff;
+        color:
+            #fff;
 
         border-color:
             var(--shop-brown);
@@ -1369,21 +2337,29 @@
 
 
     .commerce-cart-btn {
-        width: 100%;
-        min-height: 38px;
+        width:
+            100%;
 
-        border: 0;
+        min-height:
+            38px;
 
-        border-radius: 9px;
+        border:
+            0;
 
-        color: #fff;
+        border-radius:
+            9px;
+
+        color:
+            #fff;
 
         background:
             var(--shop-red);
 
-        font-size: 10px;
+        font-size:
+            10px;
 
-        font-weight: 900;
+        font-weight:
+            900;
 
         transition:
             background .17s ease;
@@ -1397,35 +2373,50 @@
 
 
     .commerce-cart-btn:disabled {
-        cursor: not-allowed;
+        cursor:
+            not-allowed;
 
-        opacity: .5;
+        opacity:
+            .5;
     }
 
 
     .commerce-admin-btn {
-        width: 100%;
-        min-height: 38px;
+        width:
+            100%;
 
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        min-height:
+            38px;
 
-        border-radius: 9px;
+        display:
+            flex;
 
-        color: #fff;
+        align-items:
+            center;
+
+        justify-content:
+            center;
+
+        border-radius:
+            9px;
+
+        color:
+            #fff;
 
         background:
             var(--shop-green);
 
-        font-size: 10px;
+        font-size:
+            10px;
 
-        font-weight: 900;
+        font-weight:
+            900;
     }
 
 
     .commerce-admin-btn:hover {
-        color: #fff;
+        color:
+            #fff;
 
         background:
             var(--shop-green-dark);
@@ -1437,30 +2428,42 @@
     ========================================================= */
 
     .wide-promo {
-        position: relative;
+        position:
+            relative;
 
-        overflow: hidden;
+        overflow:
+            hidden;
 
-        display: grid;
+        display:
+            grid;
 
         grid-template-columns:
             1fr auto;
 
-        align-items: center;
+        align-items:
+            center;
 
-        gap: 20px;
+        gap:
+            20px;
 
         padding:
             30px 35px;
 
-        border-radius: 17px;
+        border-radius:
+            17px;
 
-        color: #fff;
+        color:
+            #fff;
 
         background:
             radial-gradient(
                 circle at 84% 15%,
-                rgba(231,173,66,.30),
+                rgba(
+                    231,
+                    173,
+                    66,
+                    .30
+                ),
                 transparent 28%
             ),
 
@@ -1476,38 +2479,55 @@
 
 
     .wide-promo::after {
-        content: "✦";
+        content:
+            "✦";
 
-        position: absolute;
+        position:
+            absolute;
 
-        right: 17%;
+        right:
+            17%;
 
-        top: -60px;
+        top:
+            -60px;
 
         color:
-            rgba(255,255,255,.06);
+            rgba(
+                255,
+                255,
+                255,
+                .06
+            );
 
-        font-size: 180px;
+        font-size:
+            180px;
     }
 
 
     .wide-promo-copy {
-        position: relative;
+        position:
+            relative;
 
-        z-index: 2;
+        z-index:
+            2;
     }
 
 
     .wide-promo-label {
-        color: #f4cf78;
+        color:
+            #f4cf78;
 
-        font-size: 10px;
+        font-size:
+            10px;
 
-        font-weight: 900;
+        font-weight:
+            900;
 
-        letter-spacing: .09em;
+        letter-spacing:
+            .09em;
 
-        text-transform: uppercase;
+        text-transform:
+            uppercase;
     }
 
 
@@ -1516,58 +2536,85 @@
             5px 0 0;
 
         font-size:
-            clamp(24px,2.7vw,35px);
+            clamp(
+                24px,
+                2.7vw,
+                35px
+            );
 
-        font-weight: 950;
+        font-weight:
+            950;
 
-        letter-spacing: -.035em;
+        letter-spacing:
+            -.035em;
     }
 
 
     .wide-promo p {
-        max-width: 690px;
+        max-width:
+            690px;
 
         margin:
             7px 0 0;
 
         color:
-            rgba(255,255,255,.70);
+            rgba(
+                255,
+                255,
+                255,
+                .70
+            );
 
-        font-size: 11px;
+        font-size:
+            11px;
 
-        line-height: 1.6;
+        line-height:
+            1.6;
     }
 
 
     .wide-promo-btn {
-        position: relative;
+        position:
+            relative;
 
-        z-index: 3;
+        z-index:
+            3;
 
-        min-height: 43px;
+        min-height:
+            43px;
 
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        display:
+            inline-flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
 
         padding:
             0 16px;
 
-        border-radius: 10px;
+        border-radius:
+            10px;
 
-        color: #50301b;
+        color:
+            #50301b;
 
         background:
             #f3cb73;
 
-        font-size: 11px;
+        font-size:
+            11px;
 
-        font-weight: 950;
+        font-weight:
+            950;
     }
 
 
     .wide-promo-btn:hover {
-        color: #422517;
+        color:
+            #422517;
 
         background:
             #ffe19a;
@@ -1582,18 +2629,24 @@
         grid-column:
             1 / -1;
 
-        padding: 42px 20px;
+        padding:
+            42px 20px;
 
         border:
-            1px dashed #dccab4;
+            1px dashed
+            #dccab4;
 
-        border-radius: 14px;
+        border-radius:
+            14px;
 
-        color: #897d74;
+        color:
+            #897d74;
 
-        background: #fff;
+        background:
+            #fff;
 
-        text-align: center;
+        text-align:
+            center;
     }
 
 
@@ -1611,31 +2664,40 @@
 
 
         .market-side {
-            display: none;
+            display:
+                none;
         }
 
 
         .category-grid {
             grid-template-columns:
-                repeat(4,1fr);
+                repeat(
+                    4,
+                    1fr
+                );
         }
 
 
         .category-tile:nth-child(4n) {
-            border-right: 0;
+            border-right:
+                0;
         }
 
 
         .commerce-grid,
         .flash-products {
             grid-template-columns:
-                repeat(4,minmax(0,1fr));
+                repeat(
+                    4,
+                    minmax(0,1fr)
+                );
         }
 
 
         .flash-products
         .commerce-card:nth-child(5) {
-            display: none;
+            display:
+                none;
         }
 
     }
@@ -1650,42 +2712,53 @@
 
 
         .market-categories {
-            display: none;
+            display:
+                none;
         }
 
 
         .market-hero {
-            min-height: 360px;
+            min-height:
+                360px;
         }
 
 
         .shop-service-strip {
             grid-template-columns:
-                repeat(2,1fr);
+                repeat(
+                    2,
+                    1fr
+                );
         }
 
 
         .shop-service:nth-child(2) {
-            border-right: 0;
+            border-right:
+                0;
         }
 
 
         .shop-service:nth-child(-n+2) {
             border-bottom:
-                1px solid var(--shop-border);
+                1px solid
+                var(--shop-border);
         }
 
 
         .commerce-grid,
         .flash-products {
             grid-template-columns:
-                repeat(3,minmax(0,1fr));
+                repeat(
+                    3,
+                    minmax(0,1fr)
+                );
         }
 
 
         .flash-products
         .commerce-card:nth-child(4) {
-            display: none;
+            display:
+                none;
         }
 
     }
@@ -1694,70 +2767,100 @@
     @media (max-width: 767.98px) {
 
         .shop-section {
-            margin-top: 33px;
+            margin-top:
+                33px;
         }
 
 
         .shop-section-header {
-            align-items: flex-start;
+            align-items:
+                flex-start;
 
-            flex-direction: column;
+            flex-direction:
+                column;
         }
 
 
         .market-hero {
-            grid-template-columns: 1fr;
-            min-height: 0;
-            aspect-ratio: auto;
+            grid-template-columns:
+                1fr;
+
+            min-height:
+                0;
+
+            aspect-ratio:
+                auto;
         }
+
 
         .market-hero-copy {
-            padding: 26px;
+            padding:
+                26px;
         }
+
 
         .market-hero-title {
-            font-size: 32px;
+            font-size:
+                32px;
         }
+
 
         .market-hero-eyebrow {
-            margin-bottom: 14px;
+            margin-bottom:
+                14px;
         }
+
 
         .market-hero-description {
-            margin: 16px 0 20px;
+            margin:
+                16px 0 20px;
         }
+
 
         .market-hero-visual {
-            min-height: 0;
-            aspect-ratio: 4 / 3;
+            min-height:
+                0;
+
+            aspect-ratio:
+                4 / 3;
         }
 
+
         .taybac-discovery {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+                1fr;
         }
 
 
         .category-grid {
             grid-template-columns:
-                repeat(4,1fr);
+                repeat(
+                    4,
+                    1fr
+                );
         }
 
 
         .category-tile {
-            min-height: 110px;
+            min-height:
+                110px;
         }
 
 
         .commerce-grid,
         .flash-products {
             grid-template-columns:
-                repeat(2,minmax(0,1fr));
+                repeat(
+                    2,
+                    minmax(0,1fr)
+                );
         }
 
 
         .flash-products
         .commerce-card:nth-child(3) {
-            display: none;
+            display:
+                none;
         }
 
 
@@ -1771,7 +2874,8 @@
 
 
         .wide-promo-btn {
-            width: fit-content;
+            width:
+                fit-content;
         }
 
     }
@@ -1780,232 +2884,147 @@
     @media (max-width: 575.98px) {
 
         .shop-service-strip {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+                1fr;
         }
 
 
         .shop-service {
-            border-right: 0 !important;
+            border-right:
+                0 !important;
 
             border-bottom:
-                1px solid var(--shop-border);
+                1px solid
+                var(--shop-border);
         }
 
 
         .shop-service:last-child {
-            border-bottom: 0;
+            border-bottom:
+                0;
         }
 
 
         .category-grid {
             grid-template-columns:
-                repeat(2,1fr);
+                repeat(
+                    2,
+                    1fr
+                );
         }
 
 
         .category-tile {
             border-right:
-                1px solid #eee9e4 !important;
+                1px solid
+                #eee9e4 !important;
 
             border-bottom:
-                1px solid #eee9e4;
+                1px solid
+                #eee9e4;
         }
 
 
         .category-tile:nth-child(2n) {
-            border-right: 0 !important;
+            border-right:
+                0 !important;
         }
 
 
         .commerce-grid {
-            gap: 9px;
+            gap:
+                9px;
         }
 
 
         .commerce-media {
-            height: 165px;
+            height:
+                165px;
         }
 
 
         .commerce-body {
-            padding: 10px;
+            padding:
+                10px;
         }
 
 
         .commerce-name {
-            font-size: 12px;
+            font-size:
+                12px;
         }
 
 
         .commerce-price {
-            font-size: 15px;
+            font-size:
+                15px;
         }
 
 
         .commerce-actions {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+                1fr;
         }
 
 
         .commerce-detail-btn {
-            display: none;
+            display:
+                none;
         }
 
 
         .flash-header {
-            align-items: flex-start;
+            align-items:
+                flex-start;
 
-            flex-direction: column;
+            flex-direction:
+                column;
         }
 
     }
+
+
     /* =========================================================
-   NEW PRODUCTS - VỪA LÊN KỆ
-   Chỉ làm section sản phẩm mới gọn và cân đối hơn
-========================================================= */
+       NEW PRODUCTS - VỪA LÊN KỆ
+    ========================================================= */
 
-.tb-new-products-section {
-    position: relative;
+    .tb-new-products-section {
+        position:
+            relative;
 
-    padding:
-        30px 28px 32px;
+        padding:
+            30px 28px 32px;
 
-    border:
-        1px solid
-        #eadbc6;
+        border:
+            1px solid
+            #eadbc6;
 
-    border-radius:
-        24px;
+        border-radius:
+            24px;
 
-    background:
-        linear-gradient(
-            145deg,
-            #fffdf9 0%,
-            #fff8ed 58%,
-            #f5f8f2 100%
-        );
+        background:
+            linear-gradient(
+                145deg,
+                #fffdf9 0%,
+                #fff8ed 58%,
+                #f5f8f2 100%
+            );
 
-    box-shadow:
-        0 12px 34px
-        rgba(74, 47, 29, .07);
-}
-
-
-.tb-new-products-section
-.tb-home-section-head {
-    margin-bottom:
-        24px;
-}
-
-
-.tb-new-products-section
-.tb-products-grid {
-    grid-template-columns:
-        repeat(
-            5,
-            minmax(0, 1fr)
-        );
-
-    gap:
-        16px;
-}
-
-
-.tb-new-products-section
-.tb-product-card {
-    border-radius:
-        17px;
-
-    box-shadow:
-        0 8px 22px
-        rgba(75, 46, 28, .07);
-}
-
-
-.tb-new-products-section
-.tb-product-media {
-    height:
-        205px;
-}
-
-
-.tb-new-products-section
-.tb-product-body {
-    padding:
-        15px;
-}
-
-
-.tb-new-products-section
-.tb-product-name {
-    min-height:
-        44px;
-
-    font-size:
-        15px;
-}
-
-
-.tb-new-products-section
-.tb-product-desc {
-    display: none;
-}
-
-
-.tb-new-products-section
-.tb-product-category {
-    margin-bottom:
-        7px;
-
-    font-size:
-        11px;
-}
-
-
-.tb-new-products-section
-.tb-price {
-    font-size:
-        18px;
-}
-
-
-.tb-new-products-section
-.tb-product-actions {
-    margin-top:
-        12px;
-}
-
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (max-width: 1199.98px) {
-
-    .tb-new-products-section
-    .tb-products-grid {
-        grid-template-columns:
-            repeat(
-                3,
-                minmax(0, 1fr)
+        box-shadow:
+            0 12px 34px
+            rgba(
+                74,
+                47,
+                29,
+                .07
             );
     }
 
-}
 
-
-/* =========================================================
-   SMALL TABLET
-========================================================= */
-
-@media (max-width: 767.98px) {
-
-    .tb-new-products-section {
-        padding:
-            22px 18px 24px;
-
-        border-radius:
-            19px;
+    .tb-new-products-section
+    .tb-home-section-head {
+        margin-bottom:
+            24px;
     }
 
 
@@ -2013,43 +3032,150 @@
     .tb-products-grid {
         grid-template-columns:
             repeat(
-                2,
+                5,
                 minmax(0, 1fr)
             );
 
         gap:
+            16px;
+    }
+
+
+    .tb-new-products-section
+    .tb-product-card {
+        border-radius:
+            17px;
+
+        box-shadow:
+            0 8px 22px
+            rgba(
+                75,
+                46,
+                28,
+                .07
+            );
+    }
+
+
+    .tb-new-products-section
+    .tb-product-media {
+        height:
+            205px;
+    }
+
+
+    .tb-new-products-section
+    .tb-product-body {
+        padding:
+            15px;
+    }
+
+
+    .tb-new-products-section
+    .tb-product-name {
+        min-height:
+            44px;
+
+        font-size:
+            15px;
+    }
+
+
+    .tb-new-products-section
+    .tb-product-desc {
+        display:
+            none;
+    }
+
+
+    .tb-new-products-section
+    .tb-product-category {
+        margin-bottom:
+            7px;
+
+        font-size:
+            11px;
+    }
+
+
+    .tb-new-products-section
+    .tb-price {
+        font-size:
+            18px;
+    }
+
+
+    .tb-new-products-section
+    .tb-product-actions {
+        margin-top:
             12px;
     }
 
 
-    .tb-new-products-section
-    .tb-product-media {
-        height:
-            190px;
-    }
+    @media (max-width: 1199.98px) {
 
-}
+        .tb-new-products-section
+        .tb-products-grid {
+            grid-template-columns:
+                repeat(
+                    3,
+                    minmax(0, 1fr)
+                );
+        }
 
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 575.98px) {
-
-    .tb-new-products-section
-    .tb-products-grid {
-        grid-template-columns: 1fr;
     }
 
 
-    .tb-new-products-section
-    .tb-product-media {
-        height:
-            245px;
+    @media (max-width: 767.98px) {
+
+        .tb-new-products-section {
+            padding:
+                22px 18px 24px;
+
+            border-radius:
+                19px;
+        }
+
+
+        .tb-new-products-section
+        .tb-products-grid {
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(0, 1fr)
+                );
+
+            gap:
+                12px;
+        }
+
+
+        .tb-new-products-section
+        .tb-product-media {
+            height:
+                190px;
+        }
+
     }
 
-}
+
+    @media (max-width: 575.98px) {
+
+        .tb-new-products-section
+        .tb-products-grid {
+            grid-template-columns:
+                1fr;
+        }
+
+
+        .tb-new-products-section
+        .tb-product-media {
+            height:
+                245px;
+        }
+
+    }
+
 </style>
 
 
@@ -2059,12 +3185,14 @@
     {{-- =====================================================
         TOP MARKETPLACE
     ====================================================== --}}
+
     <section>
 
         <div class="market-layout">
 
 
             {{-- CATEGORY SIDEBAR --}}
+
             <aside class="market-categories">
 
                 <div class="market-category-title">
@@ -2093,11 +3221,7 @@
                             >
 
                                 <span class="market-category-link-icon">
-
-                                    {{
-                                        $category->icon
-                                    }}
-
+                                    {{ $category->icon }}
                                 </span>
 
 
@@ -2129,35 +3253,315 @@
             </aside>
 
 
-            {{-- HERO --}}
-            <section class="market-hero" aria-labelledby="market-hero-title">
-                <div class="market-hero-copy">
-                    <p class="market-hero-eyebrow">Tinh Hoa Tây Bắc</p>
-                    <h1 class="market-hero-title" id="market-hero-title">
-                        Tinh hoa núi rừng
-                        <span>Gửi trọn hương vị Tây Bắc</span>
-                    </h1>
-                    <p class="market-hero-description">
-                        Khám phá thịt gác bếp, gia vị và những món quà đặc trưng vùng cao.
-                    </p>
-                    <a href="{{ route('products.index') }}" class="market-hero-cta">
-                        Khám phá đặc sản <span aria-hidden="true">→</span>
-                    </a>
+            {{-- =================================================
+                HERO SLIDER
+            ================================================== --}}
+
+            <section
+                class="market-hero"
+                data-hero-carousel
+                aria-roledescription="carousel"
+                aria-label="Giới thiệu và sản phẩm nổi bật"
+            >
+
+                {{-- SLIDE ĐẦU --}}
+
+                <div
+                    class="
+                        market-hero-slide
+                        is-active
+                    "
+                    data-hero-slide
+                    aria-hidden="false"
+                >
+
+                    <div class="market-hero-copy">
+
+                        <p class="market-hero-eyebrow">
+                            Tinh Hoa Tây Bắc
+                        </p>
+
+
+                        <h1
+                            class="market-hero-title"
+                            id="market-hero-title"
+                        >
+
+                            Tinh hoa núi rừng
+
+                            <span>
+                                Gửi trọn hương vị Tây Bắc
+                            </span>
+
+                        </h1>
+
+
+                        <p class="market-hero-description">
+
+                            Khám phá thịt gác bếp,
+                            gia vị và những món quà
+                            đặc trưng vùng cao.
+
+                        </p>
+
+
+                        <a
+                            href="{{ route('products.index') }}"
+                            class="market-hero-cta"
+                        >
+
+                            Khám phá đặc sản
+
+                            <span aria-hidden="true">
+                                →
+                            </span>
+
+                        </a>
+
+                    </div>
+
+
+                    <figure class="market-hero-visual">
+
+                        <img
+                            src="{{
+                                asset(
+                                    'images/tay-bac-specialties-hero.png'
+                                )
+                            }}"
+                            alt="Thịt gác bếp, gia vị, trà và mật ong trên mẹt tre giữa phong cảnh núi rừng Tây Bắc"
+                            width="1254"
+                            height="1254"
+                            fetchpriority="high"
+                        >
+
+                    </figure>
+
                 </div>
-                <figure class="market-hero-visual">
-                    <img
-                        src="{{ asset('images/tay-bac-specialties-hero.png') }}"
-                        alt="Thịt gác bếp, gia vị, trà và mật ong trên mẹt tre giữa phong cảnh núi rừng Tây Bắc"
-                        width="1254"
-                        height="1254"
-                        fetchpriority="high"
+
+
+                {{-- CÁC SẢN PHẨM NỔI BẬT --}}
+
+                @foreach($featuredList as $product)
+
+                    @php
+                        $heroProductImage =
+                            $product->image
+                            ? (
+                                str_starts_with(
+                                    $product->image,
+                                    'http'
+                                )
+                                ? $product->image
+                                : asset(
+                                    'storage/'
+                                    .
+                                    ltrim(
+                                        $product->image,
+                                        '/'
+                                    )
+                                )
+                            )
+                            : asset(
+                                'images/tay-bac-specialties-hero.png'
+                            );
+                    @endphp
+
+
+                    <div
+                        class="market-hero-slide"
+                        data-hero-slide
+                        aria-hidden="true"
+                        inert
                     >
-                </figure>
+
+                        <div class="market-hero-copy">
+
+                            <p class="market-hero-eyebrow">
+
+                                ⭐ Sản phẩm nổi bật ·
+
+                                {{
+                                    $product
+                                        ->category
+                                        ?->name
+                                    ??
+                                    'Đặc sản Tây Bắc'
+                                }}
+
+                            </p>
+
+
+                            <h2
+                                class="
+                                    market-hero-title
+                                    market-hero-product-title
+                                "
+                            >
+                                {{ $product->name }}
+                            </h2>
+
+
+                            <p
+                                class="
+                                    market-hero-description
+                                    market-hero-product-description
+                                "
+                            >
+
+                                {{
+                                    \Illuminate\Support\Str::limit(
+                                        strip_tags(
+                                            $product->description
+                                            ?:
+                                            'Khám phá hương vị Tây Bắc được yêu thích tại cửa hàng.'
+                                        ),
+                                        125
+                                    )
+                                }}
+
+                            </p>
+
+
+                            <div class="market-hero-product-prices">
+
+                                <strong class="market-hero-product-price">
+
+                                    {{
+                                        number_format(
+                                            $product
+                                                ->getCurrentPrice(),
+                                            0,
+                                            ',',
+                                            '.'
+                                        )
+                                    }}đ/{{
+                                        $product->unit
+                                        ?:
+                                        'sản phẩm'
+                                    }}
+
+                                </strong>
+
+
+                                @if($product->isOnSale())
+
+                                    <span class="market-hero-product-old-price">
+
+                                        {{
+                                            number_format(
+                                                (float)
+                                                $product->price,
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}đ/{{
+                                            $product->unit
+                                            ?:
+                                            'sản phẩm'
+                                        }}
+
+                                    </span>
+
+                                @endif
+
+                            </div>
+
+
+                            <a
+                                href="{{
+                                    route(
+                                        'products.show',
+                                        $product
+                                    )
+                                }}"
+                                class="market-hero-cta"
+                            >
+
+                                Xem sản phẩm
+
+                                <span aria-hidden="true">
+                                    →
+                                </span>
+
+                            </a>
+
+                        </div>
+
+
+                        <figure
+                            class="
+                                market-hero-visual
+                                market-hero-visual--product
+                            "
+                        >
+
+                            <span class="market-hero-visual-badge">
+                                ⭐ Nổi bật
+                            </span>
+
+
+                            <img
+                                src="{{ $heroProductImage }}"
+                                alt="{{ $product->name }}"
+                                loading="lazy"
+                                decoding="async"
+                            >
+
+                        </figure>
+
+                    </div>
+
+                @endforeach
+
+
+                {{-- CONTROLS --}}
+
+                @if($featuredList->isNotEmpty())
+
+                    <div
+                        class="market-hero-controls"
+                        aria-label="Điều khiển trình chiếu"
+                    >
+
+                        <button
+                            type="button"
+                            class="market-hero-control"
+                            data-hero-prev
+                            aria-label="Trang trước"
+                        >
+                            ‹
+                        </button>
+
+
+                        <span
+                            class="market-hero-counter"
+                            data-hero-counter
+                            aria-live="off"
+                        >
+                            1 / {{ $featuredList->count() + 1 }}
+                        </span>
+
+
+                        <button
+                            type="button"
+                            class="market-hero-control"
+                            data-hero-next
+                            aria-label="Trang tiếp theo"
+                        >
+                            ›
+                        </button>
+
+                    </div>
+
+                @endif
+
             </section>
 
 
-
             {{-- SIDE PROMOS --}}
+
             <aside class="market-side">
 
 
@@ -2167,14 +3571,19 @@
                         Ưu đãi
                     </div>
 
+
                     <div class="side-banner-title">
                         Giá tốt cho đặc sản yêu thích
                     </div>
 
+
                     <div class="side-banner-text">
+
                         Khám phá sản phẩm
                         đang có chương trình khuyến mãi.
+
                     </div>
+
 
                     <a
                         href="{{ route('products.promotions') }}"
@@ -2192,44 +3601,87 @@
                         Bán chạy
                     </div>
 
+
                     <div class="side-banner-title">
                         Sản phẩm bán chạy
                     </div>
 
+
                     <div class="best-seller-side-list">
 
-                        @forelse($bestSellerList->take(3) as $bestProduct)
+                        @if($bestSellerList->take(3)->isNotEmpty())
 
-                            <a
-                                href="{{ route('products.show', $bestProduct) }}"
-                                class="best-seller-side-item"
-                                title="{{ $bestProduct->name }}"
-                            >
-                                <span class="best-seller-side-rank">
-                                    {{ $loop->iteration }}
-                                </span>
+                            @foreach($bestSellerList->take(3) as $bestProduct)
 
-                                <span class="best-seller-side-info">
-                                    <span class="best-seller-side-name">
-                                        {{ $bestProduct->name }}
+                                <a
+                                    href="{{ route('products.show', $bestProduct) }}"
+                                    class="best-seller-side-item"
+                                    title="{{ $bestProduct->name }}"
+                                >
+
+                                    <span class="best-seller-side-rank">
+                                        {{ $loop->iteration }}
                                     </span>
 
-                                    <span class="best-seller-side-meta">
-                                        {{ number_format($bestProduct->getCurrentPrice(), 0, ',', '.') }}đ
-                                        · Đã bán {{ number_format((int) ($bestProduct->sold_quantity ?? 0), 0, ',', '.') }}
-                                    </span>
-                                </span>
-                            </a>
 
-                        @empty
+                                    <span class="best-seller-side-info">
+
+                                        <span class="best-seller-side-name">
+                                            {{ $bestProduct->name }}
+                                        </span>
+
+
+                                        <span class="best-seller-side-meta">
+
+                                            {{
+                                                number_format(
+                                                    $bestProduct
+                                                        ->getCurrentPrice(),
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                            }}đ/{{
+                                                $bestProduct->unit
+                                                ?:
+                                                'sản phẩm'
+                                            }}
+
+                                            · Đã bán
+
+                                            {{
+                                                number_format(
+                                                    (int)
+                                                    (
+                                                        $bestProduct
+                                                            ->sold_quantity
+                                                        ??
+                                                        0
+                                                    ),
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                )
+                                            }}
+
+                                        </span>
+
+                                    </span>
+
+                                </a>
+
+                            @endforeach
+
+                        @else
 
                             <p class="best-seller-side-empty">
                                 Chưa có đủ dữ liệu bán hàng.
                             </p>
 
-                        @endforelse
+                        @endif
 
                     </div>
+
 
                     <a
                         href="{{ route('products.index') }}"
@@ -2246,6 +3698,7 @@
 
 
         {{-- SERVICE STRIP --}}
+
         <div class="shop-service-strip">
 
 
@@ -2254,6 +3707,7 @@
                 <div class="shop-service-icon">
                     🌿
                 </div>
+
 
                 <div>
 
@@ -2276,6 +3730,7 @@
                     🚚
                 </div>
 
+
                 <div>
 
                     <strong>
@@ -2297,6 +3752,7 @@
                     💳
                 </div>
 
+
                 <div>
 
                     <strong>
@@ -2317,6 +3773,7 @@
                 <div class="shop-service-icon">
                     📦
                 </div>
+
 
                 <div>
 
@@ -2340,6 +3797,7 @@
     {{-- =====================================================
         FLASH SALE / FEATURED
     ====================================================== --}}
+
     @if($featuredList->count() > 0)
 
         <section class="shop-section">
@@ -2361,9 +3819,12 @@
 
                         </div>
 
+
                         <div class="flash-note">
+
                             Những sản phẩm đáng chú ý
                             tại Tinh Hoa Tây Bắc.
+
                         </div>
 
                     </div>
@@ -2427,7 +3888,8 @@
                                             src="{{
                                                 asset(
                                                     'storage/'
-                                                    . $product->image
+                                                    .
+                                                    $product->image
                                                 )
                                             }}"
                                             alt="{{ $product->name }}"
@@ -2518,7 +3980,7 @@
                                                     '.'
                                                 )
                                             }}
-                                            đ
+                                            đ/{{ $product->unit ?: 'sản phẩm' }}
 
                                         @endif
 
@@ -2573,7 +4035,6 @@
 
                                 <div class="commerce-actions">
 
-
                                     <a
                                         href="{{
                                             route(
@@ -2616,6 +4077,7 @@
                                         >
 
                                             @csrf
+
 
                                             <button
                                                 type="submit"
@@ -2662,6 +4124,7 @@
     {{-- =====================================================
         BEST SELLERS
     ====================================================== --}}
+
     @if($bestSellerList->count() > 0)
 
         <section class="shop-section">
@@ -2675,9 +4138,11 @@
                         🔥 Khách hàng lựa chọn
                     </div>
 
+
                     <h2 class="shop-section-title">
                         Sản phẩm bán chạy
                     </h2>
+
 
                     <div class="shop-section-subtitle">
                         Những đặc sản được lựa chọn nhiều.
@@ -2735,7 +4200,8 @@
                                         src="{{
                                             asset(
                                                 'storage/'
-                                                . $product->image
+                                                .
+                                                $product->image
                                             )
                                         }}"
                                         alt="{{ $product->name }}"
@@ -2783,7 +4249,7 @@
                             </a>
 
 
-                                <div class="commerce-rating">
+                            <div class="commerce-rating">
 
                                 ★★★★★
 
@@ -2826,7 +4292,7 @@
                                                 '.'
                                             )
                                         }}
-                                        đ
+                                        đ/{{ $product->unit ?: 'sản phẩm' }}
 
                                     @endif
 
@@ -2881,6 +4347,380 @@
 
                             <div class="commerce-actions">
 
+                                <a
+                                    href="{{
+                                        route(
+                                            'products.show',
+                                            $product
+                                        )
+                                    }}"
+                                    class="commerce-detail-btn"
+                                    title="Xem chi tiết"
+                                >
+                                    👁
+                                </a>
+
+
+                                @if(Auth::check() && Auth::user()->role === 'admin')
+
+                                    <a
+                                        href="{{
+                                            route(
+                                                'admin.products.edit',
+                                                $product
+                                            )
+                                        }}"
+                                        class="commerce-admin-btn"
+                                    >
+                                        Quản lý
+                                    </a>
+
+
+                                @elseif(Auth::check())
+
+                                    <form
+                                        action="{{
+                                            route(
+                                                'cart.add',
+                                                $product
+                                            )
+                                        }}"
+                                        method="POST"
+                                    >
+
+                                        @csrf
+
+
+                                        <button
+                                            type="submit"
+                                            class="commerce-cart-btn"
+                                            {{ $product->quantity <= 0 ? 'disabled' : '' }}
+                                        >
+                                            🛒 Thêm vào giỏ
+                                        </button>
+
+                                    </form>
+
+
+                                @else
+
+                                    <a
+                                        href="{{ route('login') }}"
+                                        class="commerce-admin-btn"
+                                        style="
+                                            background:#b43e2e;
+                                        "
+                                    >
+                                        Đăng nhập để mua
+                                    </a>
+
+                                @endif
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                @endforeach
+
+            </div>
+
+        </section>
+
+    @endif
+
+
+    {{-- =====================================================
+        WIDE PROMO
+    ====================================================== --}}
+
+    <section class="shop-section">
+
+        <div class="wide-promo">
+
+
+            <div class="wide-promo-copy">
+
+                <div class="wide-promo-label">
+                    Đặc sản Tây Bắc
+                </div>
+
+
+                <h2>
+                    Một món ngon, một món quà mang hương vị núi rừng.
+                </h2>
+
+
+                <p>
+
+                    Chọn những sản phẩm đặc trưng
+                    cho gia đình hoặc làm quà
+                    với giá bán,
+                    tồn kho và khuyến mãi
+                    được hiển thị rõ ràng.
+
+                </p>
+
+            </div>
+
+
+            <a
+                href="{{ route('products.promotions') }}"
+                class="wide-promo-btn"
+            >
+                Khám phá ưu đãi →
+            </a>
+
+        </div>
+
+    </section>
+
+
+    {{-- =====================================================
+        NEW PRODUCTS
+    ====================================================== --}}
+
+    <section
+        class="
+            tb-home-section
+            tb-new-products-section
+        "
+    >
+
+        <div class="shop-section-header">
+
+            <div>
+
+                <div class="shop-section-label">
+                    🆕 Sản phẩm mới
+                </div>
+
+
+                <h2 class="shop-section-title">
+                    Vừa lên kệ
+                </h2>
+
+
+                <div class="shop-section-subtitle">
+
+                    Những sản phẩm mới nhất
+                    tại Tinh Hoa Tây Bắc.
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="{{ route('products.index') }}"
+                class="shop-more-link"
+            >
+                Tất cả sản phẩm →
+            </a>
+
+        </div>
+
+
+        <div class="commerce-grid">
+
+            @php
+                $newProducts =
+                    $products
+                    instanceof
+                    \Illuminate\Pagination\AbstractPaginator
+                    ? collect(
+                        $products->items()
+                    )->take(5)
+                    : $products->take(5);
+            @endphp
+
+
+            @if($newProducts->isNotEmpty())
+
+                @foreach($newProducts as $product)
+
+                    <article class="commerce-card">
+
+
+                        <div class="commerce-media">
+
+
+                            @if($product->isOnSale())
+
+                                <span class="commerce-sale">
+
+                                    -{{
+                                        $product
+                                            ->getDiscountPercent()
+                                    }}%
+
+                                </span>
+
+                            @endif
+
+
+                            <a
+                                href="{{
+                                    route(
+                                        'products.show',
+                                        $product
+                                    )
+                                }}"
+                            >
+
+                                @if($product->image)
+
+                                    <img
+                                        src="{{
+                                            asset(
+                                                'storage/'
+                                                .
+                                                $product->image
+                                            )
+                                        }}"
+                                        alt="{{ $product->name }}"
+                                        loading="lazy"
+                                    >
+
+                                @else
+
+                                    <div class="commerce-no-image">
+                                        🧺
+                                    </div>
+
+                                @endif
+
+                            </a>
+
+                        </div>
+
+
+                        <div class="commerce-body">
+
+                            <div class="commerce-category">
+
+                                {{
+                                    $product
+                                        ->category
+                                        ?->name
+                                    ??
+                                    'Đặc sản Tây Bắc'
+                                }}
+
+                            </div>
+
+
+                            <a
+                                href="{{
+                                    route(
+                                        'products.show',
+                                        $product
+                                    )
+                                }}"
+                                class="commerce-name"
+                            >
+                                {{ $product->name }}
+                            </a>
+
+
+                            <div class="commerce-rating">
+
+                                ★★★★★
+
+                                <span class="commerce-sold">
+
+                                    Đã bán
+
+                                    {{
+                                        number_format(
+                                            (float)
+                                            (
+                                                $product
+                                                    ->sold_quantity
+                                                ??
+                                                0
+                                            ),
+                                            0,
+                                            ',',
+                                            '.'
+                                        )
+                                    }}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="commerce-price-box">
+
+                                <div class="commerce-old-price">
+
+                                    @if($product->isOnSale())
+
+                                        {{
+                                            number_format(
+                                                (float)
+                                                $product->price,
+                                                0,
+                                                ',',
+                                                '.'
+                                            )
+                                        }}
+                                        đ/{{ $product->unit ?: 'sản phẩm' }}
+
+                                    @endif
+
+                                </div>
+
+
+                                <div class="commerce-price">
+
+                                    {{
+                                        number_format(
+                                            $product
+                                                ->getCurrentPrice(),
+                                            0,
+                                            ',',
+                                            '.'
+                                        )
+                                    }}
+                                    đ
+
+                                    @if($product->unit)
+
+                                        <span class="commerce-unit">
+                                            /{{ $product->unit }}
+                                        </span>
+
+                                    @endif
+
+                                </div>
+
+
+                                <div
+                                    class="
+                                        commerce-stock
+                                        {{
+                                            $product->quantity > 0
+                                            ? ''
+                                            : 'out'
+                                        }}
+                                    "
+                                >
+
+                                    {{
+                                        $product->quantity > 0
+                                        ? 'Còn hàng'
+                                        : 'Hết hàng'
+                                    }}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="commerce-actions">
 
                                 <a
                                     href="{{
@@ -2925,12 +4765,13 @@
 
                                         @csrf
 
+
                                         <button
                                             type="submit"
                                             class="commerce-cart-btn"
                                             {{ $product->quantity <= 0 ? 'disabled' : '' }}
                                         >
-                                                🛒 Thêm vào giỏ
+                                            🛒 Thêm vào giỏ
                                         </button>
 
                                     </form>
@@ -2958,360 +4799,7 @@
 
                 @endforeach
 
-            </div>
-
-        </section>
-
-    @endif
-
-
-    {{-- =====================================================
-        WIDE PROMO
-    ====================================================== --}}
-    <section class="shop-section">
-
-        <div class="wide-promo">
-
-
-            <div class="wide-promo-copy">
-
-                <div class="wide-promo-label">
-                    Đặc sản Tây Bắc
-                </div>
-
-                <h2>
-                    Một món ngon, một món quà mang hương vị núi rừng.
-                </h2>
-
-                <p>
-
-                    Chọn những sản phẩm đặc trưng
-                    cho gia đình hoặc làm quà
-                    với giá bán,
-                    tồn kho và khuyến mãi
-                    được hiển thị rõ ràng.
-
-                </p>
-
-            </div>
-
-
-            <a
-                href="{{ route('products.promotions') }}"
-                class="wide-promo-btn"
-            >
-                Khám phá ưu đãi →
-            </a>
-
-        </div>
-
-    </section>
-
-
-    {{-- =====================================================
-        NEW PRODUCTS
-    ====================================================== --}}
-  <section class="tb-home-section tb-new-products-section">
-
-
-        <div class="shop-section-header">
-
-            <div>
-
-                <div class="shop-section-label">
-                    🆕 Sản phẩm mới
-                </div>
-
-                <h2 class="shop-section-title">
-                    Vừa lên kệ
-                </h2>
-
-                <div class="shop-section-subtitle">
-                    Những sản phẩm mới nhất
-                    tại Tinh Hoa Tây Bắc.
-                </div>
-
-            </div>
-
-
-            <a
-                href="{{ route('products.index') }}"
-                class="shop-more-link"
-            >
-                Tất cả sản phẩm →
-            </a>
-
-        </div>
-
-
-        <div class="commerce-grid">
-
-            @php
-    $newProducts = $products instanceof \Illuminate\Pagination\AbstractPaginator
-        ? collect($products->items())->take(5)
-        : $products->take(5);
-@endphp
-
-@forelse($newProducts as $product)
-
-                <article class="commerce-card">
-
-
-                    <div class="commerce-media">
-
-
-                        @if($product->isOnSale())
-
-                            <span class="commerce-sale">
-
-                                -{{
-                                    $product
-                                        ->getDiscountPercent()
-                                }}%
-
-                            </span>
-
-                        @endif
-
-
-                        <a
-                            href="{{
-                                route(
-                                    'products.show',
-                                    $product
-                                )
-                            }}"
-                        >
-
-                            @if($product->image)
-
-                                <img
-                                    src="{{
-                                        asset(
-                                            'storage/'
-                                            . $product->image
-                                        )
-                                    }}"
-                                    alt="{{ $product->name }}"
-                                    loading="lazy"
-                                >
-
-                            @else
-
-                                <div class="commerce-no-image">
-                                        🧺
-                                </div>
-
-                            @endif
-
-                        </a>
-
-                    </div>
-
-
-                    <div class="commerce-body">
-
-                        <div class="commerce-category">
-
-                            {{
-                                $product
-                                    ->category
-                                    ?->name
-                                ??
-                                'Đặc sản Tây Bắc'
-                            }}
-
-                        </div>
-
-
-                        <a
-                            href="{{
-                                route(
-                                    'products.show',
-                                    $product
-                                )
-                            }}"
-                            class="commerce-name"
-                        >
-                            {{ $product->name }}
-                        </a>
-
-
-                        <div class="commerce-rating">
-
-                            ★★★★★
-
-                            <span class="commerce-sold">
-
-                                Đã bán
-
-                                {{
-                                    number_format(
-                                        (float)
-                                        (
-                                            $product
-                                                ->sold_quantity
-                                            ??
-                                            0
-                                        ),
-                                        0,
-                                        ',',
-                                        '.'
-                                    )
-                                }}
-
-                            </span>
-
-                        </div>
-
-
-                        <div class="commerce-price-box">
-
-                            <div class="commerce-old-price">
-
-                                @if($product->isOnSale())
-
-                                    {{
-                                        number_format(
-                                            (float)
-                                            $product->price,
-                                            0,
-                                            ',',
-                                            '.'
-                                        )
-                                    }}
-                                    đ
-
-                                @endif
-
-                            </div>
-
-
-                            <div class="commerce-price">
-
-                                {{
-                                    number_format(
-                                        $product
-                                            ->getCurrentPrice(),
-                                        0,
-                                        ',',
-                                        '.'
-                                    )
-                                }}
-                                đ
-
-                                @if($product->unit)
-
-                                    <span class="commerce-unit">
-                                        /{{ $product->unit }}
-                                    </span>
-
-                                @endif
-
-                            </div>
-
-
-                            <div
-                                class="
-                                    commerce-stock
-                                    {{
-                                        $product->quantity > 0
-                                        ? ''
-                                        : 'out'
-                                    }}
-                                "
-                            >
-
-                                {{
-                                    $product->quantity > 0
-                                    ? 'Còn hàng'
-                                    : 'Hết hàng'
-                                }}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="commerce-actions">
-
-
-                            <a
-                                href="{{
-                                    route(
-                                        'products.show',
-                                        $product
-                                    )
-                                }}"
-                                class="commerce-detail-btn"
-                                title="Xem chi tiết"
-                            >
-                                👁
-                            </a>
-
-
-                            @if(Auth::check() && Auth::user()->role === 'admin')
-
-                                <a
-                                    href="{{
-                                        route(
-                                            'admin.products.edit',
-                                            $product
-                                        )
-                                    }}"
-                                    class="commerce-admin-btn"
-                                >
-                                    Quản lý
-                                </a>
-
-
-                            @elseif(Auth::check())
-
-                                <form
-                                    action="{{
-                                        route(
-                                            'cart.add',
-                                            $product
-                                        )
-                                    }}"
-                                    method="POST"
-                                >
-
-                                    @csrf
-
-                                    <button
-                                        type="submit"
-                                        class="commerce-cart-btn"
-                                        {{ $product->quantity <= 0 ? 'disabled' : '' }}
-                                    >
-                                        🛒 Thêm vào giỏ
-                                    </button>
-
-                                </form>
-
-
-                            @else
-
-                                <a
-                                    href="{{ route('login') }}"
-                                    class="commerce-admin-btn"
-                                    style="
-                                        background:#b43e2e;
-                                    "
-                                >
-                                    Đăng nhập để mua
-                                </a>
-
-                            @endif
-
-                        </div>
-
-                    </div>
-
-                </article>
-
-
-            @empty
+            @else
 
                 <div class="commerce-empty">
 
@@ -3323,7 +4811,7 @@
 
                 </div>
 
-            @endforelse
+            @endif
 
         </div>
 
@@ -3339,31 +4827,700 @@
     </section>
 
 
+    {{-- =====================================================
+        VIDEO TÂY BẮC
+    ====================================================== --}}
+
     @if(file_exists(public_path('videos/tay-bac-nature.mp4')))
-        <section class="shop-section taybac-discovery" aria-labelledby="taybac-discovery-title">
+
+        <section
+            class="
+                shop-section
+                taybac-discovery
+            "
+            aria-labelledby="taybac-discovery-title"
+        >
+
             <div class="taybac-discovery-copy">
-                <p class="taybac-discovery-label">Miền đất của những hương vị</p>
-                <h2 id="taybac-discovery-title">Khám phá Tây Bắc</h2>
-                <p class="taybac-discovery-description">
-                    Ngắm những thửa ruộng bậc thang Mù Cang Chải và cảm nhận
-                    vẻ đẹp bình dị của núi rừng Tây Bắc.
+
+                <p class="taybac-discovery-label">
+                    Miền đất của những hương vị
                 </p>
-                <a class="taybac-discovery-credit"
-                   href="https://pixabay.com/videos/rice-fields-terraces-mountain-rice-87041/"
-                   target="_blank" rel="noopener noreferrer">
+
+
+                <h2 id="taybac-discovery-title">
+                    Khám phá Tây Bắc
+                </h2>
+
+
+                <p class="taybac-discovery-description">
+
+                    Ngắm những thửa ruộng bậc thang
+                    Mù Cang Chải và cảm nhận
+                    vẻ đẹp bình dị của núi rừng Tây Bắc.
+
+                </p>
+
+
+                <a
+                    class="taybac-discovery-credit"
+                    href="https://pixabay.com/videos/rice-fields-terraces-mountain-rice-87041/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
                     Video: trilemedia / Pixabay
                 </a>
+
             </div>
-            <video controls playsinline muted preload="metadata" aria-label="Phong cảnh ruộng bậc thang Mù Cang Chải">
-                <source src="{{ asset('videos/tay-bac-nature.mp4') }}" type="video/mp4">
-                Trình duyệt của bạn chưa hỗ trợ phát video.
+
+
+            <video
+                controls
+                playsinline
+                muted
+                preload="metadata"
+                aria-label="Phong cảnh ruộng bậc thang Mù Cang Chải"
+            >
+
+                <source
+                    src="{{
+                        asset(
+                            'videos/tay-bac-nature.mp4'
+                        )
+                    }}"
+                    type="video/mp4"
+                >
+
+                Trình duyệt của bạn
+                chưa hỗ trợ phát video.
+
             </video>
+
         </section>
+
     @endif
 
 
-
-
 </div>
+
+
+<script>
+(() => {
+
+    /*
+    |--------------------------------------------------------------------------
+    | HERO CAROUSEL
+    |--------------------------------------------------------------------------
+    |
+    | - Mỗi slide giữ 3 giây
+    | - Slide hiện tại trượt sang trái
+    | - Slide mới đi từ bên phải vào
+    | - Hết slide cuối quay lại slide đầu
+    | - Nút trái / phải vẫn hoạt động
+    |
+    */
+
+    const hero =
+        document.querySelector(
+            '[data-hero-carousel]'
+        );
+
+
+    if (!hero) {
+        return;
+    }
+
+
+    const slides =
+        Array.from(
+            hero.querySelectorAll(
+                '[data-hero-slide]'
+            )
+        );
+
+
+    if (
+        slides.length < 2
+    ) {
+
+        hero
+            .classList
+            .add(
+                'is-ready'
+            );
+
+        return;
+
+    }
+
+
+    const previous =
+        hero.querySelector(
+            '[data-hero-prev]'
+        );
+
+
+    const next =
+        hero.querySelector(
+            '[data-hero-next]'
+        );
+
+
+    const counter =
+        hero.querySelector(
+            '[data-hero-counter]'
+        );
+
+
+    let activeIndex =
+        0;
+
+
+    let timer =
+        null;
+
+
+    let animating =
+        false;
+
+
+    const animationDuration =
+        700;
+
+
+    const autoplayDelay =
+        3000;
+
+
+    const stopAutoSlide =
+        function () {
+
+            if (
+                timer !== null
+            ) {
+
+                window.clearTimeout(
+                    timer
+                );
+
+
+                timer =
+                    null;
+
+            }
+
+        };
+
+
+    const updateCounter =
+        function () {
+
+            if (!counter) {
+                return;
+            }
+
+
+            counter.textContent =
+                (
+                    activeIndex
+                    +
+                    1
+                )
+                +
+                ' / '
+                +
+                slides.length;
+
+        };
+
+
+    const updateAccessibility =
+        function () {
+
+            slides.forEach(
+                function (
+                    slide,
+                    index
+                ) {
+
+                    const active =
+                        index
+                        ===
+                        activeIndex;
+
+
+                    slide.setAttribute(
+                        'aria-hidden',
+                        active
+                            ? 'false'
+                            : 'true'
+                    );
+
+
+                    if (active) {
+
+                        slide.removeAttribute(
+                            'inert'
+                        );
+
+                    }
+                    else {
+
+                        slide.setAttribute(
+                            'inert',
+                            ''
+                        );
+
+                    }
+
+                }
+            );
+
+        };
+
+
+    const preloadNextImage =
+        function () {
+
+            const nextIndex =
+                (
+                    activeIndex
+                    +
+                    1
+                )
+                %
+                slides.length;
+
+
+            const image =
+                slides[
+                    nextIndex
+                ]
+                    .querySelector(
+                        'img'
+                    );
+
+
+            if (image) {
+
+                image.loading =
+                    'eager';
+
+            }
+
+        };
+
+
+    const resetSlideToRight =
+        function (
+            slide
+        ) {
+
+            slide.style.transition =
+                'none';
+
+
+            slide.classList.remove(
+                'is-active',
+                'is-leaving-left',
+                'is-leaving-right',
+                'is-from-left'
+            );
+
+
+            void slide.offsetWidth;
+
+
+            slide.style.transition =
+                '';
+
+        };
+
+
+    const goNext =
+        function () {
+
+            if (animating) {
+                return;
+            }
+
+
+            animating =
+                true;
+
+
+            stopAutoSlide();
+
+
+            const oldIndex =
+                activeIndex;
+
+
+            const newIndex =
+                (
+                    activeIndex
+                    +
+                    1
+                )
+                %
+                slides.length;
+
+
+            const oldSlide =
+                slides[
+                    oldIndex
+                ];
+
+
+            const newSlide =
+                slides[
+                    newIndex
+                ];
+
+
+            resetSlideToRight(
+                newSlide
+            );
+
+
+            oldSlide.classList.remove(
+                'is-leaving-right',
+                'is-from-left'
+            );
+
+
+            oldSlide.classList.add(
+                'is-leaving-left'
+            );
+
+
+            oldSlide.classList.remove(
+                'is-active'
+            );
+
+
+            requestAnimationFrame(
+                function () {
+
+                    requestAnimationFrame(
+                        function () {
+
+                            newSlide
+                                .classList
+                                .add(
+                                    'is-active'
+                                );
+
+                        }
+                    );
+
+                }
+            );
+
+
+            activeIndex =
+                newIndex;
+
+
+            updateCounter();
+
+
+            updateAccessibility();
+
+
+            preloadNextImage();
+
+
+            window.setTimeout(
+                function () {
+
+                    resetSlideToRight(
+                        oldSlide
+                    );
+
+
+                    animating =
+                        false;
+
+
+                    startAutoSlide();
+
+                },
+                animationDuration
+            );
+
+        };
+
+
+    const goPrevious =
+        function () {
+
+            if (animating) {
+                return;
+            }
+
+
+            animating =
+                true;
+
+
+            stopAutoSlide();
+
+
+            const oldIndex =
+                activeIndex;
+
+
+            const newIndex =
+                (
+                    activeIndex
+                    -
+                    1
+                    +
+                    slides.length
+                )
+                %
+                slides.length;
+
+
+            const oldSlide =
+                slides[
+                    oldIndex
+                ];
+
+
+            const newSlide =
+                slides[
+                    newIndex
+                ];
+
+
+            newSlide.classList.remove(
+                'is-active',
+                'is-leaving-left',
+                'is-leaving-right'
+            );
+
+
+            newSlide.classList.add(
+                'is-from-left'
+            );
+
+
+            void newSlide.offsetWidth;
+
+
+            oldSlide.classList.remove(
+                'is-leaving-left',
+                'is-from-left'
+            );
+
+
+            oldSlide.classList.add(
+                'is-leaving-right'
+            );
+
+
+            oldSlide.classList.remove(
+                'is-active'
+            );
+
+
+            requestAnimationFrame(
+                function () {
+
+                    requestAnimationFrame(
+                        function () {
+
+                            newSlide
+                                .classList
+                                .remove(
+                                    'is-from-left'
+                                );
+
+
+                            newSlide
+                                .classList
+                                .add(
+                                    'is-active'
+                                );
+
+                        }
+                    );
+
+                }
+            );
+
+
+            activeIndex =
+                newIndex;
+
+
+            updateCounter();
+
+
+            updateAccessibility();
+
+
+            preloadNextImage();
+
+
+            window.setTimeout(
+                function () {
+
+                    resetSlideToRight(
+                        oldSlide
+                    );
+
+
+                    animating =
+                        false;
+
+
+                    startAutoSlide();
+
+                },
+                animationDuration
+            );
+
+        };
+
+
+    const startAutoSlide =
+        function () {
+
+            stopAutoSlide();
+
+
+            if (
+                document.hidden
+            ) {
+
+                return;
+
+            }
+
+
+            timer =
+                window.setTimeout(
+                    function () {
+
+                        goNext();
+
+                    },
+                    autoplayDelay
+                );
+
+        };
+
+
+    if (previous) {
+
+        previous
+            .addEventListener(
+                'click',
+                function () {
+
+                    goPrevious();
+
+                }
+            );
+
+    }
+
+
+    if (next) {
+
+        next
+            .addEventListener(
+                'click',
+                function () {
+
+                    goNext();
+
+                }
+            );
+
+    }
+
+
+    document
+        .addEventListener(
+            'visibilitychange',
+            function () {
+
+                if (
+                    document.hidden
+                ) {
+
+                    stopAutoSlide();
+
+                }
+                else if (
+                    !animating
+                ) {
+
+                    startAutoSlide();
+
+                }
+
+            }
+        );
+
+
+    slides.forEach(
+        function (
+            slide,
+            index
+        ) {
+
+            slide.classList.remove(
+                'is-active',
+                'is-leaving-left',
+                'is-leaving-right',
+                'is-from-left'
+            );
+
+
+            if (
+                index === 0
+            ) {
+
+                slide
+                    .classList
+                    .add(
+                        'is-active'
+                    );
+
+            }
+
+        }
+    );
+
+
+    activeIndex =
+        0;
+
+
+    hero
+        .classList
+        .add(
+            'is-ready'
+        );
+
+
+    updateCounter();
+
+
+    updateAccessibility();
+
+
+    preloadNextImage();
+
+
+    startAutoSlide();
+
+})();
+</script>
 
 @endsection

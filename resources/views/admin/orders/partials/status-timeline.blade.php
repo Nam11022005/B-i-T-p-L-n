@@ -193,7 +193,7 @@
                 color:#2c1810;
             "
         >
-            • Lịch sử trạng thái đơn hàng
+            🕒 Lịch sử trạng thái đơn hàng
         </h5>
 
     </div>
@@ -412,7 +412,7 @@
                                 "
                             >
 
-                                •
+                                👤
 
                                 @if(
                                     $history->user
@@ -459,7 +459,7 @@
                     "
                 >
 
-                    •
+                    📭
 
                 </div>
 

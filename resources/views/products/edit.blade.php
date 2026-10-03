@@ -58,7 +58,7 @@
     }
 
     .product-form-hero::after {
-        content: "•";
+        content: "✦";
 
         position: absolute;
 
@@ -604,7 +604,7 @@
                 <div class="alert alert-danger mb-4">
 
                     <strong class="d-block mb-2">
-                        • Vui lòng kiểm tra lại:
+                        ⚠️ Vui lòng kiểm tra lại:
                     </strong>
 
                     <ul class="mb-0 ps-3">
@@ -729,11 +729,7 @@
                                     </option>
 
 
-                                    @foreach(
-                                        $categories
-                                        as
-                                        $category
-                                    )
+                                    @foreach($categories as $category)
 
                                         <option
                                             value="{{ $category->id }}"
@@ -1093,7 +1089,7 @@
                             <div class="unit-help mt-3">
 
                                 <strong>
-                                    • Quy cách bán:
+                                    ⚖️ Quy cách bán:
                                 </strong>
 
                                 <span id="unitHelpText">
@@ -1187,7 +1183,7 @@
                                         <div class="main-preview-placeholder">
 
                                             <div style="font-size:42px;">
-                                                •
+                                                📷
                                             </div>
 
                                             <strong>
@@ -1252,11 +1248,7 @@
                                     id="existingGallery"
                                 >
 
-                                    @forelse(
-                                        $product->images
-                                        as
-                                        $galleryImage
-                                    )
+                                    @forelse($product->images as $galleryImage)
 
                                         <div
                                             class="existing-image"
@@ -1435,7 +1427,7 @@
                             btn-save-product
                         "
                     >
-                        • Cập nhật sản phẩm
+                        💾 Cập nhật sản phẩm
                     </button>
 
 
@@ -1502,7 +1494,7 @@
                             btn-outline-danger
                         "
                     >
-                        • Xóa sản phẩm
+                        🗑️ Xóa sản phẩm
                     </button>
 
                 </form>

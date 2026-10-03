@@ -36,6 +36,43 @@
         border: 2px dashed #d8c5ac !important;
     }
 
+    .gallery-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .gallery-preview-item {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 1;
+        border: 1px solid #e3cdae;
+        border-radius: 12px;
+        background: #fffaf0;
+    }
+
+    .gallery-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .gallery-preview-number {
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        display: grid;
+        width: 22px;
+        height: 22px;
+        place-items: center;
+        border-radius: 50%;
+        color: #fff;
+        background: #48633b;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
     .btn-tb {
         border: 0;
         background: linear-gradient(135deg, #48633b, #2f4b2b);
@@ -150,7 +187,7 @@
     }
 
     .admin-product-form-page .product-form-header::after {
-        content: "•";
+        content: "✦";
         position: absolute;
         right: 38px;
         top: 16px;
@@ -286,7 +323,7 @@
     }
 
     .admin-product-form-page .unit-help::after {
-        content: "•";
+        content: "✦";
         position: absolute;
         right: 14px;
         bottom: -8px;
@@ -494,14 +531,14 @@
 
 <div class="admin-product-form-page"><div class="card product-form-card">
     <div class="product-form-header">
-        <h2 class="mb-0">• Thêm Sản phẩm Mới</h2>
+        <h2 class="mb-0">➕ Thêm Sản phẩm Mới</h2>
     </div>
 
     <div class="card-body p-4">
 
         @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show mb-4">
-                <strong class="d-block mb-2">• Lỗi xảy ra:</strong>
+                <strong class="d-block mb-2">⚠️ Lỗi xảy ra:</strong>
 
                 <ul class="mb-0 ps-3">
                     @foreach ($errors->all() as $error)
@@ -762,7 +799,7 @@
                     </div>
 
                     <div class="unit-help">
-                        <strong>• Gợi ý:</strong>
+                        <strong>💡 Gợi ý:</strong>
                         <span id="unitHelpText">
                             Với sản phẩm bán theo kg, có thể đặt tối thiểu 0.25 kg
                             và bước tăng 0.25 kg.
@@ -783,7 +820,7 @@
                             id="image-drop-area"
                         >
                             <div id="image-placeholder">
-                                <div class="fs-3 mb-2">•</div>
+                                <div class="fs-3 mb-2">📷</div>
                                 <p class="text-muted mb-0">
                                     Click hoặc kéo ảnh vào đây
                                 </p>
@@ -810,6 +847,40 @@
                         @enderror
                     </div>
 
+                    <div class="mb-3 pt-2 border-top">
+                        <label for="gallery_images" class="form-label fw-bold">
+                            Ảnh chi tiết sản phẩm
+                        </label>
+
+                        <input
+                            type="file"
+                            id="gallery_images"
+                            name="gallery_images[]"
+                            class="form-control @error('gallery_images') is-invalid @enderror"
+                            accept="image/jpeg,image/png,image/webp"
+                            multiple
+                        >
+
+                        <small class="text-muted d-block mt-2">
+                            Chọn tối đa 8 ảnh JPG, PNG hoặc WEBP, mỗi ảnh không quá 5MB.
+                        </small>
+
+                        <div id="gallery-selection-status" class="small fw-semibold mt-2" aria-live="polite"></div>
+                        <div id="gallery-preview-grid" class="gallery-preview-grid" aria-label="Ảnh chi tiết đã chọn"></div>
+
+                        @error('gallery_images')
+                            <div class="invalid-feedback d-block">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                        @error('gallery_images.*')
+                            <div class="invalid-feedback d-block">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
                 </div>
 
             </div>
@@ -823,7 +894,7 @@
                 </a>
 
                 <button type="submit" class="btn btn-tb">
-                    • Thêm sản phẩm
+                    ➕ Thêm sản phẩm
                 </button>
             </div>
 
@@ -955,6 +1026,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
         reader.readAsDataURL(file);
     }
+
+    const galleryInput = document.getElementById('gallery_images');
+    const galleryPreviewGrid = document.getElementById('gallery-preview-grid');
+    const gallerySelectionStatus = document.getElementById('gallery-selection-status');
+    const maxGalleryImages = 8;
+
+    galleryInput.addEventListener('change', function () {
+        const files = Array.from(this.files || []);
+        galleryPreviewGrid.innerHTML = '';
+
+        if (files.length > maxGalleryImages) {
+            gallerySelectionStatus.textContent = `Bạn đang chọn ${files.length} ảnh. Vui lòng giữ tối đa ${maxGalleryImages} ảnh.`;
+            gallerySelectionStatus.className = 'small fw-semibold mt-2 text-danger';
+            return;
+        }
+
+        gallerySelectionStatus.textContent = files.length
+            ? `Đã chọn ${files.length}/${maxGalleryImages} ảnh chi tiết.`
+            : '';
+        gallerySelectionStatus.className = 'small fw-semibold mt-2 text-success';
+
+        files.forEach(function (file, index) {
+            if (!file.type.startsWith('image/')) return;
+
+            const item = document.createElement('div');
+            item.className = 'gallery-preview-item';
+            const image = document.createElement('img');
+            image.alt = `Ảnh chi tiết ${index + 1}: ${file.name}`;
+            image.src = URL.createObjectURL(file);
+            image.onload = function () { URL.revokeObjectURL(image.src); };
+
+            const number = document.createElement('span');
+            number.className = 'gallery-preview-number';
+            number.textContent = index + 1;
+
+            item.append(image, number);
+            galleryPreviewGrid.appendChild(item);
+        });
+    });
 });
 </script>
 @endpush

@@ -440,6 +440,25 @@ class AdminController extends Controller
             ->latest()
             ->paginate(10);
 
+        $walletTransactions = $customer
+            ->walletTransactions()
+            ->with('order:id')
+            ->latest()
+            ->paginate(8, ['*'], 'wallet_page')
+            ->withQueryString();
+
+        $pendingWalletTopUps = $customer
+            ->walletTransactions()
+            ->where('type', 'topup')
+            ->where('status', 'pending')
+            ->count();
+
+        $completedWalletTopUps = (float) $customer
+            ->walletTransactions()
+            ->where('type', 'topup')
+            ->where('status', 'completed')
+            ->sum('amount');
+
         // ==========================================
         // ĐỊA CHỈ KHÁCH HÀNG ĐÃ LƯU
         // ==========================================
@@ -476,7 +495,10 @@ class AdminController extends Controller
                 'pendingOrders',
                 'deliveredOrders',
                 'totalSpent',
-                'latestOrder'
+                'latestOrder',
+                'walletTransactions',
+                'pendingWalletTopUps',
+                'completedWalletTopUps'
             )
         );
     }

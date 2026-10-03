@@ -312,11 +312,11 @@
         <div>
 
             <div class="text-primary fw-bold mb-1">
-                • KHU VỰC QUẢN TRỊ
+                ⚙️ KHU VỰC QUẢN TRỊ
             </div>
 
             <h2 class="page-title mb-1">
-                • Quản lý danh mục
+                📂 Quản lý danh mục
             </h2>
 
             <p class="text-muted mb-0">
@@ -331,7 +331,7 @@
             href="{{ route('admin.categories.create') }}"
             class="btn btn-primary add-btn"
         >
-            • Thêm danh mục
+            ➕ Thêm danh mục
         </a>
 
     </div>
@@ -354,7 +354,7 @@
                     <div class="d-flex align-items-center gap-3">
 
                         <div class="stat-icon">
-                            •
+                            📂
                         </div>
 
                         <div>
@@ -389,7 +389,7 @@
                     <div class="d-flex align-items-center gap-3">
 
                         <div class="stat-icon">
-                            •
+                            ✅
                         </div>
 
                         <div>
@@ -424,7 +424,7 @@
                     <div class="d-flex align-items-center gap-3">
 
                         <div class="stat-icon">
-                            •
+                            📄
                         </div>
 
                         <div>
@@ -460,7 +460,7 @@
 
         <div class="alert alert-success alert-dismissible fade show shadow-sm">
 
-            • {{ session('success') }}
+            ✅ {{ session('success') }}
 
             <button
                 type="button"
@@ -478,7 +478,7 @@
 
         <div class="alert alert-danger alert-dismissible fade show shadow-sm">
 
-            • {{ session('error') }}
+            ❌ {{ session('error') }}
 
             <button
                 type="button"
@@ -533,7 +533,7 @@
                 <div class="text-center py-5">
 
                     <div style="font-size: 65px;">
-                        •
+                        📭
                     </div>
 
                     <h5 class="text-muted mt-3">
@@ -545,7 +545,7 @@
                         href="{{ route('admin.categories.create') }}"
                         class="btn btn-primary mt-2"
                     >
-                        • Thêm danh mục đầu tiên
+                        ➕ Thêm danh mục đầu tiên
                     </a>
 
                 </div>
@@ -711,7 +711,7 @@
                                                 ) }}"
                                                 class="btn btn-warning btn-sm action-btn"
                                             >
-                                                • Sửa
+                                                ✏️ Sửa
                                             </a>
 
 
@@ -740,7 +740,7 @@
                                                         ? 'disabled'
                                                         : '' }}
                                                 >
-                                                    • Xóa
+                                                    🗑️ Xóa
                                                 </button>
 
                                             </form>

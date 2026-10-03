@@ -85,7 +85,7 @@
     $paymentStatusConfig = [
         'unpaid' => [
             'label' => 'Chưa thanh toán',
-            'icon' => '○',
+            'icon' => '⚠️',
             'class' => 'unpaid',
         ],
 
@@ -116,7 +116,7 @@
         ??
         [
             'label' => 'Chưa xác định',
-            'icon' => '○',
+            'icon' => '❔',
             'class' => 'unpaid',
         ];
 
@@ -128,6 +128,9 @@
 
             'bank' =>
                 'Chuyển khoản ngân hàng',
+
+            'wallet' =>
+                'Ví Tinh Hoa',
 
             default =>
                 strtoupper(
@@ -243,24 +246,19 @@
     |
     */
 
-    $bankCode =
-        'MB';
+    $bankCode = config('payment.bank_code', 'MB');
 
 
-    $bankName =
-        'MB BANK';
+    $bankName = config('payment.bank_name', 'MB BANK');
 
 
-    $accountNumber =
-        '0385742505';
+    $accountNumber = config('payment.bank_account_number');
 
 
-    $accountNameQr =
-        'DO PHUONG NAM';
+    $accountNameQr = config('payment.bank_account_name');
 
 
-    $accountNameDisplay =
-        'ĐỖ PHƯƠNG NAM';
+    $accountNameDisplay = config('payment.bank_account_display_name');
 
 
     $qrAmount =
@@ -4193,6 +4191,47 @@
                 </div>
 
             </section>
+
+
+            {{-- =============================================
+                YÊU CẦU HỖ TRỢ ĐƠN
+            ============================================== --}}
+            @php
+                $pendingServiceRequest = $order->serviceRequests->firstWhere('status', 'pending');
+                $canRequestCancellation = in_array($order->status, ['pending', 'confirmed'], true);
+                $canRequestRefund = $order->status === 'delivered' && $order->payment_status === 'paid';
+            @endphp
+
+            @if($pendingServiceRequest || $canRequestCancellation || $canRequestRefund)
+                <section class="od-card">
+                    <div class="od-card-head">
+                        <div>
+                            <h2 class="od-card-title">🛟 Hỗ trợ đơn hàng</h2>
+                            <div class="od-card-subtitle">Gửi yêu cầu để shop kiểm tra và phản hồi.</div>
+                        </div>
+                    </div>
+
+                    <div class="od-card-body">
+                        @if($pendingServiceRequest)
+                            <div style="padding:11px;border:1px solid #ecd28b;border-radius:9px;background:#fff8dd;color:#705316;font-size:10px;line-height:1.55;">
+                                <strong>⏳ Yêu cầu {{ $pendingServiceRequest->type === 'cancel' ? 'hủy đơn' : 'hoàn tiền' }} đang được xử lý</strong><br>
+                                {{ $pendingServiceRequest->reason }}
+                            </div>
+                        @else
+                            <form action="{{ route('orders.service-requests.store', $order) }}" method="POST">
+                                @csrf
+                                <label style="display:block;margin-bottom:6px;color:#51443b;font-size:10px;font-weight:900;">Bạn cần hỗ trợ gì?</label>
+                                <select name="type" style="width:100%;min-height:38px;padding:8px;border:1px solid #dec8a7;border-radius:8px;font-size:10px;" required>
+                                    @if($canRequestCancellation)<option value="cancel">Yêu cầu hủy đơn</option>@endif
+                                    @if($canRequestRefund)<option value="refund">Yêu cầu hoàn tiền về Ví Tinh Hoa</option>@endif
+                                </select>
+                                <textarea name="reason" rows="3" minlength="10" maxlength="1000" placeholder="Mô tả lý do để shop xử lý nhanh hơn" style="width:100%;margin-top:9px;padding:9px;border:1px solid #dec8a7;border-radius:8px;font-size:10px;resize:vertical;" required></textarea>
+                                <button type="submit" style="width:100%;min-height:38px;margin-top:8px;border:0;border-radius:8px;color:#fff;background:#633820;font-size:10px;font-weight:900;">Gửi yêu cầu</button>
+                            </form>
+                        @endif
+                    </div>
+                </section>
+            @endif
 
 
             {{-- =============================================

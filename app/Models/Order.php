@@ -94,6 +94,11 @@ class Order extends Model
         )->oldest();
     }
 
+    public function serviceRequests()
+    {
+        return $this->hasMany(OrderServiceRequest::class)->latest();
+    }
+
 
     /*
     |--------------------------------------------------------------------------

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Env;
 use Tests\TestCase;
@@ -440,5 +441,50 @@ class PaymentWebhookFlowTest extends TestCase
                     $order->id,
             ]
         );
+    }
+
+
+    public function test_webhook_credits_a_pending_wallet_top_up_once(): void
+    {
+        $customer = $this->createCustomer();
+
+        $topUp = WalletTransaction::create([
+            'user_id' => $customer->id,
+            'type' => 'topup',
+            'status' => 'pending',
+            'amount' => 100000,
+            'reference_code' => 'WLTTEST1234',
+        ]);
+
+        $payload = $this->webhookPayload([
+            'id' => 'SEPAY-WALLET-001',
+            'transferAmount' => 100000,
+            'code' => 'WLTTEST1234',
+            'content' => 'NAP VI WLTTEST1234',
+        ]);
+
+        $this
+            ->withHeader('Authorization', 'Apikey test-sepay-key')
+            ->postJson(route('webhooks.sepay'), $payload)
+            ->assertOk();
+
+        $this
+            ->withHeader('Authorization', 'Apikey test-sepay-key')
+            ->postJson(route('webhooks.sepay'), $payload)
+            ->assertOk();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $customer->id,
+            'wallet_balance' => 100000,
+        ]);
+
+        $this->assertDatabaseHas('wallet_transactions', [
+            'id' => $topUp->id,
+            'status' => 'completed',
+            'provider' => 'sepay',
+            'provider_transaction_id' => 'SEPAY-WALLET-001',
+        ]);
+
+        $this->assertDatabaseCount('wallet_transactions', 1);
     }
 }

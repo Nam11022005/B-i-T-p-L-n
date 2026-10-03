@@ -1138,7 +1138,7 @@
         <div class="cd-hero-copy">
 
             <div class="cd-kicker">
-                • Tài khoản Tinh Hoa Tây Bắc
+                🌿 Tài khoản Tinh Hoa Tây Bắc
             </div>
 
 
@@ -1171,7 +1171,7 @@
                         primary
                     "
                 >
-                    • Mua sắm ngay
+                    🛍 Mua sắm ngay
                 </a>
 
 
@@ -1182,7 +1182,7 @@
                         secondary
                     "
                 >
-                    • Đơn hàng của tôi
+                    📦 Đơn hàng của tôi
                 </a>
 
             </div>
@@ -1233,7 +1233,7 @@
         <div class="cd-stat">
 
             <div class="cd-stat-icon">
-                •
+                📦
             </div>
 
             <div>
@@ -1254,7 +1254,7 @@
         <div class="cd-stat">
 
             <div class="cd-stat-icon">
-                •
+                ⏳
             </div>
 
             <div>
@@ -1275,7 +1275,7 @@
         <div class="cd-stat">
 
             <div class="cd-stat-icon">
-                •
+                ✅
             </div>
 
             <div>
@@ -1296,7 +1296,7 @@
         <div class="cd-stat">
 
             <div class="cd-stat-icon">
-                •
+                💰
             </div>
 
             <div>
@@ -1341,7 +1341,7 @@
                     <div>
 
                         <h2 class="cd-card-title">
-                            • Đơn hàng gần đây
+                            📦 Đơn hàng gần đây
                         </h2>
 
                         <div class="cd-card-subtitle">
@@ -1369,7 +1369,7 @@
                         <div class="cd-empty">
 
                             <div class="cd-empty-icon">
-                                •
+                                📭
                             </div>
 
 
@@ -1393,7 +1393,7 @@
                                     primary
                                 "
                             >
-                                • Mua sắm ngay
+                                🛍 Mua sắm ngay
                             </a>
 
                         </div>
@@ -1419,7 +1419,7 @@
 
                                             'icon'
                                                 =>
-                                                '•',
+                                                '📦',
 
                                             'class'
                                                 =>
@@ -1497,7 +1497,7 @@
 
                                                 <div>
 
-                                                    •
+                                                    📦
                                                     {{
                                                         $item
                                                             ->product
@@ -1618,7 +1618,7 @@
                     <div>
 
                         <h2 class="cd-card-title">
-                            • Truy cập nhanh
+                            ⚡ Truy cập nhanh
                         </h2>
 
                     </div>
@@ -1639,7 +1639,7 @@
                             <span class="cd-link-left">
 
                                 <span class="cd-link-icon">
-                                    •
+                                    👤
                                 </span>
 
                                 <span>
@@ -1669,7 +1669,7 @@
                             <span class="cd-link-left">
 
                                 <span class="cd-link-icon">
-                                    •
+                                    📍
                                 </span>
 
                                 <span>
@@ -1699,7 +1699,7 @@
                             <span class="cd-link-left">
 
                                 <span class="cd-link-icon">
-                                    •
+                                    🛒
                                 </span>
 
                                 <span>
@@ -1729,7 +1729,7 @@
                             <span class="cd-link-left">
 
                                 <span class="cd-link-icon">
-                                    •
+                                    🔥
                                 </span>
 
                                 <span>
@@ -1764,7 +1764,7 @@
                     <div>
 
                         <h2 class="cd-card-title">
-                            • Tài khoản
+                            👤 Tài khoản
                         </h2>
 
                     </div>
@@ -1801,8 +1801,8 @@
                                 {{
                                     $user
                                         ->email_verified_at
-                                    ? '• Đã xác thực'
-                                    : 'Chưa xác thực'
+                                    ? '✓ Đã xác thực'
+                                    : '⚠️ Chưa xác thực'
                                 }}
 
                             </strong>

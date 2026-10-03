@@ -2,40 +2,45 @@
 
 @section('title', 'Đăng ký | Tinh Hoa Tây Bắc')
 
+@section('hide-store-header', '1')
+
 @section('content')
 
 <style>
     /* =========================================================
-       REGISTER - TINH HOA TÂY BẮC
+       AUTH SHARED DESIGN
     ========================================================= */
 
-    .tb-register-page {
-        --rg-brown: #633820;
-        --rg-brown-dark: #2d1a11;
-        --rg-green: #35562f;
-        --rg-red: #b43e2e;
-        --rg-gold: #e5ad42;
-        --rg-cream: #fff8e9;
-        --rg-border: #e7d4b7;
-        --rg-text: #33261f;
-        --rg-muted: #76685e;
+    .tb-auth-page {
+        --auth-brown: #633820;
+        --auth-brown-dark: #2d1a11;
+        --auth-green: #35562f;
+        --auth-red: #b43e2e;
+        --auth-gold: #e5ad42;
+        --auth-cream: #fff8e9;
+        --auth-border: #e7d4b7;
+        --auth-text: #33261f;
+        --auth-muted: #76685e;
 
         position: relative;
         isolation: isolate;
 
         width: 100%;
 
-        padding: 42px 0 72px;
+        padding:
+            42px 0
+            76px;
     }
 
 
-    .tb-register-page::before {
+    .tb-auth-page::before {
         content: "";
 
         position: absolute;
         z-index: -2;
 
-        inset: -30px -40px 0;
+        inset:
+            -30px -40px 0;
 
         pointer-events: none;
 
@@ -64,18 +69,107 @@
     }
 
 
-    .tb-register-shell {
+    /* =========================================================
+       RETURN HOME
+    ========================================================= */
+
+    .tb-auth-return {
+        width:
+            min(
+                1100px,
+                100%
+            );
+
+        margin:
+            0 auto
+            16px;
+    }
+
+
+    .tb-auth-home-link {
+        display: inline-flex;
+        align-items: center;
+
+        gap:
+            9px;
+
+        min-height:
+            42px;
+
+        padding:
+            9px 17px;
+
+        border:
+            1px solid
+            #bdaa88;
+
+        color:
+            var(--auth-green);
+
+        background:
+            #fffaf0;
+
+        font-size:
+            13px;
+
+        font-weight:
+            800;
+
+        text-decoration: none;
+
+        transition:
+            background .18s ease,
+            border-color .18s ease,
+            color .18s ease,
+            transform .18s ease;
+    }
+
+
+    .tb-auth-home-link:hover {
+        color: #fff;
+
+        border-color:
+            var(--auth-green);
+
+        background:
+            var(--auth-green);
+
+        transform:
+            translateY(-1px);
+    }
+
+
+    .tb-auth-home-link:focus-visible {
+        outline:
+            3px solid
+            var(--auth-gold);
+
+        outline-offset:
+            3px;
+    }
+
+
+    /* =========================================================
+       SHELL
+    ========================================================= */
+
+    .tb-auth-shell {
         position: relative;
 
-        width: min(1140px, 100%);
+        width:
+            min(
+                1100px,
+                100%
+            );
 
-        margin: 0 auto;
+        margin:
+            0 auto;
 
         display: grid;
 
         grid-template-columns:
-            minmax(0, .9fr)
-            minmax(0, 1.1fr);
+            minmax(0, .92fr)
+            minmax(0, 1.08fr);
 
         overflow: hidden;
 
@@ -83,9 +177,11 @@
             1px solid
             rgba(222,195,158,.88);
 
-        border-radius: 30px;
+        border-radius:
+            30px;
 
-        background: #fff;
+        background:
+            #fff;
 
         box-shadow:
             0 32px 80px
@@ -93,53 +189,58 @@
     }
 
 
-    .tb-register-shell::before {
+    .tb-auth-shell::before {
         content: "";
 
         position: absolute;
-
         z-index: 10;
 
         top: 0;
         left: 8%;
         right: 8%;
 
-        height: 3px;
+        height:
+            3px;
 
-        border-radius: 999px;
+        border-radius:
+            999px;
 
         background:
             linear-gradient(
                 90deg,
                 transparent,
-                var(--rg-gold),
-                var(--rg-red),
-                var(--rg-green),
+                var(--auth-gold),
+                var(--auth-red),
+                var(--auth-green),
                 transparent
             );
 
-        pointer-events: none;
+        pointer-events:
+            none;
     }
 
 
     /* =========================================================
-       LEFT PANEL
+       BRAND
     ========================================================= */
 
-    .tb-register-brand {
+    .tb-auth-brand {
         position: relative;
 
         overflow: hidden;
 
-        min-height: 690px;
+        min-height:
+            690px;
 
         display: flex;
         flex-direction: column;
         justify-content: space-between;
 
-        padding: 52px 46px;
+        padding:
+            52px 46px;
 
-        color: #fff;
+        color:
+            #fff;
 
         background:
             radial-gradient(
@@ -161,18 +262,25 @@
     }
 
 
-    .tb-register-brand::before {
+    .tb-auth-brand::before {
         content: "";
 
         position: absolute;
 
-        right: -70px;
-        bottom: -55px;
+        right:
+            -70px;
 
-        width: 420px;
-        height: 250px;
+        bottom:
+            -55px;
 
-        opacity: .13;
+        width:
+            420px;
+
+        height:
+            250px;
+
+        opacity:
+            .13;
 
         clip-path:
             polygon(
@@ -195,99 +303,132 @@
     }
 
 
-    .tb-register-brand::after {
-        content: "•";
+    .tb-auth-brand::after {
+        content:
+            "✦";
 
         position: absolute;
 
-        top: 30px;
-        right: 38px;
+        top:
+            30px;
 
-        color: #ffe291;
+        right:
+            38px;
 
-        font-size: 90px;
+        color:
+            #ffe291;
 
-        opacity: .055;
+        font-size:
+            90px;
 
-        transform: rotate(18deg);
+        opacity:
+            .055;
+
+        transform:
+            rotate(18deg);
     }
 
 
-    .tb-register-brand-top,
-    .tb-register-benefits {
+    .tb-auth-brand-top,
+    .tb-auth-benefits {
         position: relative;
-
         z-index: 2;
     }
 
 
-    .tb-register-logo {
-        width: 58px;
-        height: 58px;
+    .tb-auth-logo {
+        width:
+            58px;
+
+        height:
+            58px;
 
         display: grid;
         place-items: center;
 
-        margin-bottom: 24px;
+        margin-bottom:
+            24px;
 
         border:
             1px solid
-            rgba(255,255,255,.16);
+            #d1a64d;
 
-        border-radius: 18px;
-
-        color: #f5d47e;
+        border-radius:
+            18px;
 
         background:
-            rgba(255,255,255,.08);
+            linear-gradient(
+                145deg,
+                #fff6d5,
+                #e9bd61
+            );
 
         box-shadow:
             inset 0 1px 0
-            rgba(255,255,255,.12),
+            rgba(255,255,255,.55),
             0 12px 26px
             rgba(0,0,0,.14);
-
-        font-size: 25px;
     }
 
 
-    .tb-register-kicker {
+    .tb-auth-logo .tb-brand-mark {
+        width:
+            38px;
+
+        height:
+            38px;
+    }
+
+
+    .tb-auth-kicker {
         display: inline-flex;
         align-items: center;
 
-        gap: 7px;
+        gap:
+            7px;
 
-        margin-bottom: 18px;
+        margin-bottom:
+            18px;
 
-        padding: 8px 12px;
+        padding:
+            8px 12px;
 
         border:
             1px solid
             rgba(229,173,66,.34);
 
-        border-radius: 999px;
+        border-radius:
+            999px;
 
-        color: #f5d789;
+        color:
+            #f5d789;
 
         background:
             rgba(255,255,255,.06);
 
-        font-size: 12px;
+        font-size:
+            12px;
 
-        font-weight: 900;
+        font-weight:
+            900;
 
-        letter-spacing: .08em;
+        letter-spacing:
+            .08em;
 
-        text-transform: uppercase;
+        text-transform:
+            uppercase;
     }
 
 
-    .tb-register-brand h1 {
-        max-width: 460px;
+    .tb-auth-brand h1 {
+        max-width:
+            450px;
 
-        margin: 0;
+        margin:
+            0;
 
-        color: #fff;
+        color:
+            #fff;
 
         font-size:
             clamp(
@@ -296,50 +437,62 @@
                 56px
             );
 
-        line-height: 1.05;
+        line-height:
+            1.05;
 
-        font-weight: 950;
+        font-weight:
+            950;
 
-        letter-spacing: -1.2px;
+        letter-spacing:
+            -1.2px;
     }
 
 
-    .tb-register-brand-copy {
-        max-width: 470px;
+    .tb-auth-brand-copy {
+        max-width:
+            465px;
 
-        margin: 19px 0 0;
+        margin:
+            19px 0 0;
 
         color:
-            rgba(255,255,255,.76);
+            rgba(255,255,255,.77);
 
-        font-size: 15px;
+        font-size:
+            15px;
 
-        line-height: 1.75;
+        line-height:
+            1.75;
     }
 
 
-    .tb-register-benefits {
+    .tb-auth-benefits {
         display: grid;
 
-        gap: 11px;
+        gap:
+            11px;
 
-        margin-top: 35px;
+        margin-top:
+            34px;
     }
 
 
-    .tb-register-benefit {
+    .tb-auth-benefit {
         display: flex;
         align-items: center;
 
-        gap: 11px;
+        gap:
+            11px;
 
-        padding: 11px 13px;
+        padding:
+            11px 13px;
 
         border:
             1px solid
             rgba(255,255,255,.09);
 
-        border-radius: 14px;
+        border-radius:
+            14px;
 
         color:
             rgba(255,255,255,.84);
@@ -347,42 +500,51 @@
         background:
             rgba(255,255,255,.045);
 
-        font-size: 14px;
+        font-size:
+            14px;
 
-        font-weight: 700;
+        font-weight:
+            700;
     }
 
 
-    .tb-register-benefit-icon {
-        width: 36px;
-        height: 36px;
+    .tb-auth-benefit-icon {
+        width:
+            36px;
 
-        flex: 0 0 36px;
+        height:
+            36px;
+
+        flex:
+            0 0 36px;
 
         display: grid;
         place-items: center;
 
-        border-radius: 11px;
+        border-radius:
+            11px;
 
         background:
             rgba(255,255,255,.09);
 
-        font-size: 17px;
+        font-size:
+            17px;
     }
 
 
     /* =========================================================
-       RIGHT FORM
+       FORM PANEL
     ========================================================= */
 
-    .tb-register-form-panel {
+    .tb-auth-form-panel {
         position: relative;
 
         display: flex;
         flex-direction: column;
         justify-content: center;
 
-        padding: 50px 60px;
+        padding:
+            46px 60px;
 
         background:
             radial-gradient(
@@ -399,56 +561,72 @@
     }
 
 
-    .tb-register-form-panel::after {
+    .tb-auth-form-panel::after {
         content: "";
 
         position: absolute;
 
-        top: 25px;
-        right: 27px;
+        top:
+            25px;
 
-        width: 90px;
-        height: 90px;
+        right:
+            27px;
+
+        width:
+            90px;
+
+        height:
+            90px;
 
         border:
             1px solid
             rgba(99,56,32,.06);
 
-        border-left: 0;
-        border-bottom: 0;
+        border-left:
+            0;
+
+        border-bottom:
+            0;
 
         border-radius:
             0 24px 0 0;
 
-        pointer-events: none;
+        pointer-events:
+            none;
     }
 
 
-    .tb-register-form-head {
+    .tb-auth-form-head {
         position: relative;
-
         z-index: 2;
 
-        margin-bottom: 24px;
+        margin-bottom:
+            23px;
     }
 
 
-    .tb-register-form-icon {
-        width: 42px;
-        height: 42px;
+    .tb-auth-form-icon {
+        width:
+            42px;
+
+        height:
+            42px;
 
         display: grid;
         place-items: center;
 
-        margin-bottom: 15px;
+        margin-bottom:
+            15px;
 
         border:
             1px solid
             #e8d1ad;
 
-        border-radius: 13px;
+        border-radius:
+            13px;
 
-        color: #7e4729;
+        color:
+            #7e4729;
 
         background:
             linear-gradient(
@@ -461,134 +639,176 @@
             0 7px 15px
             rgba(99,56,32,.07);
 
-        font-size: 18px;
+        font-size:
+            18px;
     }
 
 
-    .tb-register-form-head h2 {
-        margin: 0;
+    .tb-auth-form-head h2 {
+        margin:
+            0;
 
-        color: #30231c;
+        color:
+            #30231c;
 
-        font-size: 34px;
+        font-size:
+            34px;
 
-        line-height: 1.15;
+        line-height:
+            1.15;
 
-        font-weight: 950;
+        font-weight:
+            950;
 
-        letter-spacing: -.7px;
+        letter-spacing:
+            -.7px;
     }
 
 
-    .tb-register-form-head p {
-        margin: 9px 0 0;
+    .tb-auth-form-head p {
+        margin:
+            9px 0 0;
 
-        max-width: 520px;
+        max-width:
+            520px;
 
-        color: var(--rg-muted);
+        color:
+            var(--auth-muted);
 
-        font-size: 14px;
+        font-size:
+            14px;
 
-        line-height: 1.65;
+        line-height:
+            1.65;
     }
 
 
-    .tb-register-trust {
+    .tb-auth-trust {
         display: flex;
         flex-wrap: wrap;
 
-        gap: 8px;
+        gap:
+            8px;
 
-        margin-bottom: 22px;
+        margin-bottom:
+            21px;
     }
 
 
-    .tb-register-trust span {
+    .tb-auth-trust span {
         display: inline-flex;
         align-items: center;
 
-        min-height: 34px;
+        min-height:
+            34px;
 
-        padding: 6px 11px;
+        padding:
+            6px 11px;
 
         border:
             1px solid
             #e6dacb;
 
-        border-radius: 999px;
+        border-radius:
+            999px;
 
-        color: #655349;
+        color:
+            #655349;
 
-        background: #fffdf9;
+        background:
+            #fffdf9;
 
-        font-size: 12px;
+        font-size:
+            12px;
 
-        font-weight: 750;
+        font-weight:
+            750;
     }
 
 
     /* =========================================================
-       FORM FIELD
+       FIELDS
     ========================================================= */
 
-    .tb-register-field {
-        margin-bottom: 16px;
+    .tb-auth-field {
+        margin-bottom:
+            15px;
     }
 
 
-    .tb-register-label {
-        display: block;
+    .tb-auth-label {
+        display:
+            block;
 
-        margin-bottom: 8px;
+        margin-bottom:
+            7px;
 
-        color: #4c3529;
+        color:
+            #4c3529;
 
-        font-size: 14px;
+        font-size:
+            14px;
 
-        font-weight: 850;
+        font-weight:
+            850;
     }
 
 
-    .tb-register-input-wrap {
-        position: relative;
+    .tb-auth-input-wrap {
+        position:
+            relative;
     }
 
 
-    .tb-register-input-icon {
-        position: absolute;
+    .tb-auth-input-icon {
+        position:
+            absolute;
 
-        z-index: 2;
+        z-index:
+            2;
 
-        top: 50%;
-        left: 17px;
+        top:
+            50%;
+
+        left:
+            17px;
 
         transform:
             translateY(-50%);
 
-        pointer-events: none;
+        pointer-events:
+            none;
 
-        font-size: 17px;
+        font-size:
+            16px;
 
-        opacity: .7;
+        opacity:
+            .68;
     }
 
 
-    .tb-register-input {
-        width: 100%;
+    .tb-auth-input {
+        width:
+            100%;
 
-        min-height: 53px;
+        min-height:
+            53px;
 
-        padding: 10px 48px;
+        padding:
+            10px 48px;
 
         border:
             1px solid
             #dfcbae;
 
-        border-radius: 15px;
+        border-radius:
+            15px;
 
-        outline: none;
+        outline:
+            0;
 
-        color: #34261f;
+        color:
+            #34261f;
 
         background:
             linear-gradient(
@@ -597,7 +817,8 @@
                 #fffaf3
             );
 
-        font-size: 14px;
+        font-size:
+            14px;
 
         box-shadow:
             inset 0 1px 0
@@ -610,20 +831,24 @@
     }
 
 
-    .tb-register-input::placeholder {
-        color: #a69990;
+    .tb-auth-input::placeholder {
+        color:
+            #a69990;
     }
 
 
-    .tb-register-input:hover {
-        border-color: #d8b98e;
+    .tb-auth-input:hover {
+        border-color:
+            #d8b98e;
     }
 
 
-    .tb-register-input:focus {
-        border-color: #cf9f5d;
+    .tb-auth-input:focus {
+        border-color:
+            #cf9f5d;
 
-        background: #fff;
+        background:
+            #fff;
 
         box-shadow:
             0 0 0 .22rem
@@ -631,82 +856,110 @@
     }
 
 
-    .tb-register-input.is-invalid {
-        border-color: #c85a4b;
+    .tb-auth-input.is-invalid {
+        border-color:
+            #c85a4b;
     }
 
 
-    .tb-register-password {
-        padding-right: 54px;
+    .tb-auth-password {
+        padding-right:
+            54px;
     }
 
 
-    .tb-register-toggle {
-        position: absolute;
+    .tb-auth-toggle {
+        position:
+            absolute;
 
-        z-index: 3;
+        z-index:
+            3;
 
-        top: 50%;
-        right: 9px;
+        top:
+            50%;
+
+        right:
+            9px;
 
         transform:
             translateY(-50%);
 
-        width: 38px;
-        height: 38px;
+        width:
+            38px;
+
+        height:
+            38px;
 
         display: grid;
         place-items: center;
 
-        padding: 0;
+        padding:
+            0;
 
-        border: 0;
+        border:
+            0;
 
-        border-radius: 10px;
+        border-radius:
+            10px;
 
-        color: #705a4c;
+        color:
+            #705a4c;
 
-        background: transparent;
+        background:
+            transparent;
 
-        cursor: pointer;
+        cursor:
+            pointer;
 
-        font-size: 17px;
+        font-size:
+            16px;
     }
 
 
-    .tb-register-toggle:hover,
-    .tb-register-toggle:focus {
-        color: #4b2d1d;
+    .tb-auth-toggle:hover,
+    .tb-auth-toggle:focus {
+        color:
+            #4b2d1d;
 
-        background: #f7eee2;
+        background:
+            #f7eee2;
 
-        outline: none;
+        outline:
+            none;
     }
 
 
-    .tb-register-error {
-        margin-top: 7px;
+    .tb-auth-error {
+        margin-top:
+            7px;
 
-        color: #b43e2e;
+        color:
+            var(--auth-red);
 
-        font-size: 13px;
+        font-size:
+            13px;
 
-        font-weight: 700;
+        font-weight:
+            700;
     }
 
 
     /* =========================================================
-       PASSWORD STATUS
+       PASSWORD STRENGTH
     ========================================================= */
 
     .tb-password-info {
-        margin-top: 8px;
+        margin-top:
+            7px;
 
-        color: #84756b;
+        color:
+            #84756b;
 
-        font-size: 12px;
+        font-size:
+            11px;
 
-        line-height: 1.5;
+        line-height:
+            1.45;
     }
 
 
@@ -719,91 +972,116 @@
                 1fr
             );
 
-        gap: 5px;
+        gap:
+            5px;
 
-        margin-top: 9px;
+        margin-top:
+            8px;
     }
 
 
     .tb-password-strength span {
-        height: 4px;
+        height:
+            4px;
 
-        border-radius: 999px;
+        border-radius:
+            999px;
 
-        background: #eadfd3;
+        background:
+            #eadfd3;
 
-        transition: .18s ease;
+        transition:
+            background .18s ease;
     }
 
 
-    .tb-password-strength.level-1 span:nth-child(1) {
-        background: #b43e2e;
+    .tb-password-strength.level-1
+    span:nth-child(1) {
+        background:
+            #b43e2e;
     }
 
 
-    .tb-password-strength.level-2 span:nth-child(-n+2) {
-        background: #d58a30;
+    .tb-password-strength.level-2
+    span:nth-child(-n+2) {
+        background:
+            #d58a30;
     }
 
 
-    .tb-password-strength.level-3 span:nth-child(-n+3) {
-        background: #77914d;
+    .tb-password-strength.level-3
+    span:nth-child(-n+3) {
+        background:
+            #77914d;
     }
 
 
-    .tb-password-strength.level-4 span {
-        background: #35562f;
+    .tb-password-strength.level-4
+    span {
+        background:
+            #35562f;
     }
 
 
     .tb-password-match {
-        display: none;
+        display:
+            none;
 
-        margin-top: 7px;
+        margin-top:
+            7px;
 
-        font-size: 12px;
+        font-size:
+            12px;
 
-        font-weight: 750;
+        font-weight:
+            750;
     }
 
 
     .tb-password-match.show {
-        display: block;
+        display:
+            block;
     }
 
 
     .tb-password-match.ok {
-        color: #35562f;
+        color:
+            #35562f;
     }
 
 
     .tb-password-match.error {
-        color: #b43e2e;
+        color:
+            #b43e2e;
     }
 
 
     /* =========================================================
-       OTP INFO
+       OTP NOTE
     ========================================================= */
 
-    .tb-register-note {
+    .tb-auth-note {
         display: flex;
-
         align-items: flex-start;
 
-        gap: 10px;
+        gap:
+            10px;
 
-        margin-top: 4px;
+        margin-top:
+            4px;
 
-        padding: 13px 14px;
+        padding:
+            13px 14px;
 
         border:
             1px solid
             #ead09d;
 
-        border-radius: 13px;
+        border-radius:
+            13px;
 
-        color: #6a5333;
+        color:
+            #6a5333;
 
         background:
             linear-gradient(
@@ -812,9 +1090,11 @@
                 #fff1ca
             );
 
-        font-size: 13px;
+        font-size:
+            13px;
 
-        line-height: 1.55;
+        line-height:
+            1.55;
     }
 
 
@@ -822,28 +1102,37 @@
        SUBMIT
     ========================================================= */
 
-    .tb-register-submit {
-        position: relative;
+    .tb-auth-submit {
+        position:
+            relative;
 
-        overflow: hidden;
+        overflow:
+            hidden;
 
-        width: 100%;
+        width:
+            100%;
 
-        min-height: 56px;
+        min-height:
+            56px;
 
         display: flex;
         align-items: center;
         justify-content: center;
 
-        gap: 8px;
+        gap:
+            8px;
 
-        margin-top: 20px;
+        margin-top:
+            18px;
 
-        border: 0;
+        border:
+            0;
 
-        border-radius: 16px;
+        border-radius:
+            16px;
 
-        color: #fff;
+        color:
+            #fff;
 
         background:
             linear-gradient(
@@ -857,11 +1146,14 @@
             0 13px 28px
             rgba(99,56,32,.21);
 
-        font-size: 15px;
+        font-size:
+            15px;
 
-        font-weight: 900;
+        font-weight:
+            900;
 
-        cursor: pointer;
+        cursor:
+            pointer;
 
         transition:
             transform .18s ease,
@@ -869,92 +1161,94 @@
     }
 
 
-    .tb-register-submit::before {
-        content: "";
-
-        position: absolute;
-
-        top: 0;
-        left: -120%;
-
-        width: 60%;
-        height: 100%;
-
-        transform:
-            skewX(-20deg);
-
-        background:
-            linear-gradient(
-                90deg,
-                transparent,
-                rgba(255,255,255,.22),
-                transparent
-            );
-
-        transition:
-            left .45s ease;
-    }
-
-
-    .tb-register-submit:hover {
+    .tb-auth-submit:hover {
         transform:
             translateY(-2px);
 
         box-shadow:
-            0 17px 34px
+            0 17px 32px
             rgba(99,56,32,.25);
     }
 
 
-    .tb-register-submit:hover::before {
-        left: 145%;
+    /* =========================================================
+       LOGIN LINK
+    ========================================================= */
+
+    .tb-auth-link {
+        color:
+            var(--auth-red);
+
+        font-size:
+            13px;
+
+        font-weight:
+            800;
+
+        text-decoration:
+            none;
     }
 
 
-    /* =========================================================
-       BOTTOM
-    ========================================================= */
+    .tb-auth-link:hover {
+        color:
+            var(--auth-brown);
 
-    .tb-register-separator {
+        text-decoration:
+            underline;
+    }
+
+
+    .tb-auth-separator {
         display: flex;
         align-items: center;
 
-        gap: 13px;
+        gap:
+            13px;
 
-        margin: 25px 0 19px;
+        margin:
+            23px 0 17px;
 
-        color: #9a8a80;
+        color:
+            #9b8a7f;
 
-        font-size: 12px;
+        font-size:
+            11px;
 
-        font-weight: 800;
-
-        letter-spacing: .04em;
+        font-weight:
+            800;
     }
 
 
-    .tb-register-separator::before,
-    .tb-register-separator::after {
-        content: "";
+    .tb-auth-separator::before,
+    .tb-auth-separator::after {
+        content:
+            "";
 
-        flex: 1;
+        flex:
+            1;
 
-        height: 1px;
+        height:
+            1px;
 
-        background: #ead8bf;
+        background:
+            #ead8bf;
     }
 
 
-    .tb-register-login-box {
-        padding: 15px 17px;
+    .tb-auth-alt-box {
+        padding:
+            14px 16px;
 
         border:
             1px solid
-            #e6d2b2;
+            #ead0a7;
 
-        border-radius: 14px;
+        border-radius:
+            14px;
 
-        color: #6d594d;
+        color:
+            #6d584c;
 
         background:
             linear-gradient(
@@ -963,25 +1257,11 @@
                 #fff4e2
             );
 
-        text-align: center;
+        text-align:
+            center;
 
-        font-size: 14px;
-    }
-
-
-    .tb-register-link {
-        color: var(--rg-red);
-
-        font-weight: 850;
-
-        text-decoration: none;
-    }
-
-
-    .tb-register-link:hover {
-        color: var(--rg-brown);
-
-        text-decoration: underline;
+        font-size:
+            14px;
     }
 
 
@@ -991,55 +1271,56 @@
 
     @media (max-width: 991.98px) {
 
-        .tb-register-page {
+        .tb-auth-page {
             padding:
-                30px 0 60px;
+                30px 0
+                60px;
         }
 
 
-        .tb-register-shell {
-            max-width: 680px;
-
-            grid-template-columns: 1fr;
+        .tb-auth-return,
+        .tb-auth-shell {
+            max-width:
+                680px;
         }
 
 
-        .tb-register-brand {
-            min-height: auto;
-
-            padding: 38px 34px;
+        .tb-auth-shell {
+            grid-template-columns:
+                1fr;
         }
 
 
-        .tb-register-brand h1 {
-            max-width: 540px;
+        .tb-auth-brand {
+            min-height:
+                360px;
 
-            font-size: 40px;
+            padding:
+                38px 34px;
         }
 
 
-        .tb-register-benefits {
+        .tb-auth-benefits {
             grid-template-columns:
                 repeat(
                     3,
-                    minmax(0,1fr)
+                    1fr
                 );
-
-            margin-top: 28px;
         }
 
 
-        .tb-register-benefit {
-            align-items: flex-start;
+        .tb-auth-benefit {
+            align-items:
+                flex-start;
 
-            flex-direction: column;
-
-            font-size: 13px;
+            flex-direction:
+                column;
         }
 
 
-        .tb-register-form-panel {
-            padding: 44px 38px;
+        .tb-auth-form-panel {
+            padding:
+                42px 38px;
         }
 
     }
@@ -1047,87 +1328,76 @@
 
     @media (max-width: 575.98px) {
 
-        .tb-register-page {
+        .tb-auth-page {
             padding:
-                18px 0 42px;
+                20px 0
+                50px;
         }
 
 
-        .tb-register-shell {
-            border-radius: 22px;
+        .tb-auth-return {
+            margin-bottom:
+                12px;
         }
 
 
-        .tb-register-brand {
-            padding: 29px 23px;
+        .tb-auth-home-link {
+            min-height:
+                39px;
+
+            padding:
+                8px 14px;
+
+            font-size:
+                12px;
         }
 
 
-        .tb-register-logo {
-            width: 50px;
-            height: 50px;
-
-            margin-bottom: 18px;
-
-            border-radius: 15px;
+        .tb-auth-shell {
+            border-radius:
+                22px;
         }
 
 
-        .tb-register-brand h1 {
-            font-size: 34px;
+        .tb-auth-brand {
+            min-height:
+                315px;
+
+            padding:
+                30px 23px;
         }
 
 
-        .tb-register-brand-copy {
-            font-size: 14px;
+        .tb-auth-brand h1 {
+            font-size:
+                36px;
         }
 
 
-        .tb-register-benefits {
-            grid-template-columns: 1fr;
-
-            gap: 8px;
-
-            margin-top: 24px;
+        .tb-auth-brand-copy {
+            font-size:
+                14px;
         }
 
 
-        .tb-register-benefit {
-            flex-direction: row;
+        .tb-auth-benefits {
+            grid-template-columns:
+                1fr;
 
-            align-items: center;
+            margin-top:
+                28px;
         }
 
 
-        .tb-register-form-panel {
-            padding: 32px 22px;
+        .tb-auth-form-panel {
+            padding:
+                32px 22px;
         }
 
 
-        .tb-register-form-panel::after {
-            display: none;
-        }
-
-
-        .tb-register-form-head h2 {
-            font-size: 29px;
-        }
-
-
-        .tb-register-trust {
-            display: grid;
-
-            grid-template-columns: 1fr;
-        }
-
-
-        .tb-register-trust span {
-            justify-content: center;
-        }
-
-
-        .tb-register-input {
-            min-height: 52px;
+        .tb-auth-form-head h2 {
+            font-size:
+                29px;
         }
 
     }
@@ -1135,34 +1405,56 @@
 
     @media (prefers-reduced-motion: reduce) {
 
-        .tb-register-page *,
-        .tb-register-page *::before,
-        .tb-register-page *::after {
-            transition: none !important;
+        .tb-auth-page *,
+        .tb-auth-page *::before,
+        .tb-auth-page *::after {
+            transition:
+                none !important;
         }
 
     }
 </style>
 
 
-<div class="tb-register-page">
+<div class="tb-auth-page">
 
-    <div class="tb-register-shell">
+    <nav
+        class="tb-auth-return"
+        aria-label="Quay lại trang chủ"
+    >
+        <a
+            href="{{ url('/') }}"
+            class="tb-auth-home-link"
+        >
+            <span aria-hidden="true">
+                ←
+            </span>
 
+            Quay lại trang chủ
+        </a>
+    </nav>
+
+
+    <div class="tb-auth-shell">
 
         {{-- =====================================================
-            BRAND
+            LEFT
         ====================================================== --}}
-        <aside class="tb-register-brand">
+        <aside class="tb-auth-brand">
 
-            <div class="tb-register-brand-top">
+            <div class="tb-auth-brand-top">
 
-                <div class="tb-register-logo">
-                    •
+                <div class="tb-auth-logo">
+                    @include(
+                        'layouts.partials.brand-mark',
+                        [
+                            'variant' => 'header'
+                        ]
+                    )
                 </div>
 
 
-                <div class="tb-register-kicker">
+                <div class="tb-auth-kicker">
                     Tinh Hoa Tây Bắc
                 </div>
 
@@ -1173,7 +1465,7 @@
                 </h1>
 
 
-                <p class="tb-register-brand-copy">
+                <p class="tb-auth-brand-copy">
 
                     Tạo tài khoản để mua sắm thuận tiện,
                     lưu địa chỉ giao hàng,
@@ -1185,12 +1477,12 @@
             </div>
 
 
-            <div class="tb-register-benefits">
+            <div class="tb-auth-benefits">
 
-                <div class="tb-register-benefit">
+                <div class="tb-auth-benefit">
 
-                    <span class="tb-register-benefit-icon">
-                        •
+                    <span class="tb-auth-benefit-icon">
+                        ✉
                     </span>
 
                     <span>
@@ -1200,10 +1492,10 @@
                 </div>
 
 
-                <div class="tb-register-benefit">
+                <div class="tb-auth-benefit">
 
-                    <span class="tb-register-benefit-icon">
-                        •
+                    <span class="tb-auth-benefit-icon">
+                        📍
                     </span>
 
                     <span>
@@ -1213,10 +1505,10 @@
                 </div>
 
 
-                <div class="tb-register-benefit">
+                <div class="tb-auth-benefit">
 
-                    <span class="tb-register-benefit-icon">
-                        •
+                    <span class="tb-auth-benefit-icon">
+                        🎟️
                     </span>
 
                     <span>
@@ -1231,15 +1523,14 @@
 
 
         {{-- =====================================================
-            FORM
+            RIGHT
         ====================================================== --}}
-        <section class="tb-register-form-panel">
+        <section class="tb-auth-form-panel">
 
+            <div class="tb-auth-form-head">
 
-            <div class="tb-register-form-head">
-
-                <div class="tb-register-form-icon">
-                    •
+                <div class="tb-auth-form-icon">
+                    👤
                 </div>
 
 
@@ -1249,27 +1540,29 @@
 
 
                 <p>
+
                     Điền thông tin bên dưới.
                     Sau khi đăng ký thành công,
                     hệ thống sẽ gửi mã OTP
                     tới email của bạn.
+
                 </p>
 
             </div>
 
 
-            <div class="tb-register-trust">
+            <div class="tb-auth-trust">
 
                 <span>
-                    • Đăng ký nhanh
+                    ⚡ Đăng ký nhanh
                 </span>
 
                 <span>
-                    • OTP qua email
+                    ✉ OTP qua email
                 </span>
 
                 <span>
-                    • Bảo mật tài khoản
+                    🔒 Bảo mật tài khoản
                 </span>
 
             </div>
@@ -1285,20 +1578,20 @@
 
 
                 {{-- NAME --}}
-                <div class="tb-register-field">
+                <div class="tb-auth-field">
 
                     <label
                         for="name"
-                        class="tb-register-label"
+                        class="tb-auth-label"
                     >
                         Họ và tên
                     </label>
 
 
-                    <div class="tb-register-input-wrap">
+                    <div class="tb-auth-input-wrap">
 
-                        <span class="tb-register-input-icon">
-                            •
+                        <span class="tb-auth-input-icon">
+                            👤
                         </span>
 
 
@@ -1308,7 +1601,7 @@
                             name="name"
                             value="{{ old('name') }}"
                             class="
-                                tb-register-input
+                                tb-auth-input
                                 @error('name')
                                     is-invalid
                                 @enderror
@@ -1324,7 +1617,7 @@
 
                     @error('name')
 
-                        <div class="tb-register-error">
+                        <div class="tb-auth-error">
                             {{ $message }}
                         </div>
 
@@ -1334,20 +1627,20 @@
 
 
                 {{-- EMAIL --}}
-                <div class="tb-register-field">
+                <div class="tb-auth-field">
 
                     <label
                         for="email"
-                        class="tb-register-label"
+                        class="tb-auth-label"
                     >
                         Email
                     </label>
 
 
-                    <div class="tb-register-input-wrap">
+                    <div class="tb-auth-input-wrap">
 
-                        <span class="tb-register-input-icon">
-                            •
+                        <span class="tb-auth-input-icon">
+                            ✉
                         </span>
 
 
@@ -1357,7 +1650,7 @@
                             name="email"
                             value="{{ old('email') }}"
                             class="
-                                tb-register-input
+                                tb-auth-input
                                 @error('email')
                                     is-invalid
                                 @enderror
@@ -1372,7 +1665,7 @@
 
                     @error('email')
 
-                        <div class="tb-register-error">
+                        <div class="tb-auth-error">
                             {{ $message }}
                         </div>
 
@@ -1382,20 +1675,20 @@
 
 
                 {{-- PASSWORD --}}
-                <div class="tb-register-field">
+                <div class="tb-auth-field">
 
                     <label
                         for="password"
-                        class="tb-register-label"
+                        class="tb-auth-label"
                     >
                         Mật khẩu
                     </label>
 
 
-                    <div class="tb-register-input-wrap">
+                    <div class="tb-auth-input-wrap">
 
-                        <span class="tb-register-input-icon">
-                            •
+                        <span class="tb-auth-input-icon">
+                            🔒
                         </span>
 
 
@@ -1404,8 +1697,8 @@
                             type="password"
                             name="password"
                             class="
-                                tb-register-input
-                                tb-register-password
+                                tb-auth-input
+                                tb-auth-password
                                 @error('password')
                                     is-invalid
                                 @enderror
@@ -1418,7 +1711,7 @@
 
                         <button
                             type="button"
-                            class="tb-register-toggle"
+                            class="tb-auth-toggle"
                             data-toggle-password="password"
                             aria-label="Hiện mật khẩu"
                             title="Hiện mật khẩu"
@@ -1430,8 +1723,10 @@
 
 
                     <div class="tb-password-info">
+
                         Nên sử dụng chữ hoa, chữ thường,
                         số và ký tự đặc biệt.
+
                     </div>
 
 
@@ -1448,7 +1743,7 @@
 
                     @error('password')
 
-                        <div class="tb-register-error">
+                        <div class="tb-auth-error">
                             {{ $message }}
                         </div>
 
@@ -1458,20 +1753,20 @@
 
 
                 {{-- CONFIRM PASSWORD --}}
-                <div class="tb-register-field">
+                <div class="tb-auth-field">
 
                     <label
                         for="password_confirmation"
-                        class="tb-register-label"
+                        class="tb-auth-label"
                     >
                         Xác nhận mật khẩu
                     </label>
 
 
-                    <div class="tb-register-input-wrap">
+                    <div class="tb-auth-input-wrap">
 
-                        <span class="tb-register-input-icon">
-                            •
+                        <span class="tb-auth-input-icon">
+                            🔒
                         </span>
 
 
@@ -1480,8 +1775,8 @@
                             type="password"
                             name="password_confirmation"
                             class="
-                                tb-register-input
-                                tb-register-password
+                                tb-auth-input
+                                tb-auth-password
                             "
                             placeholder="Nhập lại mật khẩu"
                             autocomplete="new-password"
@@ -1491,7 +1786,7 @@
 
                         <button
                             type="button"
-                            class="tb-register-toggle"
+                            class="tb-auth-toggle"
                             data-toggle-password="password_confirmation"
                             aria-label="Hiện mật khẩu"
                             title="Hiện mật khẩu"
@@ -1511,29 +1806,31 @@
                 </div>
 
 
-                {{-- OTP NOTE --}}
-                <div class="tb-register-note">
+                {{-- OTP --}}
+                <div class="tb-auth-note">
 
                     <span>
-                        •
+                        🔐
                     </span>
 
+
                     <span>
+
                         Sau khi tạo tài khoản,
                         một mã OTP 6 số sẽ được gửi
                         tới email trên để xác thực tài khoản.
+
                     </span>
 
                 </div>
 
 
-                {{-- SUBMIT --}}
                 <button
                     type="submit"
-                    class="tb-register-submit"
+                    class="tb-auth-submit"
                 >
                     <span>
-                        •
+                        ➕
                     </span>
 
                     <span>
@@ -1544,16 +1841,16 @@
             </form>
 
 
-            <div class="tb-register-separator">
+            <div class="tb-auth-separator">
                 ĐÃ CÓ TÀI KHOẢN?
             </div>
 
 
-            <div class="tb-register-login-box">
+            <div class="tb-auth-alt-box">
 
                 <a
                     href="{{ route('login') }}"
-                    class="tb-register-link"
+                    class="tb-auth-link"
                 >
                     ← Quay lại đăng nhập
                 </a>
@@ -1572,9 +1869,11 @@ document.addEventListener(
     'DOMContentLoaded',
     function () {
 
-        /* =============================================
-           SHOW / HIDE PASSWORD
-        ============================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | SHOW / HIDE PASSWORD
+        |--------------------------------------------------------------------------
+        */
 
         const toggles =
             document.querySelectorAll(
@@ -1590,7 +1889,8 @@ document.addEventListener(
                     function () {
 
                         const targetId =
-                            button.dataset
+                            button
+                                .dataset
                                 .togglePassword;
 
 
@@ -1605,37 +1905,37 @@ document.addEventListener(
                         }
 
 
-                        const isHidden =
+                        const hidden =
                             input.type
                             ===
                             'password';
 
 
                         input.type =
-                            isHidden
-                            ? 'text'
-                            : 'password';
+                            hidden
+                                ? 'text'
+                                : 'password';
 
 
                         button.textContent =
-                            isHidden
-                            ? '🙈'
-                            : '👁';
+                            hidden
+                                ? '🙈'
+                                : '👁';
 
 
                         button.setAttribute(
                             'aria-label',
-                            isHidden
-                            ? 'Ẩn mật khẩu'
-                            : 'Hiện mật khẩu'
+                            hidden
+                                ? 'Ẩn mật khẩu'
+                                : 'Hiện mật khẩu'
                         );
 
 
                         button.setAttribute(
                             'title',
-                            isHidden
-                            ? 'Ẩn mật khẩu'
-                            : 'Hiện mật khẩu'
+                            hidden
+                                ? 'Ẩn mật khẩu'
+                                : 'Hiện mật khẩu'
                         );
 
                     }
@@ -1645,9 +1945,11 @@ document.addEventListener(
         );
 
 
-        /* =============================================
-           PASSWORD STRENGTH
-        ============================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | PASSWORD STRENGTH
+        |--------------------------------------------------------------------------
+        */
 
         const password =
             document.getElementById(
@@ -1688,10 +1990,15 @@ document.addEventListener(
                 password.value;
 
 
-            let score = 0;
+            let score =
+                0;
 
 
-            if (value.length >= 8) {
+            if (
+                value.length
+                >=
+                8
+            ) {
                 score++;
             }
 
@@ -1705,7 +2012,9 @@ document.addEventListener(
             }
 
 
-            if (/\d/.test(value)) {
+            if (
+                /\d/.test(value)
+            ) {
                 score++;
             }
 
@@ -1723,7 +2032,9 @@ document.addEventListener(
                 'tb-password-strength';
 
 
-            if (score > 0) {
+            if (
+                score > 0
+            ) {
 
                 strength.classList.add(
                     'level-' + score
@@ -1756,11 +2067,12 @@ document.addEventListener(
                 match.className =
                     'tb-password-match';
 
+
                 match.textContent =
                     '';
 
-                return;
 
+                return;
             }
 
 
@@ -1773,16 +2085,19 @@ document.addEventListener(
                 match.className =
                     'tb-password-match show ok';
 
-                match.textContent =
-                    '• Mật khẩu xác nhận trùng khớp.';
 
-            } else {
+                match.textContent =
+                    '✓ Mật khẩu xác nhận trùng khớp.';
+
+            }
+            else {
 
                 match.className =
                     'tb-password-match show error';
 
+
                 match.textContent =
-                    '• Mật khẩu xác nhận chưa trùng khớp.';
+                    '✕ Mật khẩu xác nhận chưa trùng khớp.';
 
             }
 

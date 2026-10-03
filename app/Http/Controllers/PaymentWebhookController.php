@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Voucher;
 use App\Models\OrderStatusHistory;
+use App\Models\User;
+use App\Models\WalletTransaction;
 
 use Carbon\Carbon;
 
@@ -127,6 +129,10 @@ class PaymentWebhookController extends Controller
                     $data,
                     $providerTransactionId
                 ) {
+
+                    if ($this->processWalletTopUp($data, $providerTransactionId)) {
+                        return;
+                    }
 
                     /*
                     |--------------------------------------------------------------------------
@@ -668,6 +674,81 @@ class PaymentWebhookController extends Controller
     | 5. Ghi timeline.
     |
     */
+
+    private function processWalletTopUp(
+        array $data,
+        string $providerTransactionId
+    ): bool {
+        $code = strtoupper(trim((string) ($data['code'] ?? '')));
+        $content = strtoupper((string) ($data['content'] ?? ''));
+
+        if (!str_starts_with($code, 'WLT') && !str_contains($content, 'WLT')) {
+            return false;
+        }
+
+        $topUp = WalletTransaction::query()
+            ->where('type', 'topup')
+            ->where('status', 'pending')
+            ->whereRaw('UPPER(reference_code) = ?', [$code])
+            ->lockForUpdate()
+            ->first();
+
+        if (!$topUp && $content !== '') {
+            $topUp = WalletTransaction::query()
+                ->where('type', 'topup')
+                ->where('status', 'pending')
+                ->whereNotNull('reference_code')
+                ->lockForUpdate()
+                ->get()
+                ->first(fn (WalletTransaction $transaction) => str_contains(
+                    $content,
+                    strtoupper($transaction->reference_code)
+                ));
+        }
+
+        if (!$topUp) {
+            return false;
+        }
+
+        if (WalletTransaction::query()
+            ->where('provider', 'sepay')
+            ->where('provider_transaction_id', $providerTransactionId)
+            ->exists()) {
+            return true;
+        }
+
+        $receivedAmount = round((float) $data['transferAmount'], 2);
+
+        if ($receivedAmount < (float) $topUp->amount) {
+            Log::warning('SePay webhook: số tiền nạp ví chưa đủ.', [
+                'wallet_transaction_id' => $topUp->id,
+                'received' => $receivedAmount,
+            ]);
+
+            return true;
+        }
+
+        $user = User::query()
+            ->whereKey($topUp->user_id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        $newBalance = round((float) $user->wallet_balance + $receivedAmount, 2);
+        $user->wallet_balance = $newBalance;
+        $user->save();
+
+        $topUp->update([
+            'status' => 'completed',
+            'amount' => $receivedAmount,
+            'balance_after' => $newBalance,
+            'provider' => 'sepay',
+            'provider_transaction_id' => $providerTransactionId,
+            'description' => 'Nạp tiền qua chuyển khoản ngân hàng.',
+            'raw_payload' => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        ]);
+
+        return true;
+    }
 
     private function cancelExpiredOrder(
         Order $order

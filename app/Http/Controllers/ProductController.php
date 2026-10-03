@@ -31,6 +31,7 @@ class ProductController extends Controller
         );
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | ADMIN - DANH SÁCH SẢN PHẨM
@@ -39,12 +40,15 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query =
+            Product::with('category');
+
 
         if ($request->filled('search')) {
 
             $search =
                 trim($request->search);
+
 
             $query->where(
                 function ($q) use ($search) {
@@ -60,6 +64,7 @@ class ProductController extends Controller
                         '%' . $search . '%'
                     );
 
+
                     if (is_numeric($search)) {
 
                         $q->orWhere(
@@ -74,6 +79,7 @@ class ProductController extends Controller
 
         }
 
+
         if ($request->filled('category_id')) {
 
             $query->where(
@@ -82,6 +88,7 @@ class ProductController extends Controller
             );
 
         }
+
 
         if ($request->stock === 'in_stock') {
 
@@ -105,6 +112,7 @@ class ProductController extends Controller
             );
 
         }
+
 
         if (
             $request->featured
@@ -131,8 +139,10 @@ class ProductController extends Controller
 
         }
 
+
         $currentPriceSql =
             $this->currentPriceSql();
+
 
         if ($request->filled('min_price')) {
 
@@ -141,11 +151,13 @@ class ProductController extends Controller
                 [
                     now(),
                     now(),
-                    (float) $request->min_price,
+                    (float)
+                    $request->min_price,
                 ]
             );
 
         }
+
 
         if ($request->filled('max_price')) {
 
@@ -154,11 +166,13 @@ class ProductController extends Controller
                 [
                     now(),
                     now(),
-                    (float) $request->max_price,
+                    (float)
+                    $request->max_price,
                 ]
             );
 
         }
+
 
         switch ($request->sort) {
 
@@ -231,14 +245,17 @@ class ProductController extends Controller
                 break;
         }
 
+
         $products =
             $query
                 ->paginate(10)
                 ->withQueryString();
 
+
         $categories =
             Category::orderBy('name')
                 ->get();
+
 
         return view(
             'admin.products.index',
@@ -248,6 +265,7 @@ class ProductController extends Controller
             )
         );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -261,11 +279,13 @@ class ProductController extends Controller
             Category::orderBy('name')
                 ->get();
 
+
         return view(
             'admin.products.create',
             compact('categories')
         );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -281,22 +301,23 @@ class ProductController extends Controller
                 $this->productMessages()
             );
 
+
         $this->validateSaleRule(
             $request
         );
 
+
         $this->validateGalleryLimit(
             $request
         );
+
 
         unset(
             $validatedData['gallery_images'],
             $validatedData['remove_gallery_images']
         );
 
-        /*
-         * Ảnh đại diện
-         */
+
         if ($request->hasFile('image')) {
 
             $validatedData['image'] =
@@ -309,18 +330,18 @@ class ProductController extends Controller
 
         }
 
+
         $product =
             Product::create(
                 $validatedData
             );
 
-        /*
-         * Nhiều ảnh chi tiết
-         */
+
         $this->storeGalleryImages(
             $request,
             $product
         );
+
 
         return redirect()
             ->route(
@@ -332,6 +353,7 @@ class ProductController extends Controller
             );
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | ADMIN - SHOW
@@ -342,11 +364,13 @@ class ProductController extends Controller
     {
         $product->load('images');
 
+
         return view(
             'admin.products.show',
             compact('product')
         );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -360,7 +384,9 @@ class ProductController extends Controller
             Category::orderBy('name')
                 ->get();
 
+
         $product->load('images');
+
 
         return view(
             'admin.products.edit',
@@ -370,6 +396,7 @@ class ProductController extends Controller
             )
         );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -387,26 +414,28 @@ class ProductController extends Controller
                 $this->productMessages()
             );
 
+
         $this->validateSaleRule(
             $request
         );
+
 
         $this->validateGalleryLimit(
             $request,
             $product
         );
 
+
         unset(
             $validatedData['gallery_images'],
             $validatedData['remove_gallery_images']
         );
 
+
         $oldMainImage =
             $product->image;
 
-        /*
-         * Thay ảnh đại diện
-         */
+
         if ($request->hasFile('image')) {
 
             $validatedData['image'] =
@@ -419,14 +448,12 @@ class ProductController extends Controller
 
         }
 
+
         $product->update(
             $validatedData
         );
 
-        /*
-         * Sau khi update thành công
-         * mới xóa ảnh đại diện cũ.
-         */
+
         if (
             $request->hasFile('image')
             &&
@@ -443,21 +470,18 @@ class ProductController extends Controller
 
         }
 
-        /*
-         * Xóa ảnh gallery được chọn
-         */
+
         $this->removeSelectedGalleryImages(
             $request,
             $product
         );
 
-        /*
-         * Thêm ảnh gallery mới
-         */
+
         $this->storeGalleryImages(
             $request,
             $product
         );
+
 
         return redirect()
             ->route(
@@ -469,6 +493,56 @@ class ProductController extends Controller
             );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN - XÓA ẢNH CHI TIẾT NGAY LẬP TỨC
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroyGalleryImage(
+        Product $product,
+        int $image
+    ) {
+        $galleryImage =
+            $product
+                ->images()
+                ->whereKey($image)
+                ->firstOrFail();
+
+
+        $path =
+            $galleryImage->path;
+
+
+        if (
+            $path
+            &&
+            Storage::disk('public')
+                ->exists($path)
+        ) {
+
+            Storage::disk('public')
+                ->delete(
+                    $path
+                );
+
+        }
+
+
+        $galleryImage->delete();
+
+
+        return response()->json([
+            'success' =>
+                true,
+
+            'message' =>
+                'Đã xóa ảnh chi tiết và cập nhật sản phẩm.',
+        ]);
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | ADMIN - DELETE
@@ -479,14 +553,14 @@ class ProductController extends Controller
     {
         $product->load('images');
 
-        /*
-         * Xóa ảnh đại diện
-         */
+
         if (
             $product->image
             &&
             Storage::disk('public')
-                ->exists($product->image)
+                ->exists(
+                    $product->image
+                )
         ) {
 
             Storage::disk('public')
@@ -496,9 +570,7 @@ class ProductController extends Controller
 
         }
 
-        /*
-         * Xóa toàn bộ ảnh chi tiết
-         */
+
         foreach (
             $product->images
             as
@@ -523,7 +595,9 @@ class ProductController extends Controller
 
         }
 
+
         $product->delete();
+
 
         return redirect()
             ->route(
@@ -534,6 +608,7 @@ class ProductController extends Controller
                 'Xóa sản phẩm thành công!'
             );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -575,10 +650,13 @@ class ProductController extends Controller
             ]
         );
 
+
         if (
-            (float) $request->sale_price
+            (float)
+            $request->sale_price
             >=
-            (float) $product->price
+            (float)
+            $product->price
         ) {
 
             return back()->with(
@@ -587,6 +665,7 @@ class ProductController extends Controller
             );
 
         }
+
 
         $product->update([
             'sale_price' =>
@@ -599,10 +678,9 @@ class ProductController extends Controller
                 $request->sale_end,
         ]);
 
+
         return redirect()
-            ->route(
-                'admin.products.index'
-            )
+            ->back()
             ->with(
                 'success',
                 '🔥 Đã đưa "' .
@@ -610,6 +688,7 @@ class ProductController extends Controller
                 '" lên chương trình khuyến mãi!'
             );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -626,10 +705,9 @@ class ProductController extends Controller
             'sale_end' => null,
         ]);
 
+
         return redirect()
-            ->route(
-                'admin.products.index'
-            )
+            ->back()
             ->with(
                 'success',
                 'Đã gỡ "' .
@@ -637,6 +715,148 @@ class ProductController extends Controller
                 '" khỏi chương trình khuyến mãi.'
             );
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN - DANH SÁCH SẢN PHẨM KHUYẾN MÃI
+    |--------------------------------------------------------------------------
+    */
+
+    public function adminPromotions(Request $request)
+    {
+        $now =
+            now();
+
+
+        $status =
+            $request
+                ->string(
+                    'status',
+                    'all'
+                )
+                ->toString();
+
+
+        $promotions =
+            Product::query()
+                ->with('category')
+                ->whereNotNull(
+                    'sale_price'
+                )
+                ->whereColumn(
+                    'sale_price',
+                    '<',
+                    'price'
+                );
+
+
+        if ($status === 'active') {
+
+            $promotions->onSale();
+
+        }
+        elseif ($status === 'upcoming') {
+
+            $promotions->where(
+                'sale_start',
+                '>',
+                $now
+            );
+
+        }
+        elseif ($status === 'expired') {
+
+            $promotions
+                ->whereNotNull(
+                    'sale_end'
+                )
+                ->where(
+                    'sale_end',
+                    '<',
+                    $now
+                );
+
+        }
+
+
+        $promotions =
+            $promotions
+                ->orderByRaw(
+                    'CASE WHEN sale_end IS NULL THEN 1 ELSE 0 END, sale_end ASC'
+                )
+                ->paginate(12)
+                ->withQueryString();
+
+
+        $promotionStats = [
+
+            'all' =>
+                Product::query()
+                    ->whereNotNull(
+                        'sale_price'
+                    )
+                    ->whereColumn(
+                        'sale_price',
+                        '<',
+                        'price'
+                    )
+                    ->count(),
+
+            'active' =>
+                Product::query()
+                    ->onSale()
+                    ->count(),
+
+            'upcoming' =>
+                Product::query()
+                    ->whereNotNull(
+                        'sale_price'
+                    )
+                    ->whereColumn(
+                        'sale_price',
+                        '<',
+                        'price'
+                    )
+                    ->where(
+                        'sale_start',
+                        '>',
+                        $now
+                    )
+                    ->count(),
+
+            'expired' =>
+                Product::query()
+                    ->whereNotNull(
+                        'sale_price'
+                    )
+                    ->whereColumn(
+                        'sale_price',
+                        '<',
+                        'price'
+                    )
+                    ->whereNotNull(
+                        'sale_end'
+                    )
+                    ->where(
+                        'sale_end',
+                        '<',
+                        $now
+                    )
+                    ->count(),
+        ];
+
+
+        return view(
+            'admin.promotions.index',
+            compact(
+                'promotions',
+                'promotionStats',
+                'status'
+            )
+        );
+    }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -656,17 +876,20 @@ class ProductController extends Controller
                 )
             );
 
+
         if (
             mb_strlen($keyword)
             <
             2
         ) {
+
             return response()->json([]);
+
         }
+
 
         $products =
             Product::with('category')
-
                 ->where(
                     function ($query)
                     use ($keyword) {
@@ -676,7 +899,6 @@ class ProductController extends Controller
                             'like',
                             '%' . $keyword . '%'
                         )
-
                         ->orWhere(
                             'description',
                             'like',
@@ -685,26 +907,28 @@ class ProductController extends Controller
 
                     }
                 )
-
                 ->orderByRaw(
                     'CASE WHEN name LIKE ? THEN 0 ELSE 1 END',
                     [
                         $keyword . '%'
                     ]
                 )
-
                 ->latest('id')
                 ->limit(6)
                 ->get();
 
+
         return response()->json(
 
             $products->map(
+
                 function (
                     Product $product
                 ) {
 
-                    $imageUrl = null;
+                    $imageUrl =
+                        null;
+
 
                     if ($product->image) {
 
@@ -727,7 +951,9 @@ class ProductController extends Controller
 
                     }
 
+
                     return [
+
                         'id' =>
                             $product->id,
 
@@ -750,8 +976,14 @@ class ProductController extends Controller
                             (float)
                             $product->price,
 
+                        'unit' =>
+                            $product->unit
+                            ?:
+                            'sản phẩm',
+
                         'on_sale' =>
-                            $product->isOnSale(),
+                            $product
+                                ->isOnSale(),
 
                         'in_stock' =>
                             (float)
@@ -768,11 +1000,11 @@ class ProductController extends Controller
                                 $product
                             ),
                     ];
-
                 }
             )
         );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -786,12 +1018,14 @@ class ProductController extends Controller
         $query =
             Product::with('category');
 
+
         if ($request->filled('search')) {
 
             $search =
                 trim(
                     $request->search
                 );
+
 
             $query->where(
                 function ($q)
@@ -802,7 +1036,6 @@ class ProductController extends Controller
                         'like',
                         '%' . $search . '%'
                     )
-
                     ->orWhere(
                         'description',
                         'like',
@@ -813,6 +1046,7 @@ class ProductController extends Controller
             );
 
         }
+
 
         if (
             $request->filled(
@@ -827,8 +1061,10 @@ class ProductController extends Controller
 
         }
 
+
         $currentPriceSql =
             $this->currentPriceSql();
+
 
         if (
             $request->filled(
@@ -837,16 +1073,20 @@ class ProductController extends Controller
         ) {
 
             $query->whereRaw(
-                $currentPriceSql . ' >= ?',
+                $currentPriceSql
+                .
+                ' >= ?',
                 [
                     now(),
                     now(),
+
                     (float)
                     $request->min_price,
                 ]
             );
 
         }
+
 
         if (
             $request->filled(
@@ -855,16 +1095,20 @@ class ProductController extends Controller
         ) {
 
             $query->whereRaw(
-                $currentPriceSql . ' <= ?',
+                $currentPriceSql
+                .
+                ' <= ?',
                 [
                     now(),
                     now(),
+
                     (float)
                     $request->max_price,
                 ]
             );
 
         }
+
 
         if (
             $request->stock
@@ -893,12 +1137,15 @@ class ProductController extends Controller
 
         }
 
+
         switch ($request->sort) {
 
             case 'price_asc':
 
                 $query->orderByRaw(
-                    $currentPriceSql . ' ASC',
+                    $currentPriceSql
+                    .
+                    ' ASC',
                     [
                         now(),
                         now(),
@@ -911,7 +1158,9 @@ class ProductController extends Controller
             case 'price_desc':
 
                 $query->orderByRaw(
-                    $currentPriceSql . ' DESC',
+                    $currentPriceSql
+                    .
+                    ' DESC',
                     [
                         now(),
                         now(),
@@ -946,14 +1195,17 @@ class ProductController extends Controller
                 break;
         }
 
+
         $products =
             $query
                 ->paginate(20)
                 ->withQueryString();
 
+
         $categories =
             Category::orderBy('name')
                 ->get();
+
 
         return view(
             'products.index',
@@ -963,6 +1215,7 @@ class ProductController extends Controller
             )
         );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -978,11 +1231,13 @@ class ProductController extends Controller
             'images',
         ]);
 
+
         return view(
             'products.show',
             compact('product')
         );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -992,21 +1247,20 @@ class ProductController extends Controller
 
     public function promotions()
     {
-        $now = now();
+        $now =
+            now();
+
 
         $products =
             Product::with('category')
-
                 ->whereNotNull(
                     'sale_price'
                 )
-
                 ->whereColumn(
                     'sale_price',
                     '<',
                     'price'
                 )
-
                 ->where(
                     function ($query)
                     use ($now) {
@@ -1015,7 +1269,6 @@ class ProductController extends Controller
                             ->whereNull(
                                 'sale_start'
                             )
-
                             ->orWhere(
                                 'sale_start',
                                 '<=',
@@ -1024,7 +1277,6 @@ class ProductController extends Controller
 
                     }
                 )
-
                 ->where(
                     function ($query)
                     use ($now) {
@@ -1033,7 +1285,6 @@ class ProductController extends Controller
                             ->whereNull(
                                 'sale_end'
                             )
-
                             ->orWhere(
                                 'sale_end',
                                 '>=',
@@ -1042,16 +1293,16 @@ class ProductController extends Controller
 
                     }
                 )
-
                 ->latest()
-
                 ->paginate(12);
+
 
         return view(
             'products.promotions',
             compact('products')
         );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -1062,6 +1313,7 @@ class ProductController extends Controller
     private function productRules(): array
     {
         return [
+
             'name' =>
                 'required|string|max:255',
 
@@ -1086,33 +1338,21 @@ class ProductController extends Controller
             'category_id' =>
                 'required|exists:categories,id',
 
-            /*
-             * Ảnh đại diện
-             */
             'image' =>
                 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
 
-            /*
-             * Nhiều ảnh chi tiết
-             */
             'gallery_images' =>
                 'nullable|array|max:8',
 
             'gallery_images.*' =>
                 'image|mimes:jpeg,png,jpg,webp|max:5120',
 
-            /*
-             * ID ảnh cần xóa khi Edit
-             */
             'remove_gallery_images' =>
                 'nullable|array',
 
             'remove_gallery_images.*' =>
                 'integer',
 
-            /*
-             * Khuyến mãi
-             */
             'sale_price' =>
                 'nullable|numeric|min:0|lt:price',
 
@@ -1124,9 +1364,11 @@ class ProductController extends Controller
         ];
     }
 
+
     private function productMessages(): array
     {
         return [
+
             'name.required' =>
                 'Vui lòng nhập tên sản phẩm.',
 
@@ -1157,10 +1399,6 @@ class ProductController extends Controller
             'category_id.exists' =>
                 'Danh mục đã chọn không tồn tại.',
 
-
-            /*
-             * Ảnh đại diện
-             */
             'image.image' =>
                 'Ảnh đại diện phải là một file ảnh.',
 
@@ -1170,10 +1408,6 @@ class ProductController extends Controller
             'image.max' =>
                 'Ảnh đại diện không được lớn hơn 5MB.',
 
-
-            /*
-             * Gallery
-             */
             'gallery_images.array' =>
                 'Danh sách ảnh chi tiết không hợp lệ.',
 
@@ -1189,10 +1423,6 @@ class ProductController extends Controller
             'gallery_images.*.max' =>
                 'Mỗi ảnh chi tiết không được lớn hơn 5MB.',
 
-
-            /*
-             * Sale
-             */
             'sale_price.numeric' =>
                 'Giá khuyến mãi phải là một số.',
 
@@ -1209,6 +1439,7 @@ class ProductController extends Controller
                 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
         ];
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -1251,6 +1482,7 @@ class ProductController extends Controller
         ";
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | KIỂM TRA QUY CÁCH BÁN
@@ -1260,11 +1492,16 @@ class ProductController extends Controller
     private function validateSaleRule(
         Request $request
     ): void {
+
         $quantity =
-            (float) $request->quantity;
+            (float)
+            $request->quantity;
+
 
         $minQuantity =
-            (float) $request->min_quantity;
+            (float)
+            $request->min_quantity;
+
 
         if (
             $quantity > 0
@@ -1280,6 +1517,7 @@ class ProductController extends Controller
         }
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | KIỂM TRA TỐI ĐA 8 ẢNH CHI TIẾT
@@ -1290,6 +1528,7 @@ class ProductController extends Controller
         Request $request,
         ?Product $product = null
     ): void {
+
         $newImageCount =
             count(
                 $request->file(
@@ -1298,12 +1537,16 @@ class ProductController extends Controller
                 )
             );
 
+
         $existingCount =
             $product
+
                 ? $product
                     ->images()
                     ->count()
+
                 : 0;
+
 
         $removeIds =
             collect(
@@ -1312,17 +1555,18 @@ class ProductController extends Controller
                     []
                 )
             )
-
             ->map(
                 fn ($id) =>
-                    (int) $id
+                    (int)
+                    $id
             )
-
             ->filter()
-
             ->unique();
 
-        $validRemoveCount = 0;
+
+        $validRemoveCount =
+            0;
+
 
         if (
             $product
@@ -1333,15 +1577,14 @@ class ProductController extends Controller
             $validRemoveCount =
                 $product
                     ->images()
-
                     ->whereIn(
                         'id',
                         $removeIds
                     )
-
                     ->count();
 
         }
+
 
         $finalCount =
             $existingCount
@@ -1349,6 +1592,7 @@ class ProductController extends Controller
             $validRemoveCount
             +
             $newImageCount;
+
 
         if ($finalCount > 8) {
 
@@ -1360,6 +1604,7 @@ class ProductController extends Controller
         }
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | LƯU ẢNH CHI TIẾT
@@ -1370,25 +1615,32 @@ class ProductController extends Controller
         Request $request,
         Product $product
     ): void {
+
         if (
             !$request->hasFile(
                 'gallery_images'
             )
         ) {
+
             return;
+
         }
+
 
         $startSortOrder =
             (int)
             (
                 $product
                     ->images()
-                    ->max('sort_order')
+                    ->max(
+                        'sort_order'
+                    )
                 ??
                 -1
             )
             +
             1;
+
 
         foreach (
             $request->file(
@@ -1405,9 +1657,11 @@ class ProductController extends Controller
                     'public'
                 );
 
+
             $product
                 ->images()
                 ->create([
+
                     'path' =>
                         $path,
 
@@ -1420,6 +1674,7 @@ class ProductController extends Controller
         }
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | XÓA ẢNH CHI TIẾT ĐƯỢC ADMIN CHỌN
@@ -1430,6 +1685,7 @@ class ProductController extends Controller
         Request $request,
         Product $product
     ): void {
+
         $removeIds =
             collect(
                 $request->input(
@@ -1437,34 +1693,29 @@ class ProductController extends Controller
                     []
                 )
             )
-
             ->map(
                 fn ($id) =>
-                    (int) $id
+                    (int)
+                    $id
             )
-
             ->filter()
-
             ->unique();
+
 
         if ($removeIds->isEmpty()) {
             return;
         }
 
-        /*
-         * Chỉ lấy ảnh thuộc đúng sản phẩm
-         * để tránh xóa ảnh sản phẩm khác.
-         */
+
         $images =
             $product
                 ->images()
-
                 ->whereIn(
                     'id',
                     $removeIds
                 )
-
                 ->get();
+
 
         foreach (
             $images
@@ -1487,6 +1738,7 @@ class ProductController extends Controller
                     );
 
             }
+
 
             $galleryImage->delete();
         }

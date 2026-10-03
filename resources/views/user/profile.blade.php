@@ -146,6 +146,40 @@
         text-decoration: none;
     }
 
+    .pf-wallet {
+        margin: 24px 0;
+        overflow: hidden;
+        border: 1px solid #d9c59d;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #fffaf0, #f4ead6);
+        box-shadow: 0 12px 28px rgba(95,52,29,.07);
+    }
+
+    .pf-wallet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 22px;
+        color: #fff;
+        background: linear-gradient(135deg, #5f341d, #48633b);
+    }
+
+    .pf-wallet-head h2 { margin: 0; color: #fff; font-size: 21px; font-weight: 900; }
+    .pf-wallet-balance { font-size: clamp(24px, 3vw, 34px); font-weight: 950; }
+    .pf-wallet-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr); gap: 22px; padding: 22px; }
+    .pf-wallet-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+    .pf-wallet-input { min-height: 44px; padding: 10px 12px; border: 1px solid #d9c59d; border-radius: 10px; }
+    .pf-wallet-button { min-height: 44px; padding: 10px 16px; border: 0; border-radius: 10px; color: #fff; background: #48633b; font-weight: 800; }
+    .pf-wallet-history { margin: 15px 0 0; padding: 0; list-style: none; }
+    .pf-wallet-history li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid rgba(95,52,29,.12); font-size: 13px; }
+    .pf-wallet-credit { color: #257042; font-weight: 850; }
+    .pf-wallet-debit { color: #a83b2d; font-weight: 850; }
+    .pf-wallet-qr { text-align: center; }
+    .pf-wallet-qr img { width: min(100%, 250px); border-radius: 14px; background: #fff; box-shadow: 0 8px 18px rgba(95,52,29,.12); }
+    .pf-wallet-code { display: inline-block; margin-top: 10px; padding: 7px 10px; border-radius: 8px; color: #5f341d; background: #fff4d9; font-family: monospace; font-weight: 900; letter-spacing: .06em; }
+    @media (max-width: 767.98px) { .pf-wallet-body { grid-template-columns: 1fr; } .pf-wallet-form { grid-template-columns: 1fr; } }
+
 
     /* =========================================================
        BREADCRUMB
@@ -1458,13 +1492,13 @@
         <div class="pf-hero-copy">
 
             <div class="pf-kicker">
-                • Tài khoản khách hàng
+                👤 Tài khoản khách hàng
             </div>
 
 
             <h1 class="pf-title">
                 Hồ sơ của tôi
-                                       •
+            </h1>
 
 
             <div class="pf-description">
@@ -1482,7 +1516,7 @@
 
         <div class="pf-hero-badge">
 
-            • {{ $roleLabel }}
+            🌿 {{ $roleLabel }}
 
         </div>
 
@@ -1496,7 +1530,7 @@
 
         <div class="pf-alert success">
 
-            • {{ session('success') }}
+            ✓ {{ session('success') }}
 
         </div>
 
@@ -1508,7 +1542,7 @@
         <div class="pf-alert error">
 
             <strong>
-                • Vui lòng kiểm tra lại:
+                ⚠️ Vui lòng kiểm tra lại:
             </strong>
 
 
@@ -1538,7 +1572,7 @@
         <div class="pf-stat">
 
             <div class="pf-stat-icon">
-                •
+                📦
             </div>
 
 
@@ -1560,7 +1594,7 @@
         <div class="pf-stat">
 
             <div class="pf-stat-icon">
-                •
+                🚚
             </div>
 
 
@@ -1582,7 +1616,7 @@
         <div class="pf-stat">
 
             <div class="pf-stat-icon">
-                •
+                ✅
             </div>
 
 
@@ -1601,6 +1635,86 @@
         </div>
 
     </div>
+
+
+    {{-- =====================================================
+        VÍ TINH HOA
+    ====================================================== --}}
+    @php
+        $walletQrUrl = null;
+        if ($walletTopUp) {
+            $walletQrUrl = 'https://img.vietqr.io/image/'
+                . config('payment.bank_code')
+                . '-' . config('payment.bank_account_number')
+                . '-compact2.png?amount=' . (int) round((float) $walletTopUp->amount)
+                . '&addInfo=' . urlencode($walletTopUp->reference_code)
+                . '&accountName=' . urlencode(config('payment.bank_account_name'));
+        }
+    @endphp
+    <section class="pf-wallet" id="wallet">
+        <div class="pf-wallet-head">
+            <div>
+                <h2>💳 Ví Tinh Hoa</h2>
+                <div class="small mt-1">Nạp tiền qua chuyển khoản và thanh toán đơn hàng bằng số dư.</div>
+            </div>
+            <div class="text-end">
+                <div class="small">Số dư khả dụng</div>
+                <div class="pf-wallet-balance">{{ number_format((float) $user->wallet_balance, 0, ',', '.') }}đ</div>
+            </div>
+        </div>
+        <div class="pf-wallet-body">
+            <div>
+                <strong>Nạp tiền vào ví</strong>
+                <p class="small text-muted mt-1">Nhập số tiền, hệ thống tạo QR và tự cộng vào ví khi nhận được giao dịch chuyển khoản.</p>
+                <form action="{{ route('wallet.topup') }}" method="POST" class="pf-wallet-form">
+                    @csrf
+                    <input class="pf-wallet-input" type="number" name="amount" min="10000" step="1000" placeholder="Ví dụ: 100000" required>
+                    <button class="pf-wallet-button" type="submit">Tạo mã nạp</button>
+                </form>
+
+                <ul class="pf-wallet-history">
+                    @forelse($walletTransactions as $transaction)
+                        @php
+                            $walletTypeLabels = [
+                                'topup' => 'Nạp tiền',
+                                'payment' => 'Thanh toán đơn hàng',
+                                'refund' => 'Hoàn tiền',
+                                'admin_credit' => 'Admin cộng tiền',
+                                'admin_debit' => 'Admin trừ tiền',
+                            ];
+                            $walletIsDebit = in_array($transaction->type, ['payment', 'admin_debit'], true);
+                        @endphp
+                        <li>
+                            <span>
+                                <strong>{{ $walletTypeLabels[$transaction->type] ?? 'Giao dịch ví' }}</strong><br>
+                                <small class="text-muted">{{ $transaction->created_at->format('d/m/Y H:i') }} · {{ $transaction->status === 'completed' ? 'Hoàn tất' : 'Đang chờ' }}</small>
+                            </span>
+                            <span class="{{ $walletIsDebit ? 'pf-wallet-debit' : 'pf-wallet-credit' }}">
+                                {{ $walletIsDebit ? '-' : '+' }}{{ number_format((float) $transaction->amount, 0, ',', '.') }}đ
+                            </span>
+                        </li>
+                    @empty
+                        <li><span class="text-muted">Chưa có giao dịch ví.</span></li>
+                    @endforelse
+                </ul>
+            </div>
+
+            @if($walletTopUp)
+                <div class="pf-wallet-qr">
+                    <strong>Quét QR để nạp {{ number_format((float) $walletTopUp->amount, 0, ',', '.') }}đ</strong>
+                    <p class="small text-muted mb-2">Chuyển đúng số tiền và giữ nguyên nội dung.</p>
+                    <img src="{{ $walletQrUrl }}" alt="QR nạp tiền vào ví">
+                    <div class="pf-wallet-code">{{ $walletTopUp->reference_code }}</div>
+                    <div class="small text-muted mt-2">{{ config('payment.bank_name') }} · {{ config('payment.bank_account_display_name') }}</div>
+                </div>
+            @else
+                <div class="pf-wallet-qr text-muted">
+                    <div class="fs-1">🏦</div>
+                    <strong>Tạo mã nạp để hiển thị QR</strong>
+                </div>
+            @endif
+        </div>
+    </section>
 
 
     {{-- =====================================================
@@ -1657,7 +1771,7 @@
 
 
                         <div class="pf-avatar-camera">
-                            •
+                            📷
                         </div>
 
                     </div>
@@ -1676,7 +1790,7 @@
                     <div class="pf-user-badges">
 
                         <span class="pf-user-badge">
-                            • {{ $roleLabel }}
+                            👤 {{ $roleLabel }}
                         </span>
 
 
@@ -1690,11 +1804,11 @@
 
                             @if($emailVerified)
 
-                                • Email đã xác thực
+                                ✓ Email đã xác thực
 
                             @else
 
-                                • Email chưa xác thực
+                                ⚠️ Email chưa xác thực
 
                             @endif
 
@@ -1745,7 +1859,7 @@
                                 type="submit"
                                 class="pf-primary-btn"
                             >
-                                • Cập nhật ảnh
+                                📷 Cập nhật ảnh
                             </button>
 
                         </div>
@@ -1774,7 +1888,7 @@
                                 type="submit"
                                 class="pf-danger-btn"
                             >
-                                • Xóa ảnh đại diện
+                                🗑️ Xóa ảnh đại diện
                             </button>
 
                         </form>
@@ -1821,7 +1935,7 @@
                             <span class="pf-link-left">
 
                                 <span class="pf-link-icon">
-                                    •
+                                    📊
                                 </span>
 
                                 <span>
@@ -1853,7 +1967,7 @@
                             <span class="pf-link-left">
 
                                 <span class="pf-link-icon">
-                                    •
+                                    📦
                                 </span>
 
                                 <span>
@@ -1885,7 +1999,7 @@
                             <span class="pf-link-left">
 
                                 <span class="pf-link-icon">
-                                    •
+                                    📍
                                 </span>
 
                                 <span>
@@ -1917,7 +2031,7 @@
                             <span class="pf-link-left">
 
                                 <span class="pf-link-icon">
-                                    •
+                                    🛍
                                 </span>
 
                                 <span>
@@ -1965,7 +2079,7 @@
                     <div>
 
                         <h2 class="pf-card-title">
-                            • Thông tin cá nhân
+                            👤 Thông tin cá nhân
                         </h2>
 
                         <div class="pf-card-subtitle">
@@ -2006,7 +2120,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        •
+                                        👤
                                     </span>
 
 
@@ -2037,7 +2151,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        •
+                                        ✉
                                     </span>
 
 
@@ -2105,7 +2219,7 @@
                                             pf-active
                                         "
                                     >
-                                        ● Đang hoạt động
+                                        ✅ Đang hoạt động
                                     </span>
 
                                 </div>
@@ -2141,8 +2255,8 @@
 
                                         {{
                                             $emailVerified
-                                            ? '• Đã xác thực'
-                                            : '• Chưa xác thực'
+                                            ? '✓ Đã xác thực'
+                                            : '⚠️ Chưa xác thực'
                                         }}
 
                                     </span>
@@ -2190,7 +2304,7 @@
                                     type="submit"
                                     class="pf-primary-btn"
                                 >
-                                    • Lưu thay đổi
+                                    💾 Lưu thay đổi
                                 </button>
 
                             </div>
@@ -2216,7 +2330,7 @@
                     <div>
 
                         <h2 class="pf-card-title">
-                            • Đổi mật khẩu
+                            🔐 Đổi mật khẩu
                         </h2>
 
                         <div class="pf-card-subtitle">
@@ -2234,7 +2348,7 @@
                     <div class="pf-password-note">
 
                         <span>
-                            •
+                            🛡️
                         </span>
 
                         <span>
@@ -2277,7 +2391,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        •
+                                        🔑
                                     </span>
 
 
@@ -2319,7 +2433,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        •
+                                        🔒
                                     </span>
 
 
@@ -2362,7 +2476,7 @@
                                 <div class="pf-input-wrap">
 
                                     <span class="pf-input-icon">
-                                        •
+                                        🔒
                                     </span>
 
 
@@ -2397,7 +2511,7 @@
                                     type="submit"
                                     class="pf-primary-btn"
                                 >
-                                    • Cập nhật mật khẩu
+                                    🔒 Cập nhật mật khẩu
                                 </button>
 
                             </div>
@@ -2412,7 +2526,7 @@
                         <div class="pf-security-item">
 
                             <strong>
-                                • Mật khẩu
+                                🔐 Mật khẩu
                             </strong>
 
                             Tối thiểu 8 ký tự.
@@ -2423,7 +2537,7 @@
                         <div class="pf-security-item">
 
                             <strong>
-                                • Email
+                                ✉ Email
                             </strong>
 
                             Được sử dụng cho đăng nhập
@@ -2435,7 +2549,7 @@
                         <div class="pf-security-item">
 
                             <strong>
-                                • Bảo mật
+                                🛡 Bảo mật
                             </strong>
 
                             Không chia sẻ mật khẩu

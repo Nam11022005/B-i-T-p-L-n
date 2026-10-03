@@ -8,6 +8,7 @@ use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Admin\WalletController as AdminWalletController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WelcomeController;
@@ -15,7 +16,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderServiceRequestController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\WalletController;
 
 
 /*
@@ -34,7 +37,6 @@ Route::get('/', [
 |--------------------------------------------------------------------------
 | CHÍNH SÁCH & ĐIỀU KHOẢN
 |--------------------------------------------------------------------------
-| Guest / Customer / Admin đều có thể xem
 */
 
 Route::get('/chinh-sach-giao-hang', [
@@ -71,82 +73,70 @@ Route::get('/chinh-sach-thanh-toan', [
 |--------------------------------------------------------------------------
 | ĐĂNG KÝ + ĐĂNG NHẬP
 |--------------------------------------------------------------------------
-| Chỉ dành cho người chưa đăng nhập
 */
 
-Route::middleware('guest')->group(function () {
+Route::middleware('guest')
+    ->group(function () {
 
-    // =================================================
-    // QUÊN MẬT KHẨU BẰNG OTP
-    // =================================================
-
-    Route::get('/forgot-password', [
-        ForgotPasswordController::class,
-        'showForgotForm'
-    ])->name('password.request');
+        Route::get('/forgot-password', [
+            ForgotPasswordController::class,
+            'showForgotForm'
+        ])->name('password.request');
 
 
-    Route::post('/forgot-password', [
-        ForgotPasswordController::class,
-        'sendOtp'
-    ])->name('password.email');
+        Route::post('/forgot-password', [
+            ForgotPasswordController::class,
+            'sendOtp'
+        ])->name('password.email');
 
 
-    Route::get('/forgot-password/verify-otp', [
-        ForgotPasswordController::class,
-        'showOtpForm'
-    ])->name('password.otp.form');
+        Route::get('/forgot-password/verify-otp', [
+            ForgotPasswordController::class,
+            'showOtpForm'
+        ])->name('password.otp.form');
 
 
-    Route::post('/forgot-password/verify-otp', [
-        ForgotPasswordController::class,
-        'verifyOtp'
-    ])->name('password.otp.verify');
+        Route::post('/forgot-password/verify-otp', [
+            ForgotPasswordController::class,
+            'verifyOtp'
+        ])->name('password.otp.verify');
 
 
-    Route::get('/reset-password', [
-        ForgotPasswordController::class,
-        'showResetForm'
-    ])->name('password.reset.form');
+        Route::get('/reset-password', [
+            ForgotPasswordController::class,
+            'showResetForm'
+        ])->name('password.reset.form');
 
 
-    Route::post('/reset-password', [
-        ForgotPasswordController::class,
-        'resetPassword'
-    ])->name('password.reset');
+        Route::post('/reset-password', [
+            ForgotPasswordController::class,
+            'resetPassword'
+        ])->name('password.reset');
 
 
-    // =================================================
-    // ĐĂNG KÝ
-    // =================================================
-
-    Route::get('/register', [
-        AuthController::class,
-        'showRegistrationForm'
-    ])->name('register');
+        Route::get('/register', [
+            AuthController::class,
+            'showRegistrationForm'
+        ])->name('register');
 
 
-    Route::post('/register', [
-        AuthController::class,
-        'register'
-    ]);
+        Route::post('/register', [
+            AuthController::class,
+            'register'
+        ]);
 
 
-    // =================================================
-    // ĐĂNG NHẬP
-    // =================================================
-
-    Route::get('/login', [
-        AuthController::class,
-        'showLoginForm'
-    ])->name('login');
+        Route::get('/login', [
+            AuthController::class,
+            'showLoginForm'
+        ])->name('login');
 
 
-    Route::post('/login', [
-        AuthController::class,
-        'login'
-    ]);
-});
+        Route::post('/login', [
+            AuthController::class,
+            'login'
+        ]);
+    });
 
 
 /*
@@ -167,7 +157,6 @@ Route::post('/logout', [
 |--------------------------------------------------------------------------
 | SẢN PHẨM CÔNG KHAI
 |--------------------------------------------------------------------------
-| Guest / Customer / Admin đều có thể xem
 */
 
 Route::get('/products-search-suggestions', [
@@ -200,91 +189,88 @@ Route::get('/khuyen-mai', [
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')
+    ->group(function () {
 
-    // =================================================
-    // DASHBOARD USER
-    // =================================================
-
-    Route::get('/dashboard', [
-        AuthController::class,
-        'dashboard'
-    ])->name('dashboard');
+        Route::get('/dashboard', [
+            AuthController::class,
+            'dashboard'
+        ])->name('dashboard');
 
 
-    // =================================================
-    // PROFILE USER
-    // =================================================
-
-    Route::get('/profile', [
-        AuthController::class,
-        'profile'
-    ])->name('profile');
+        Route::get('/profile', [
+            AuthController::class,
+            'profile'
+        ])->name('profile');
 
 
-    Route::patch('/profile', [
-        AuthController::class,
-        'updateProfile'
-    ])->name('profile.update');
+        Route::patch('/profile', [
+            AuthController::class,
+            'updateProfile'
+        ])->name('profile.update');
 
 
-    Route::post('/profile/avatar', [
-        AuthController::class,
-        'updateAvatar'
-    ])->name('profile.avatar.update');
+        Route::post('/profile/avatar', [
+            AuthController::class,
+            'updateAvatar'
+        ])->name('profile.avatar.update');
 
 
-    Route::delete('/profile/avatar', [
-        AuthController::class,
-        'deleteAvatar'
-    ])->name('profile.avatar.delete');
+        Route::delete('/profile/avatar', [
+            AuthController::class,
+            'deleteAvatar'
+        ])->name('profile.avatar.delete');
 
 
-    Route::patch('/profile/password', [
-        AuthController::class,
-        'updatePassword'
-    ])->name('profile.password.update');
+        Route::patch('/profile/password', [
+            AuthController::class,
+            'updatePassword'
+        ])->name('profile.password.update');
 
 
-    // =================================================
-    // XÁC THỰC EMAIL BẰNG OTP
-    // =================================================
-
-    Route::get('/email/verify', [
-        AuthController::class,
-        'showVerifyEmail'
-    ])->name('verification.notice');
+        Route::post('/wallet/top-up', [
+            WalletController::class,
+            'createTopUp'
+        ])->name('wallet.topup');
 
 
-    Route::post('/email/verify', [
-        AuthController::class,
-        'verifyEmailCode'
-    ])->name('verification.verify.code');
+        Route::post('/orders/{order}/service-requests', [
+            OrderServiceRequestController::class,
+            'store'
+        ])->name('orders.service-requests.store');
 
 
-    Route::post('/email/resend-code', [
-        AuthController::class,
-        'resendVerificationCode'
-    ])
-        ->middleware('throttle:3,1')
-        ->name('verification.resend');
+        Route::get('/email/verify', [
+            AuthController::class,
+            'showVerifyEmail'
+        ])->name('verification.notice');
 
 
-    // =================================================
-    // DANH MỤC USER
-    // =================================================
-
-    Route::get('/categories', [
-        CategoryController::class,
-        'indexUser'
-    ])->name('categories.index');
+        Route::post('/email/verify', [
+            AuthController::class,
+            'verifyEmailCode'
+        ])->name('verification.verify.code');
 
 
-    Route::get('/categories/{category}', [
-        CategoryController::class,
-        'showNormal'
-    ])->name('categories.show');
-});
+        Route::post('/email/resend-code', [
+            AuthController::class,
+            'resendVerificationCode'
+        ])
+            ->middleware('throttle:3,1')
+            ->name('verification.resend');
+
+
+        Route::get('/categories', [
+            CategoryController::class,
+            'indexUser'
+        ])->name('categories.index');
+
+
+        Route::get('/categories/{category}', [
+            CategoryController::class,
+            'showNormal'
+        ])->name('categories.show');
+    });
 
 
 /*
@@ -293,24 +279,19 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'admin'])
+Route::middleware([
+    'auth',
+    'admin'
+])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-
-        // =================================================
-        // DASHBOARD ADMIN
-        // =================================================
 
         Route::get('/dashboard', [
             AdminController::class,
             'dashboard'
         ])->name('dashboard');
 
-
-        // =================================================
-        // QUẢN LÝ KHÁCH HÀNG
-        // =================================================
 
         Route::get('/customers', [
             AdminController::class,
@@ -324,19 +305,17 @@ Route::middleware(['auth', 'admin'])
         ])->name('customers.show');
 
 
-        // =================================================
-        // PROFILE ADMIN
-        // =================================================
+        Route::post('/customers/{customer}/wallet/adjustment', [
+            AdminWalletController::class,
+            'adjust'
+        ])->name('customers.wallet.adjust');
+
 
         Route::get('/profile', [
             AuthController::class,
             'adminProfile'
         ])->name('profile');
 
-
-        // =================================================
-        // THÔNG BÁO ADMIN
-        // =================================================
 
         Route::get('/notifications/{notification}', [
             AdminController::class,
@@ -350,19 +329,11 @@ Route::middleware(['auth', 'admin'])
         ])->name('notifications.readAll');
 
 
-        // =================================================
-        // QUẢN LÝ ĐÁNH GIÁ
-        // =================================================
-
         Route::delete('/reviews/{review}', [
             ReviewController::class,
             'destroy'
         ])->name('reviews.destroy');
 
-
-        // =================================================
-        // QUẢN LÝ SẢN PHẨM
-        // =================================================
 
         Route::patch('/products/{product}/featured', [
             ProductController::class,
@@ -370,9 +341,11 @@ Route::middleware(['auth', 'admin'])
         ])->name('products.toggleFeatured');
 
 
-        // =================================================
-        // KHUYẾN MÃI SẢN PHẨM
-        // =================================================
+        Route::get('/promotions', [
+            ProductController::class,
+            'adminPromotions'
+        ])->name('promotions.index');
+
 
         Route::patch('/products/{product}/promotion', [
             ProductController::class,
@@ -386,9 +359,13 @@ Route::middleware(['auth', 'admin'])
         ])->name('products.removePromotion');
 
 
-        // =================================================
-        // CRUD SẢN PHẨM
-        // =================================================
+        Route::delete('/products/{product}/gallery/{image}', [
+            ProductController::class,
+            'destroyGalleryImage'
+        ])
+            ->whereNumber('image')
+            ->name('products.gallery.destroy');
+
 
         Route::resource(
             'products',
@@ -396,29 +373,17 @@ Route::middleware(['auth', 'admin'])
         );
 
 
-        // =================================================
-        // QUẢN LÝ DANH MỤC
-        // =================================================
-
         Route::resource(
             'categories',
             CategoryController::class
         );
 
 
-        // =================================================
-        // QUẢN LÝ VOUCHER
-        // =================================================
-
         Route::resource(
             'vouchers',
             VoucherController::class
         )->except(['show']);
 
-
-        // =================================================
-        // QUẢN LÝ ĐƠN HÀNG
-        // =================================================
 
         Route::get('/orders', [
             OrderController::class,
@@ -442,6 +407,12 @@ Route::middleware(['auth', 'admin'])
             OrderController::class,
             'confirmPayment'
         ])->name('orders.confirmPayment');
+
+
+        Route::patch('/service-requests/{orderServiceRequest}', [
+            OrderServiceRequestController::class,
+            'process'
+        ])->name('service-requests.process');
     });
 
 
@@ -451,12 +422,11 @@ Route::middleware(['auth', 'admin'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'verified'])
+Route::middleware([
+    'auth',
+    'verified'
+])
     ->group(function () {
-
-        // =================================================
-        // THÔNG BÁO CUSTOMER
-        // =================================================
 
         Route::get('/notifications/{notification}', [
             NotificationController::class,
@@ -470,19 +440,11 @@ Route::middleware(['auth', 'verified'])
         ])->name('notifications.readAll');
 
 
-        // =================================================
-        // ĐÁNH GIÁ SẢN PHẨM
-        // =================================================
-
         Route::post('/products/{product}/reviews', [
             ReviewController::class,
             'store'
         ])->name('reviews.store');
 
-
-        // =================================================
-        // ĐỊA CHỈ KHÁCH HÀNG
-        // =================================================
 
         Route::get('/addresses', [
             AddressController::class,
@@ -514,10 +476,6 @@ Route::middleware(['auth', 'verified'])
         ])->name('addresses.destroy');
 
 
-        // =================================================
-        // GIỎ HÀNG
-        // =================================================
-
         Route::post('/cart/add/{product}', [
             CartController::class,
             'add'
@@ -542,10 +500,6 @@ Route::middleware(['auth', 'verified'])
         ])->name('cart.destroy');
 
 
-        // =================================================
-        // THANH TOÁN
-        // =================================================
-
         Route::get('/checkout', [
             CartController::class,
             'checkout'
@@ -558,20 +512,12 @@ Route::middleware(['auth', 'verified'])
         ])->name('checkout.process');
 
 
-        // =================================================
-        // ĐƠN HÀNG USER
-        // =================================================
-
         Route::get('/orders', [
             OrderController::class,
             'index'
         ])->name('orders.index');
 
 
-        /*
-         * Phải đặt route payment-status
-         * trước /orders/{order}
-         */
         Route::get('/orders/{order}/payment-status', [
             OrderController::class,
             'paymentStatus'
@@ -589,7 +535,6 @@ Route::middleware(['auth', 'verified'])
 |--------------------------------------------------------------------------
 | SEPAY WEBHOOK
 |--------------------------------------------------------------------------
-| Xác nhận chuyển khoản tự động
 */
 
 Route::post('/webhooks/sepay', [
@@ -599,4 +544,4 @@ Route::post('/webhooks/sepay', [
     ->withoutMiddleware([
         \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class
     ])
-    ->name('webhooks.sepay');
+    ->name('webhooks.sepay');   

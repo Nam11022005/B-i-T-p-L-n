@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use App\Notifications\OrderStatusChangedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -518,6 +519,56 @@ class OrderFlowTest extends TestCase
             'order_status_histories',
             2
         );
+    }
+
+
+    public function test_cancelling_a_paid_wallet_order_refunds_and_reopening_charges_the_wallet_again(): void
+    {
+        Notification::fake();
+
+        $admin = $this->createAdmin();
+        $customer = $this->createCustomer();
+
+        $order = $this->createOrder($customer, [
+            'total_price' => 375000,
+            'payment_method' => 'wallet',
+            'payment_status' => 'paid',
+        ]);
+
+        $this
+            ->actingAs($admin)
+            ->patch(route('admin.orders.updateStatus', $order), ['status' => 'cancelled'])
+            ->assertRedirect(route('admin.orders.show', $order));
+
+        $this->assertDatabaseHas('users', [
+            'id' => $customer->id,
+            'wallet_balance' => 375000,
+        ]);
+        $this->assertDatabaseHas('wallet_transactions', [
+            'order_id' => $order->id,
+            'type' => 'refund',
+            'amount' => 375000,
+        ]);
+
+        $this
+            ->actingAs($admin)
+            ->patch(route('admin.orders.updateStatus', $order), ['status' => 'confirmed'])
+            ->assertRedirect(route('admin.orders.show', $order));
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => 'confirmed',
+        ]);
+        $this->assertDatabaseHas('users', [
+            'id' => $customer->id,
+            'wallet_balance' => 0,
+        ]);
+        $this->assertDatabaseHas('wallet_transactions', [
+            'order_id' => $order->id,
+            'type' => 'payment',
+            'amount' => 375000,
+        ]);
+        $this->assertDatabaseCount('wallet_transactions', 2);
     }
 
 
