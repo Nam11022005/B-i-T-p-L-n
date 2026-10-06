@@ -1687,7 +1687,10 @@
                         <li>
                             <span>
                                 <strong>{{ $walletTypeLabels[$transaction->type] ?? 'Giao dịch ví' }}</strong><br>
-                                <small class="text-muted">{{ $transaction->created_at->format('d/m/Y H:i') }} · {{ $transaction->status === 'completed' ? 'Hoàn tất' : 'Đang chờ' }}</small>
+                                <small class="text-muted">{{ $transaction->created_at->format('d/m/Y H:i') }} · {{ $transaction->status === 'completed' ? 'Hoàn tất' : ($transaction->status === 'rejected' ? 'Đã từ chối' : 'Đang chờ') }}</small>
+                                @if(data_get($transaction->raw_payload, 'manual_review'))
+                                    <div class="small text-muted">{{ $transaction->description }}</div>
+                                @endif
                             </span>
                             <span class="{{ $walletIsDebit ? 'pf-wallet-debit' : 'pf-wallet-credit' }}">
                                 {{ $walletIsDebit ? '-' : '+' }}{{ number_format((float) $transaction->amount, 0, ',', '.') }}đ

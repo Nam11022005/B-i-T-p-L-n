@@ -688,7 +688,6 @@ class PaymentWebhookController extends Controller
 
         $topUp = WalletTransaction::query()
             ->where('type', 'topup')
-            ->where('status', 'pending')
             ->whereRaw('UPPER(reference_code) = ?', [$code])
             ->lockForUpdate()
             ->first();
@@ -696,7 +695,6 @@ class PaymentWebhookController extends Controller
         if (!$topUp && $content !== '') {
             $topUp = WalletTransaction::query()
                 ->where('type', 'topup')
-                ->where('status', 'pending')
                 ->whereNotNull('reference_code')
                 ->lockForUpdate()
                 ->get()
@@ -708,6 +706,12 @@ class PaymentWebhookController extends Controller
 
         if (!$topUp) {
             return false;
+        }
+
+        // Manual decisions are final; a delayed webhook must never credit them again.
+        if ($topUp->status !== 'pending') {
+            Log::info('SePay: yêu cầu nạp đã được xử lý.', ['wallet_transaction_id' => $topUp->id, 'status' => $topUp->status, 'provider_transaction_id' => $providerTransactionId]);
+            return true;
         }
 
         if (WalletTransaction::query()

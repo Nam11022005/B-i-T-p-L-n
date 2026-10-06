@@ -309,6 +309,8 @@ Route::middleware([
             AdminWalletController::class,
             'adjust'
         ])->name('customers.wallet.adjust');
+        Route::post('/customers/{customer}/wallet/{transaction}/review', [AdminWalletController::class, 'review'])
+            ->name('customers.wallet.review');
 
 
         Route::get('/profile', [
@@ -396,6 +398,9 @@ Route::middleware([
             'show'
         ])->name('orders.show');
 
+
+        Route::patch('/orders/{order}/shipment', [\App\Http\Controllers\ShipmentController::class, 'update'])
+            ->name('orders.shipment.update');
 
         Route::patch('/orders/{order}/status', [
             OrderController::class,

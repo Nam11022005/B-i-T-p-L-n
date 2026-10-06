@@ -44,6 +44,7 @@ class Order extends Model
     */
 
     protected $casts = [
+        'estimated_delivery_at' => 'date',
         'payment_expires_at' => 'datetime',
 
         'subtotal' => 'decimal:2',
@@ -97,6 +98,19 @@ class Order extends Model
     public function serviceRequests()
     {
         return $this->hasMany(OrderServiceRequest::class)->latest();
+    }
+
+    public function shipmentEvents()
+    {
+        return $this->hasMany(ShipmentEvent::class)->orderByDesc('id');
+    }
+
+    public function shipmentLabel(): string
+    {
+        if ($this->status === 'cancelled') return 'Đơn hàng đã hủy';
+        if ($this->status === 'delivered') return 'Đã giao thành công';
+        return ShipmentEvent::STATUSES[$this->shipment_status]
+            ?? ($this->status === 'shipped' ? 'Đang vận chuyển' : 'Chờ cập nhật vận chuyển');
     }
 
 

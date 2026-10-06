@@ -4,6 +4,8 @@
 
 @section('content')
 
+@include('orders.shipment', ['shipmentAdmin' => false])
+
 @php
     /*
     |--------------------------------------------------------------------------

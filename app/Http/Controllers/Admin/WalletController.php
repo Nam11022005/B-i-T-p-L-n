@@ -13,6 +13,43 @@ use Illuminate\Validation\ValidationException;
 
 class WalletController extends Controller
 {
+    public function review(Request $request, User $customer, WalletTransaction $transaction)
+    {
+        abort_unless($customer->role === 'customer' && $transaction->user_id === $customer->id, 404);
+        $data = $request->validate([
+            'decision' => ['required', 'in:approve,reject'],
+            'note' => ['required', 'string', 'max:500'],
+            'received' => ['required_if:decision,approve', 'accepted_if:decision,approve'],
+        ], ['note.required' => 'Vui lòng ghi lý do xử lý.', 'received.accepted_if' => 'Cần xác nhận đã nhận đủ tiền vào ngân hàng.']);
+
+        DB::transaction(function () use ($customer, $transaction, $data, $request) {
+            $topUp = WalletTransaction::whereKey($transaction->id)->lockForUpdate()->firstOrFail();
+            if ($topUp->type !== 'topup' || $topUp->status !== 'pending') {
+                throw ValidationException::withMessages(['decision' => 'Giao dịch đã được xử lý hoặc không phải yêu cầu nạp tiền.']);
+            }
+            $user = User::whereKey($customer->id)->lockForUpdate()->firstOrFail();
+            $approved = $data['decision'] === 'approve';
+            if ($approved) {
+                if ((float) $topUp->amount <= 0) {
+                    throw ValidationException::withMessages(['decision' => 'Số tiền nạp không hợp lệ.']);
+                }
+                $user->wallet_balance = round((float) $user->wallet_balance + (float) $topUp->amount, 2);
+                $user->save();
+            }
+            $topUp->update([
+                'status' => $approved ? 'completed' : 'rejected',
+                'balance_after' => $approved ? $user->wallet_balance : null,
+                'description' => ($approved ? 'Duyệt thủ công: ' : 'Từ chối nạp tiền: ') . trim($data['note']),
+                'raw_payload' => array_merge(is_array($topUp->raw_payload) ? $topUp->raw_payload : [], [
+                    'manual_review' => ['admin_id' => $request->user()->id, 'at' => now()->toIso8601String(),
+                        'decision' => $data['decision'], 'note' => trim($data['note'])],
+                ]),
+            ]);
+        });
+        return back()->with('success', $data['decision'] === 'approve'
+            ? 'Đã duyệt và cộng tiền vào ví khách hàng.' : 'Đã từ chối yêu cầu nạp tiền.');
+    }
+
     public function adjust(Request $request, User $customer)
     {
         abort_unless($customer->role === 'customer', 404);

@@ -4,6 +4,8 @@
 
 @section('content')
 
+@include('orders.shipment', ['shipmentAdmin' => true])
+
 @php
     $deliveryStarted = $order->statusHistories->where('status', 'shipped')->last();
     $deliveryCompleted = $order->statusHistories->where('status', 'delivered')->last();

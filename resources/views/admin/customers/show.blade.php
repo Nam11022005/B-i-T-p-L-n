@@ -674,6 +674,9 @@
         </div>
 
         <div class="wallet-ledger-list">
+            @if($errors->any())
+                <div class="alert alert-danger m-3" role="alert">{{ $errors->first() }}</div>
+            @endif
             @forelse($walletTransactions as $transaction)
                 @php
                     $isDebit = in_array($transaction->type, ['payment', 'admin_debit'], true);
@@ -685,16 +688,24 @@
                             {{ $walletLabels[$transaction->type] ?? 'Giao dịch ví' }}
                             @if($transaction->status === 'pending')
                                 <span class="wallet-transaction-status">Đang chờ</span>
+                            @elseif($transaction->status === 'rejected')
+                                <span class="wallet-transaction-status" style="background:#fbe9e6;color:#a3382b">Đã từ chối</span>
                             @else
                                 <span class="wallet-transaction-status done">Hoàn tất</span>
                             @endif
                         </div>
                         <div class="wallet-ledger-sub">
                             {{ $transaction->reference_code ?: $transaction->description ?: 'Không có mã giao dịch' }}
+                            @if(data_get($transaction->raw_payload, 'manual_review'))
+                                <div>{{ $transaction->description }} · Admin #{{ data_get($transaction->raw_payload, 'manual_review.admin_id') }}</div>
+                            @endif
                             @if($transaction->order)
                                 · Đơn #{{ $transaction->order->id }}
                             @endif
                         </div>
+                        @if($transaction->type === 'topup' && $transaction->status === 'pending')
+                            @include('admin.customers.wallet-review')
+                        @endif
                     </div>
                     <div class="wallet-ledger-amount {{ $isDebit ? 'out' : 'in' }}">{{ $isDebit ? '−' : '+' }}{{ number_format((float) $transaction->amount, 0, ',', '.') }}đ</div>
                     <div class="wallet-ledger-balance">Số dư sau GD<br><strong>{{ $transaction->balance_after === null ? '—' : number_format((float) $transaction->balance_after, 0, ',', '.') . 'đ' }}</strong></div>
